@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js MagicaVoxel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/MTLLoader.js"></script>
+
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #debug-info {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div id="debug-info">
+    <div class="position"></div>
+    <div class="rotation"></div>
+    <div class="velocity"></div>
+    <div class="direction"></div>
+    <div class="speed"></div>
+    <div class="jumpPower"></div>
+    <div class="isGrounded"></div>
+</div>
+<script>
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // 環境光
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+    scene.add(ambientLight);
+
+    // 平行光
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
+
+    let objects = [];
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 2, 5);
+
+    let direction = new THREE.Vector3(); //direction == 向いてる角度
+
+
+    document.body.addEventListener("click", () => {
+        document.body.requestPointerLock();
+    });
+
+    let moveX = 0, moveY = 0;
+    document.addEventListener("mousemove", (event) => {
+        if (document.pointerLockElement !== document.body) return;
+
+        moveX -= event.movementX * 0.002;
+        moveY -= event.movementY * 0.002;
+        moveY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, moveY)); // 上下90度制限
+
+        // 四元数を使った回転
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromEuler(new THREE.Euler(moveY, moveX, 0, "YXZ")); // YXZ順で回転
+
+        camera.quaternion.copy(quaternion);
+    });
+
+    let velocity = new THREE.Vector3();
+    let speed = 0.1;
+    let gravity = -0.01; // 重力加速度
+    let jumpPower = 0.2; // ジャンプの強さ
+    let isGrounded = false; // 地面についているか
+    const keys = { w: false, s: false, a: false, d: false, space: false, q: false };
+
+    document.addEventListener("keydown", (event) => {
+        const key = event.key === " " ? "space" : event.key.toLowerCase();
+        keys[key] = true;
+    });
+    document.addEventListener("keyup", (event) => {
+        const key = event.key === " " ? "space" : event.key.toLowerCase();
+        keys[key] = false;
+    });
+
+    let isCreative = false
+
+    let info = document.querySelector('#debug-info');
+    document.addEventListener('keyup', (event) => {
+        switch(event.key){
+            case 'g':
+                if(info.style.display == 'none'){
+                    info.style.display = 'block';
+                }else{
+                    info.style.display = 'none';
+                }
+                break;
+            case 'r':
+                camera.position.set(5, 10, 5);
+                break;
+            case 'i':
+                speed += 0.1;
+                break;
+            case 'o':
+                speed -= 0.1;
+                break;
+            case 'j':
+                jumpPower += 0.2;
+                break;
+            case 'k':
+                if(gravity == -0.01){
+                    isCreative = true;
+                    gravity = 0;
+                    velocity.set(0, 0, 0); //速度
+                    //acceleration.set(0, 0, 0); //加速度
+                }else{
+                    isCreative = false;
+                    gravity = -0.01;
+                }
+                break;
+            case 'l':
+                jumpPower -= 0.2;
+                break;
+            case 'n':
+                camera.fov -= 5;
+                break;
+            case 'm':
+                camera.fov += 5;
+                break;
+            // case 'q':
+            //     camera.getWorldDirection(direction);  // カメラの向いている方向を取得
+
+            //     // 向いている方向に2進んだ位置を計算
+            //     let distance = 5;  // 進む距離
+            //     let newPosition = new THREE.Vector3().copy(camera.position).add(direction.multiplyScalar(distance));
+
+            //     // 新しい位置にカメラを移動
+            //     camera.position.set(newPosition.x, newPosition.y, newPosition.z);
+            //     break;
+        }
+    })
+
+    const bullets = [];
+    const bulletSpeed = 0.5;
+    document.addEventListener("click", () => {
+        if (document.pointerLockElement !== document.body) return;
+        
+        // 弾を作成
+        const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+
+        // カメラの位置を初期位置として設定
+        bullet.position.copy(camera.position);
+
+        // カメラの向いている方向を取得
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        
+        // 速度を設定
+        bullet.userData.velocity = direction.clone().multiplyScalar(bulletSpeed);
+
+        // シーンに追加
+        scene.add(bullet);
+        bullets.push(bullet);
+    });
+
+    // 弾の移動処理
+    function updateBullets() {
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const bullet = bullets[i];
+            bullet.position.add(bullet.userData.velocity);
+
+            // 一定距離飛んだら削除
+            if (bullet.position.length() > 50) {
+                scene.remove(bullet);
+                bullets.splice(i, 1);
+            }
+        }
+    }
+
+
+
+    const raycaster = new THREE.Raycaster();
+    const downVector = new THREE.Vector3(0, -1, 0); // 真下を向いたベクトル
+
+    const touchableObjects = [];
+
+    let rooken;
+    const loader = new THREE.OBJLoader();
+    loader.load('model.obj', function (obj) {
+        obj.traverse((child) => {
+            if (child.isMesh) {
+                child.userData.touchable = true;
+                child.geometry.computeBoundingBox(); // boundingBox を計算
+                touchableObjects.push(child);
+            }
+        });
+        scene.add(obj);
+        rooken = obj
+    });
+
+    
+    let backGrounds = [];
+    let BackGround = [
+        {
+            name:'ru-kun',
+            x:0,
+            y:0,
+            z:3,
+        },
+        {
+            name:'line',
+            x:0,
+            y:-3,
+            z:0,
+        },
+        {
+            name:'wall1',
+            x:12,
+            y:0,
+            z:0,
+        },
+        {
+            name:'deathwall',
+            x:-12,
+            y:0,
+            z:10,
+        },
+        {
+            name:'room',
+            x:30,
+            y:0,
+            z:0,
+        }
+    ];
+    const mtlLoader = new THREE.MTLLoader();
+    BackGround.forEach((back) => {
+        mtlLoader.load(`${back.name}.mtl`, (materials) => {
+            materials.preload();
+
+            const backLoader = new THREE.OBJLoader();
+            backLoader.setMaterials(materials);
+            
+            backLoader.load(`${back.name}.obj`, function (obj) {
+                obj.traverse((child) => {
+                    if (child.isMesh) {
+                        child.userData.touchable = true;
+                        child.geometry.computeBoundingBox();
+                        touchableObjects.push(child);
+                    }
+                });
+                obj.position.set(back.x, back.y, back.z);
+                scene.add(obj);
+            });
+        });
+    });
+    
+
+    //床
+    let floorAtumii = 1
+    const floorGeometry = new THREE.BoxGeometry(20, floorAtumii, 20);
+    const floorMaterial = new THREE.MeshBasicMaterial({ color: 0xf0f8ff });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+
+    // 床を水平方向に配置
+    floor.rotation.x = 0;
+    floor.position.y = floorAtumii / 2;
+    floor.userData.touchable = true;
+    touchableObjects.push(floor);
+    scene.add(floor);
+
+    function checkGround() {
+        raycaster.set(camera.position, new THREE.Vector3(0, -1, 0));
+        const intersects = raycaster.intersectObjects(touchableObjects, false);
+
+        if (intersects.length > 0 && intersects[0].distance < 1.1 && !isCreative) {
+            isGrounded = true;
+            velocity.y = 0;
+        } else {
+            isGrounded = false;
+        }
+    }
+
+    function checkWallCollision() {
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        direction.y = 0; // 水平方向のみ判定
+        direction.normalize();
+
+        raycaster.set(camera.position, direction);
+        const intersects = raycaster.intersectObjects(touchableObjects, false);
+
+        if (intersects.length > 0 && intersects[0].distance < 0.5) {
+            return true; // 壁に当たった
+        }
+        return false;
+    }
+
+    function updateCameraMovement() {
+        let direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        direction.y = 0;
+        direction.normalize();
+
+        let distance = 0.1;
+        if(keys.w && !checkWallCollision()) {
+            if (!isCreative) {
+                camera.position.addScaledVector(direction, speed);  // 通常の移動
+            } else {
+                camera.position.addScaledVector(direction.clone(), distance);
+            }
+        }
+
+        if(keys.s) {
+            if (!isCreative) {
+                camera.position.addScaledVector(direction, -speed);
+            } else {
+                camera.position.addScaledVector(direction.clone(), -distance);
+            }
+        }
+        
+        let right = new THREE.Vector3();
+        right.crossVectors(camera.up, direction).normalize();
+        if (keys.a) {
+            if (!isCreative) {
+                camera.position.addScaledVector(right, speed);
+            } else {
+                camera.position.addScaledVector(right.clone(), distance);
+            }
+        }
+
+        if (keys.d) {
+            if (!isCreative) {
+                camera.position.addScaledVector(right, -speed);  // 通常の逆向き移動
+            } else {
+                camera.position.addScaledVector(right.clone(), -distance);
+            }
+        }
+
+        if (keys.space && isGrounded) {
+            velocity.y = jumpPower;
+            isGrounded = false;
+        } else if (keys.space && !isGrounded && isCreative) {
+            velocity.y = jumpPower;  // 上昇力を加える
+        } else if (!keys.space && !isGrounded && isCreative) {
+            velocity.y = 0;
+        }
+
+
+        if (!isGrounded) velocity.y += gravity;
+        camera.position.y += velocity.y;
+
+        checkGround();
+
+
+        info.querySelector('.position').textContent = `position: x:${camera.position.x.toFixed(2)}, y:${camera.position.y.toFixed(2)}, z:${camera.position.z.toFixed(2)}`;
+        info.querySelector('.rotation').textContent = `rotation: x:${camera.rotation.x.toFixed(2)}, y:${camera.rotation.y.toFixed(2)}, z:${camera.rotation.z.toFixed(2)}`;
+        info.querySelector('.velocity').textContent = `velocity: x:${velocity.x.toFixed(2)}, y:${velocity.y.toFixed(2)}, z:${velocity.z.toFixed(2)}`;
+        //direction
+        info.querySelector('.speed').textContent = `speed:${speed}`;
+        info.querySelector('.jumpPower').textContent = `jumpPower:${jumpPower}`;
+        info.querySelector('.isGrounded').textContent = `isGrounded:${isGrounded}`;
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if(rooken)rooken.rotation.y += 0.01; // 右回転
+        updateBullets();
+        updateCameraMovement();
+        renderer.render(scene, camera);
+    }
+    animate();
+</script>
+
+</body>
+</html>

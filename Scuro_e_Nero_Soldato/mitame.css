@@ -1,0 +1,222 @@
+@font-face {font-family:hangyaku; src:url("assets/fonts/hangyaku.ttf");}
+@font-face {font-family:comicsans; src:url("assets/fonts/comicsans.ttf");}
+/* ここ変えといて */
+#gameArea{
+    display:flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 95vw;
+    margin: 0 auto;
+    text-align: center;
+    font-family: comicsans;
+    padding: 10px;
+    background-color: #f0f8ff;
+    user-select: none;
+    
+}
+
+/*logとtext*/
+#log{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 320px;
+    height: 200px;
+    border: 1px solid #ffffff;
+    background-color: rgba(0,0,0,0);
+    position: fixed;
+    bottom: 150px;
+    right: -300px;
+    color: #fefefe;
+    overflow-y: hidden;
+    transition: right 0.3s;
+    z-index: 254;
+}
+#log .opener{
+    width: 20px;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    color: #fefefe;
+    text-align: center;
+    cursor: pointer;
+    z-index: 254;
+}
+#log .log{
+    width: 300px;
+    height: 100%;
+    max-height: 200px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: rgba(0,0,0,0.8);
+    color: #fefefe;
+    text-align: left;
+    font-size: 14px;
+    transition: right 0.3s;
+    z-index: 253;
+}
+#text{
+    display: none;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+
+    white-space: nowrap;
+    overflow: hidden;
+    width: fit-content; /* 文字の長さに応じた幅 */
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    0%{
+        opacity: 0;
+    }
+    100%{
+        opacity: 1;
+    }
+}
+.color-red{
+    color: #ff1919;
+}
+.color-pink{
+    color: #ff56e9;
+}
+.color-blue{
+    color: #1919ff;
+}
+
+#debug .data{
+    display: none;
+    background-color: #4e7aa3b6;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 400px;
+    height: 250px;
+    z-index: 205;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#UIs{
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    height: calc(100% - 20px);
+    background-color: #eaf5ff;
+}
+#nowPoints{
+    display: block;
+}
+#buttons{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 30px;
+    width: 400px;
+    height: 130px;
+    background-color: #d9eeff69;
+    border-radius: 50px;
+    margin: 10px;
+}
+#buttons .hit, #buttons .stand{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    height: 65px;
+    border: 4px solid #cfe9ff;
+    background-color: #def0ff;
+    font-size: 30px;
+}
+
+#cardPlaces{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    gap:30px
+}
+#cardPlaces .dealer{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    height: 130px;
+    width: 400px;
+    background-color: #eaf5ff;
+    border-radius: 50px;
+    margin: 10px;
+}
+#cardPlaces .player{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    height: 130px;
+    width: 400px;
+    background-color: #eaf5ff;
+    border-radius: 50px;
+    margin: 10px;
+}
+.card{
+    display: block;
+    height: 90px;
+    width: 60px;
+    position: relative;
+    border: 4px solid #cfe9ff;
+    background-color: #def0ff;
+}
+.card.normal .upper{
+    position: absolute;
+    top: 0px;
+    right: 3px;
+    font-size: 20px;
+}
+.card.normal .num{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    font-family: hangyaku;
+    text-align: center;
+}
+.card.normal .lower{
+    position: absolute;
+    bottom: 0px;
+    left: 3px;
+    transform: rotate(180deg);
+    font-size: 20px;
+}
+.card.tarot .upper{
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    font-family: hangyaku;
+    text-align: center;
+}
+.card.tarot .img{
+    width: 100%;
+    height: 100%;
+}
+
+#euro{
+    border: 1px solid #cfe9ff;
+}
