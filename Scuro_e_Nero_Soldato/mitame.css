@@ -109,11 +109,91 @@
     flex-direction: column;
     width: 40%;
     height: calc(100% - 20px);
+    padding: 5px, 10px;
     background-color: #eaf5ff;
 }
-#nowPoints{
-    display: block;
+#UIs .player, #UIs .dealer{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: calc(100% - 10px);
+    height: 150px;
+    padding: 2.5px;
 }
+#UIs .player .health, #UIs .dealer .health{
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    width: 25%;
+    height: calc(77% - 5px);
+    padding: 2px;
+    border: 1px solid #cfe9ff;
+}
+#UIs .player .health .hp, #UIs .dealer .health .hp{
+    display: flex;
+    flex-direction: row;
+    height: 55px;
+    /* background-color: #00ff04; */
+}
+#UIs .player .health .hp .img, #UIs .dealer .health .hp .img{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 40px;
+    height: 100%;
+    color: #ff003c;
+    font-size: 30px;
+    text-align: center;
+    /* background-color: #99ff90; */
+}
+#UIs .player .health .hp .num, #UIs .dealer .health .hp .num{
+    display: block;
+    padding: 5px;
+}
+#UIs .player .health .hp .num .now, #UIs .dealer .health .hp .num .now{
+    font-size: 30px;
+    font-family: comicsans;
+}
+#UIs .player .health .hp .num .max, #UIs .dealer .health .hp .num .max{
+    margin-top: -9px;
+    margin-left: 10px;
+}
+
+#UIs .player .health .shl, #UIs .dealer .health .shl{
+    display: flex;
+    flex-direction: row;
+    height: 55px;
+    margin-top: 1px solid #cfe9ff;
+    /* background-color: #bf00ff; */
+}
+#UIs .player .health .shl .img, #UIs .dealer .health .shl .img{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    width: 40px;
+    height: 100%;
+    color: #009dff;
+    font-size: 30px;
+    text-align: center;
+    /* background-color: #e390ff; */
+}
+#UIs .player .health .shl .num, #UIs .dealer .health .shl .num{
+    margin-top: 6px;
+    display: block;
+    padding: 5px;
+}
+#UIs .player .health .shl .num .now, #UIs .dealer .health .shl .num .now{
+    font-size: 30px;
+    font-family: comicsans;
+}
+#UIs .player .point, #UIs .dealer .point{
+    margin-left: 15px;
+    font-family: hangyaku;
+    font-size: 50px;
+}
+
 #buttons{
     margin-top: 10px;
     display: flex;

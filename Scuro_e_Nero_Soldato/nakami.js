@@ -237,12 +237,12 @@ let standButton = uiButtons.querySelector(".stand")
 
 function tekiou(){
     Object.keys(humans).forEach(cam => {
-        let div = document.querySelector(`#nowPoints .${cam}`);
+        let div = document.querySelector(`#UIs .${cam}`);
+
         let human = humans[cam];
         
+        //valueの計算
         human.value = 0;
-
-        //増加の機構とAの処理
         let aces = 0;
         humans[cam].cards.forEach(c => {
             if(c.value == 'A'){
@@ -256,10 +256,12 @@ function tekiou(){
             human.value += 10;
             aces--;
         };
-
-        console.log(human.value);
-
-        div.textContent = `${cam}: ${human.value}`;
+        
+        //適応
+        div.querySelector(".health .hp .num .now").textContent = human.hp;
+        div.querySelector(".health .hp .num .max").textContent = `/${human.maxhp}`;
+        div.querySelector(".health .shl .num .now").textContent = human.shl;
+        div.querySelector(".point").textContent = human.value;
     });
     
 }
@@ -300,14 +302,14 @@ function cardDraw(cam){
     return [card.name, card.value, card.suit];
 }
 function cardAdd(cam, name, value, suit){
-    let cardData = Cards[name]
+    let cardData = Cards[name];
     
     let drawCard = {
         name: name,
         value: value,
         suit: suit,
         data: cardData
-    }
+    };
     
     humans[cam].cards.push(drawCard);
 
@@ -395,6 +397,7 @@ standButton.addEventListener("click", async function (){
         tekiou();
         await delay(1000)
     } while(humans["dealer"].value < 17);
+    //...ここ引かせる.....?
 
     await delay(1000);
 
@@ -404,20 +407,25 @@ standButton.addEventListener("click", async function (){
 
 async function result(code = 'none'){
     //codeが${cam}ならば、${cam}がburstしたということ。!${cam}のvalueをそのままdamage
-    let player = humans["player"]
-    let dealer = humans["dealer"]
+    let player = humans["player"];
+    let dealer = humans["dealer"];
+    
+    tekiou();
+    console.log(`dealer:${dealer.value} player:${player.value}`);
 
     if(code == 'none'){
         let difference = player.value - dealer.value;
-        if(difference > 0) damage('dealer', difference)
-        else if(difference < 0) damage('player', -difference)
-        else damage(0, 0);
+        if(difference > 0) await damage('dealer', difference)
+        else if(difference < 0) await damage('player', -difference)
+        else await damage(0, 0);
+        reset();
     }else{
         let attackerCam = code == 'player' ? 'dealer' : 'player';
         damage(code, humans[attackerCam].value);
     }
 }
 async function damage(cam, dmg){
+    if(!cam) return;
     let attacker = humans[cam];
     let defender = humans[cam == 'player' ? 'dealer' : 'player'];
 
@@ -454,7 +462,7 @@ async function damage(cam, dmg){
     })
 
     //清算
-    let deal = Math.max(attack - defense, 0); //基礎控除
+    let deal = Math.max((dmg + attack) - defense, 0); //基礎控除
     deal *= power; //税率
     deal *= suffer; //－税率 (?????)
     
@@ -462,24 +470,34 @@ async function damage(cam, dmg){
     deal = Math.floor(deal);
     if(deal < 0) deal = 0;
 
-    console.log(`dmg:${dmg} ( power:${power} attack:${attack} || suffer:${suffer} defense: ${defense} )`);
+    console.log(`${attacker.name} => ${defender.name} | dmg:${dmg} ( power:${power} attack:${attack} || suffer:${suffer} defense:${defense} )`);
+    
+    if(defender.shl){
+        let diff = (defender.shl - deal);
+        if(diff >= 0){
+            defender.shl -= deal;
+        }else{
+            defender.shl = 0;
+            deal = (diff * -1);
+        }
+    }
 
     defender.hp -= deal;
-    
-    console.log(`${attacker.name} => ${defender.name} (damage:${deal})`);
+
+    if(defender.hp < 0) defender.hp = 0;
 }
 async function outcome(winner){
     let thisRate = 1;
     switch(winner){
         case 'player':
-            coin += (5 * player.value == 21 ? 3 : 2);
+            coin += (5 * dealer.coinRate);
             break;
         case 'dealer':
             break;
     }
     tekiou();
     await delay(3000);
-    battleStart();
+    // battleStart();
 }
 async function checkout(){
     //result, outcome, checkout　の三つ目くん
@@ -507,12 +525,12 @@ document.addEventListener("keydown", (e) =>{
 });
 
 
-function battleStart(){
+function reset(){
     document.querySelector("#cardPlaces .player").innerHTML = '';
     document.querySelector("#cardPlaces .dealer").innerHTML = '';
 
     let player = humans["player"];
-    let dealer = humans["dealer"]
+    let dealer = humans["dealer"];
 
     player.standed = 0;
     dealer.standed = 0;
@@ -520,6 +538,13 @@ function battleStart(){
     player.cards = [];
     dealer.cards = [];
     tekiou();
+
+    // console.log("resetですわ～")
+}
+
+function battleStart(){
+    reset();
+    addtext("dealerが現れた！")
 }
 
 
