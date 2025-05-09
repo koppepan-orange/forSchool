@@ -9,6 +9,12 @@
             "request": "launch",
             "name": "scuro e nero soldato",
             "file": "n:\\koppepan_orange\\forSchool\\Scuro_e_Nero_Soldato\\index.html"
-        }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "scuro e nero soldato_mac",
+            "file": "Scuro_e_Nero_Soldato/index.html"
+        },
     ]
 }

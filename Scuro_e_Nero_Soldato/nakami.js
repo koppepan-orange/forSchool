@@ -212,6 +212,7 @@ let humans = {
     },
     dealer:{
         name: "dealer",
+        coinRate: 1,
         deck: [],
         cards: [],
         value: 0,
@@ -277,7 +278,6 @@ hitButton.addEventListener("click", async function (){
     let dealer = humans['dealer'];
     if(!player.standed){
         let drawCard = cardDraw('player')
-        tekiou();
         await delay(750);
         
         let isburst = isBurst('player');
@@ -285,7 +285,7 @@ hitButton.addEventListener("click", async function (){
 
         if(!dealer.standed){
             drawCard = cardDraw('dealer');
-            tekiou();
+            if(dealer.value >= 17) dealer.standed = 1;
             await delay(750);
 
             let isburst = isBurst('dealer');
@@ -298,6 +298,7 @@ function cardDraw(cam){
     let deck = humans[cam].deck.filter(a => !a.showing);
     let card = arraySelect(deck);
     cardAdd(cam, card.name, card.value, card.suit)
+    tekiou();
     card.showing = 1;
     return [card.name, card.value, card.suit];
 }
@@ -388,16 +389,23 @@ function isBurst(cam){
 }
 
 standButton.addEventListener("click", async function (){
-    standed = 1;
-    
-    //dealer's turn
-    do{
-        let [num, name, suit] = getCard('dealer');
-        cardAdd("dealer", num, name, suit);
-        tekiou();
-        await delay(1000)
-    } while(humans["dealer"].value < 17);
-    //...ここ引かせる.....?
+    let player = humans['player'];
+    let dealer = humans['dealer'];
+
+    player.standed = 1;
+
+    if(!dealer.standed){
+        do{
+            let drawCard = cardDraw('dealer');
+            await delay(750);
+        
+            let isburst = isBurst('dealer');
+            if(isburst) return;
+        }while(humans["dealer"].value < 17);
+
+        dealer.standed = 1;
+    }
+
 
     await delay(1000);
 
@@ -410,24 +418,29 @@ async function result(code = 'none'){
     let player = humans["player"];
     let dealer = humans["dealer"];
     
+    player.standed = 1;
+    dealer.standed = 1;
+
     tekiou();
     console.log(`dealer:${dealer.value} player:${player.value}`);
 
+    let res = 1;
     if(code == 'none'){
         let difference = player.value - dealer.value;
-        if(difference > 0) await damage('dealer', difference)
-        else if(difference < 0) await damage('player', -difference)
-        else await damage(0, 0);
-        reset();
+        if(difference > 0) res = await damage('dealer', difference)
+        else if(difference < 0) res =  await damage('player', -difference)
+        else res =  await damage(0, 0);
     }else{
         let attackerCam = code == 'player' ? 'dealer' : 'player';
-        damage(code, humans[attackerCam].value);
+        res = await damage(code, humans[attackerCam].value);
     }
+
+    if(res) reset(); //もし死んでいないならば、続行(reset)
 }
 async function damage(cam, dmg){
     if(!cam) return;
-    let attacker = humans[cam];
-    let defender = humans[cam == 'player' ? 'dealer' : 'player'];
+    let attacker = humans[cam == 'player' ? 'dealer' : 'player'];
+    let defender = humans[cam];
 
     //加算(attacker)
     let power = 1; //倍率 *power みたいに使うから初期値は1
@@ -485,19 +498,37 @@ async function damage(cam, dmg){
     defender.hp -= deal;
 
     if(defender.hp < 0) defender.hp = 0;
+
+    tekiou();
+
+    if(humans['player'].hp == 0){
+        outcome('dealer');
+        return 0;
+    };
+
+    if(humans['dealer'].hp == 0){
+        outcome('player');
+        return 0;
+    };
+    
+    return 1; //どちらかが死んだならば処理を停止するため0を、そうでなければ1をお返し申す
 }
 async function outcome(winner){
     let thisRate = 1;
     switch(winner){
         case 'player':
-            coin += (5 * dealer.coinRate);
+            coin += (5 * humans['dealer'].coinRate);
             break;
         case 'dealer':
             break;
     }
     tekiou();
+
+    //ここいらないゾーンです
+    addtext(`${humans['dealer'].name}「${winner == 'player' ? Dealers[humans['dealer'].name].lose : Dealers[humans['dealer'].name].win}」`);
+
     await delay(3000);
-    // battleStart();
+    battleStart();
 }
 async function checkout(){
     //result, outcome, checkout　の三つ目くん
@@ -544,9 +575,11 @@ function reset(){
 
 function battleStart(){
     reset();
-    addtext("dealerが現れた！")
+    console.log(Dealers)
+    let names = Object.keys(Dealers)
+    humans['dealer'].name = arraySelect(names);
+    addtext(`${humans['dealer'].name}「${Dealers[humans['dealer'].name].opening}」`);
 }
-
 
 //一旦のやつ
 battleStart();
