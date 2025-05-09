@@ -574,11 +574,80 @@ function reset(){
 }
 
 function battleStart(){
-    reset();
-    console.log(Dealers)
     let names = Object.keys(Dealers)
     humans['dealer'].name = arraySelect(names);
     addtext(`${humans['dealer'].name}「${Dealers[humans['dealer'].name].opening}」`);
+    
+    reset();
+}
+
+function decideDealerName(){
+    let names = Object.keys(Dealers).filter(a => Enemies[a].stage == stage).map(a => Enemies[a].name);
+    let enemyname = arraySelect(names);
+    
+    let nameData = Enemies[enemyname];
+    let enemy = {};
+
+    enemy.status = 1;
+    enemy.cam = 'enemies';
+    enemy.num = target;
+
+    enemy.level = enemylv + Math.floor(Math.random() * 7)-3; 
+    if(enemy.level < 1){enemy.level = 1;}
+    
+    enemy.id = enemyname; //nameは表示用、idは内部処理用
+    enemy.name = enemyname;
+
+    enemy.attack = enemyatk;
+    enemy.defense = enemydef;
+    enemy.mattack = enemymatk;
+    enemy.mdefense = enemymdef;
+    enemy.maxhealth = enemyhp;
+    enemy.maxmp = enemymp;
+    enemy.critlate = enemycrla;
+    enemy.critdmg = enemycrdm;
+    enemy.critresist = enemycrrs;
+    enemy.speed = 50;
+
+    enemy.power = 1;
+    enemy.shell = 1;
+
+    enemy.buffs = [];
+    
+    enemy.weapon = {id:'none', lv:1};
+    enemy.armor  = {id:'none', lv:1};
+    enemy.ear    = {id:'none', lv:1};
+    enemy.ring   = {id:'none', lv:1};
+    enemy.neck   = {id:'none', lv:1};
+
+    enemy.ep = 0;
+    enemy.ex = 'null';
+    enemy.ns = 'null';
+    enemy.ps = 'null';
+
+    let statuses = ['attack','defense','mattack','mdefense','maxhealth','maxmp','critlate','critdmg','critresist','speed'];
+    statuses.forEach(statu => {
+    if(nameData[statu].startsWith('+') || nameData[statu].startsWith('-')){
+        let num = Number(nameData[statu].slice(1));
+        if(nameData[statu].startsWith('-')){num *= -1};
+        enemy[statu] += num;
+    }else if(nameData[statu].startsWith('=')){
+        let num = Number(nameData[statu].slice(1));
+        enemy[statu] = num;
+    }
+    //'0'なら変動無し
+    })
+
+    enemy.prefixe = '';
+    let prefixe = arraySelect(Object.keys(Prefixes));
+    if(Math.floor(Math.random() * 5) == 0){
+    enemy.prefixe = Prefixes[prefixe].name;
+    Prefixes[prefixe].process('enemies',target);
+    };
+
+    enemy.health = enemy.maxhealth;
+    enemy.mp = enemy.maxmp;
+    return enemy;
 }
 
 //一旦のやつ
