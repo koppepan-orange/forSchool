@@ -198,6 +198,7 @@ let humans = {
     player:{
         name: "player",
         deck: [],
+        melt: [],
         cards: [],
         value: 0,
         standed: 0,
@@ -214,6 +215,7 @@ let humans = {
         name: "dealer",
         coinRate: 1,
         deck: [],
+        melt: [],
         cards: [],
         value: 0,
         standed: 0,
@@ -232,11 +234,8 @@ let standed = 0;
 
 let spada = 21; //仮名。
 
-let uiButtons = document.getElementById('buttons')
-let hitButton = uiButtons.querySelector(".hit");
-let standButton = uiButtons.querySelector(".stand")
-
 function tekiou(){
+    //playerとdealerのvalueとhealthのtekiou
     Object.keys(humans).forEach(cam => {
         let div = document.querySelector(`#UIs .${cam}`);
 
@@ -265,54 +264,197 @@ function tekiou(){
         div.querySelector(".point").textContent = human.value;
     });
     
-}
-function getCard(cam){
-    let deck = humans[cam].deck.filter(a => !a.showing);
-    let card = arraySelect(deck); // ランダムに1枚選ぶ関数だと仮定
-    card.showing = 1;
-    return [card.name, card.value, card.suit];
-}
+    //playerのその他の要素のtekiou
+    let elseInfo = document.querySelector("#else .info");
+    elseInfo.innerHTML = '';
+    
+    let row1 = document.createElement("div");
+    row1.className = "row";
+    
+    let coinDivpre = document.createElement("div");
+    coinDivpre.className = "item coin";
+    coinDivpre.textContent = `Coin: ${coin}`;
+    row1.appendChild(coinDivpre);
+    
+    let spadaDivpre = document.createElement("div");
+    spadaDivpre.className = "item spada";
+    spadaDivpre.textContent = `Spada: ${spada}`;
+    row1.appendChild(spadaDivpre);
+    elseInfo.appendChild(row1);
+    
+    let row2 = document.createElement("div");
+    row2.className = "row";
 
-hitButton.addEventListener("click", async function (){
+    let deckDivpre = document.createElement("div");
+    deckDivpre.className = "item deck";
+    deckDivpre.textContent = `Deck: ${humans['player'].deck.length}`;
+    deckDivpre.addEventListener("click", function(){
+        DecksShow('deck');
+    });
+    row2.appendChild(deckDivpre);
+    
+    let meltDivpre = document.createElement("div"); //めーると とけてしまいそう〜〜〜〜
+    meltDivpre.className = "item melt";
+    meltDivpre.textContent = `Melt: ${humans['player'].melt.length}`;
+    meltDivpre.addEventListener("click", function(){
+        DecksShow('melt');   
+    })
+    row2.appendChild(meltDivpre);
+    elseInfo.appendChild(row2);
+}
+let deckDiv = document.querySelector('#upperLayer .deck');
+let meltDiv = document.querySelector('#upperLayer .melt');
+let detailDiv = document.querySelector('#upperLayer .detail')
+function DecksShow(type){
+    let appearDiv = document.querySelector(`#upperLayer .${type}`);
+    appearDiv.innerHTML = '';
+
+    //これ5つ、関数にまとめれそうじゃね？
+    let heartsDiv = suitMake('hearts', type);
+    appearDiv.appendChild(heartsDiv);
+
+    let spadesDiv = suitMake('spades', type);
+    appearDiv.appendChild(spadesDiv);
+
+    let diamondsDiv = suitMake('diamonds', type);
+    appearDiv.appendChild(diamondsDiv);
+    
+    let clubsDiv = suitMake('clubs', type);
+    appearDiv.appendChild(clubsDiv);
+
+    let elsesDiv = suitMake('elses', type);
+    appearDiv.appendChild(elsesDiv);
+
+    appearDiv.style.display = 'flex';  
+    appearDiv.style.pointerEvents = 'all';
+}
+function suitMake(suit, type){
     let player = humans['player'];
-    let dealer = humans['dealer'];
-    if(!player.standed){
-        let drawCard = cardDraw('player')
-        await delay(750);
-        
-        let isburst = isBurst('player');
-        if(isburst) return;
+    let mark = suit == 'hearts' ? '♡' : suit == 'spades' ? '♤' : suit == 'diamonds' ? '♢' : suit == 'clubs' ? '♧' : 'X';
+    let suits = player[type].filter(c => c.suit == mark);
 
-        if(!dealer.standed){
-            drawCard = cardDraw('dealer');
-            if(dealer.value >= 17) dealer.standed = 1;
-            await delay(750);
+    let suitsDiv = document.createElement("div");
+    suitsDiv.className = suit;
 
-            let isburst = isBurst('dealer');
-            if(isburst) return;
-        }
+    suits.forEach(card => {
+        let cardDiv = cardMake(card.name, card.value, card.suit);
+
+        cardDiv.addEventListener("click", (event) => zoomCard(event,card,cardDiv));
+
+        suitsDiv.appendChild(cardDiv);
+    });
+
+    // // カード以外の場所クリックで戻す
+    // if (!document._cardResetListenerAdded) {
+    //     document.addEventListener("click", function () {
+    //         resetCard();
+    //     });
+    //     document._cardResetListenerAdded = true;
+    // }
+    return suitsDiv;
+}
+document.addEventListener("click", function (e) {
+    console.log(e.target)
+    // すでに拡大してるカードがあるなら閉じるだけで終わり
+    if(document.querySelector('#upperLayer .card.active')) {
+        console.log('cardResetの5やつ')
+        resetCard();
+        return;
     }
-})
+
+    // 拡大カードもない＝deck/meltを閉じたい
+    // && 
+    if(e.target.closest('#upperLayer .deck') || e.target.closest('#upperLayer .melt') && deckDiv.style.display == 'flex' || meltDiv.style.display == 'flex' && !e.target.closest('.card')) {
+        console.log('閉じるやつ')
+        deckDiv.style.display = 'none';
+        deckDiv.style.pointerEvents = 'none';
+        meltDiv.style.display = 'none';
+        meltDiv.style.pointerEvents = 'none';
+        detailDiv.style.display = 'none';
+    }
+});
+
+function zoomCard(event,card,cardDiv) {
+    // すでに拡大中なら戻す
+    if (cardDiv.classList.contains("active")) {
+        resetCard();
+        return;
+    }
+
+    resetCard();
+
+    // 元の位置とサイズ取得
+    let rect = cardDiv.getBoundingClientRect();
+
+    // 一時的に絶対配置に
+    cardDiv.style.position = "fixed";
+    cardDiv.style.left = rect.left + "px";
+    cardDiv.style.top = rect.top + "px";
+    cardDiv.style.width = rect.width + "px";
+    cardDiv.style.height = rect.height + "px";
+    cardDiv.style.zIndex = 105;
+
+    // 強制再描画（← transition動作させるためのトリック）
+    cardDiv.offsetWidth;
+
+    // 中央に移動＋拡大
+    cardDiv.style.transition = 'transform 0.3s ease, left 0.3s ease, top 0.3s ease';
+    cardDiv.style.left = '50%';
+    cardDiv.style.top = '50%';
+    cardDiv.style.transform = "translate(-50%, -50%) scale(2)";
+    cardDiv.classList.add("active");
+
+    // 詳細表示
+    detailDiv.style.display = 'block';
+    detailDiv.innerHTML = `
+        <h3>${card.name}</h3>
+        <p>Value: ${card.value}</p>
+        <p>Suit: ${card.suit}</p>
+        <p>${Cards[card.name].description}</p>
+    `;
+    event.stopPropagation();
+    
+}
+function resetCard() {
+    document.querySelectorAll('#upperLayer .card.active').forEach(c => {
+        c.style.transition = "transform 0.3s ease, left 0.3s ease, top 0.3s ease, ";
+        c.style.left = '';
+        c.style.top = '';
+        c.style.transform = "translate(0, 0) scale(1)";
+        c.style.position = '';
+        c.style.width = '';
+        c.style.height = '';
+        c.style.zIndex = '';
+        c.classList.remove("active");
+    });
+    detailDiv.style.display = 'none';
+}
 
 function cardDraw(cam){
-    let deck = humans[cam].deck.filter(a => !a.showing);
-    let card = arraySelect(deck);
-    cardAdd(cam, card.name, card.value, card.suit)
-    tekiou();
-    card.showing = 1;
-    return [card.name, card.value, card.suit];
-}
-function cardAdd(cam, name, value, suit){
-    let cardData = Cards[name];
-    
+    let deck = humans[cam].deck;
+    if(deck.length === 0) return null;
+
+    let i = Math.floor(Math.random() * deck.length);
+    let card = deck.splice(i, 1)[0];
+    let cardData = Cards[card.name];
+
     let drawCard = {
-        name: name,
-        value: value,
-        suit: suit,
+        name: card.name,
+        value: card.value,
+        suit: card.suit,
         data: cardData
     };
-    
     humans[cam].cards.push(drawCard);
+
+    let cardDiv = cardMake(card.name, card.value, card.suit);
+    document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
+
+    tekiou();
+    return [card.name, card.value, card.suit];
+}
+function cardMake(name, value, suit){
+    //description とか用にvalue使え
+    let cardData = Cards[name];
 
     let newCard = document.createElement("div");
     newCard.className = `card ${cardData.kind}`;
@@ -344,18 +486,64 @@ function cardAdd(cam, name, value, suit){
             
             let img = document.createElement("img");
             img.className = 'img';
-            console.log(`assets/cards/${cardData.kind}/${cardData.id}`)
             img.src = `assets/cards/${cardData.kind}/${cardData.id}.png`;
             newCard.appendChild(img);
-            'assets/cards/tarot/wheel_of_fourtune'
-            
             break;
         }
     };
     
-    document.querySelector(`#cardPlaces .${cam}`).appendChild(newCard);
-    return drawCard;
+    return newCard;
 }
+
+//プレイヤーの操作
+let uiButtons = document.getElementById('buttons');
+let hitButton = uiButtons.querySelector(".hit");
+let standButton = uiButtons.querySelector(".stand");
+
+hitButton.addEventListener("click", async function (){
+    let player = humans['player'];
+    let dealer = humans['dealer'];
+    if(!player.standed){
+        let drawCard = cardDraw('player')
+        let isburst = isBurst('player');
+        await delay(750);
+        if(isburst) return result('player');
+
+        if(!dealer.standed){
+            drawCard = cardDraw('dealer');
+            if(dealer.value >= 17) dealer.standed = 1;
+            let isburst = isBurst('dealer');
+            await delay(750);
+            if(isburst) return result('dealer');
+        }
+    }
+})
+
+standButton.addEventListener("click", async function (){
+    let player = humans['player'];
+    let dealer = humans['dealer'];
+
+    player.standed = 1;
+
+    if(!dealer.standed){
+        do{
+            let drawCard = cardDraw('dealer');
+            let isburst = isBurst('dealer');
+            await delay(750);
+            if(isburst) return result('dealer');
+        }while(humans["dealer"].value < 17);
+
+        dealer.standed = 1;
+    }
+
+
+    await delay(1000);
+
+    //result
+    result()
+});
+
+
 function isBurst(cam){
     let human = humans[cam];
 
@@ -376,42 +564,17 @@ function isBurst(cam){
                 }
                 human.cards.push(newDrawCard);
                 return 0
+                //もしcardsの中にstrength(tarot,UR)があるのならば、今引いたカードをA(normal,N)に変化させる～って動き
+                //スツ金みたいな感じにさせたい
             }
         })
-        //もしcardsの中にstrength(tarot,UR)があるのならば、今引いたカードをA(normal,N)に変化させる～って動き
-        //スツ金みたいな感じにさせたい
         console.log(`${cam}:「ワイルドだろぉ？」`)
-        result(cam);
+        human.standed = 1;
         return 1
     }else{
         return 0
     }
 }
-
-standButton.addEventListener("click", async function (){
-    let player = humans['player'];
-    let dealer = humans['dealer'];
-
-    player.standed = 1;
-
-    if(!dealer.standed){
-        do{
-            let drawCard = cardDraw('dealer');
-            await delay(750);
-        
-            let isburst = isBurst('dealer');
-            if(isburst) return;
-        }while(humans["dealer"].value < 17);
-
-        dealer.standed = 1;
-    }
-
-
-    await delay(1000);
-
-    //result
-    result()
-});
 
 async function result(code = 'none'){
     //codeが${cam}ならば、${cam}がburstしたということ。!${cam}のvalueをそのままdamage
@@ -428,17 +591,19 @@ async function result(code = 'none'){
     if(code == 'none'){
         let difference = player.value - dealer.value;
         if(difference > 0) res = await damage('dealer', difference)
-        else if(difference < 0) res =  await damage('player', -difference)
-        else res =  await damage(0, 0);
+        else if(difference < 0) res = await damage('player', -difference)
+        else res = await damage(0, 0);
     }else{
         let attackerCam = code == 'player' ? 'dealer' : 'player';
         res = await damage(code, humans[attackerCam].value);
     }
+    //soldatoならばダメージ二倍とかあってもいいかも
+    //相手バーストの自分soldatoだったら42っていう激ヤバなダメージになるわけだし いややばくね？それ
 
     if(res) reset(); //もし死んでいないならば、続行(reset)
 }
 async function damage(cam, dmg){
-    if(!cam) return;
+    if(!cam) return 1;
     let attacker = humans[cam == 'player' ? 'dealer' : 'player'];
     let defender = humans[cam];
 
@@ -496,6 +661,7 @@ async function damage(cam, dmg){
     }
 
     defender.hp -= deal;
+    addlog(`${defender.name}に${deal}ダメージ`);
 
     if(defender.hp < 0) defender.hp = 0;
 
@@ -536,10 +702,7 @@ async function checkout(){
 let debugMenu = document.querySelector("#debug .menu");
 let debugData = document.querySelector("#debug .data");
 document.addEventListener("keydown", (e) =>{
-    if(e.key == "p"){
-        let [num, name, suit] = getCard();
-        cardAdd("player",num,name,suit);
-    }else if(e.key == 'y'){
+    if(e.key == 'y'){
         if(debugData.style.display == 'block'){
             debugData.style.display = 'none';
             debugData.innerHTML = JSON.stringify(humans);
@@ -566,8 +729,12 @@ function reset(){
     player.standed = 0;
     dealer.standed = 0;
 
+    player.melt.push(...player.cards);
+    dealer.melt.push(...dealer.cards);
+
     player.cards = [];
     dealer.cards = [];
+
     tekiou();
 
     // console.log("resetですわ～")
@@ -650,8 +817,6 @@ function decideDealerName(){
     return enemy;
 }
 
-//一旦のやつ
-battleStart();
 
 //本来はダンジョン開始時にやるべき動きを！なんと贅沢にコードの1番下に描かせていただきます！！
 let nums = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -664,10 +829,27 @@ nums.forEach(num => {
             name: num,
             value: Cards[num].val,
             suit: suit,
-            showing: 0,
             data: Cards[num]
         };
         humans.player.deck.push(card);
         humans.dealer.deck.push(card);
     });
 });
+
+let card1 = {
+    name: 'wheel of fourtune',
+    value: 0,
+    suit: '♡',
+    data: Cards['wheel of fourtune']
+};
+humans.player.deck.push(card1);
+let card2 = {
+    name: 'strength',
+    value: 0,
+    suit: '♧',
+    data: Cards['strength']
+};
+humans.player.deck.push(card2);
+
+//一旦のやつ
+battleStart();
