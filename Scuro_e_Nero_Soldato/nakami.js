@@ -230,7 +230,10 @@ let humans = {
     }
 }
 let coin = 0;
-let standed = 0;
+
+let stage = 1;
+let round = 0;
+let turn = 0;
 
 let spada = 21; //仮名。
 
@@ -287,6 +290,7 @@ function tekiou(){
 
     let deckDivpre = document.createElement("div");
     deckDivpre.className = "item deck";
+    deckDivpre.dataset.type = 'deck';
     deckDivpre.textContent = `Deck: ${humans['player'].deck.length}`;
     deckDivpre.addEventListener("click", function(){
         DecksShow('deck');
@@ -295,6 +299,7 @@ function tekiou(){
     
     let meltDivpre = document.createElement("div"); //めーると とけてしまいそう〜〜〜〜
     meltDivpre.className = "item melt";
+    meltDivpre.dataset.type = 'melt';
     meltDivpre.textContent = `Melt: ${humans['player'].melt.length}`;
     meltDivpre.addEventListener("click", function(){
         DecksShow('melt');   
@@ -309,21 +314,10 @@ function DecksShow(type){
     let appearDiv = document.querySelector(`#upperLayer .${type}`);
     appearDiv.innerHTML = '';
 
-    //これ5つ、関数にまとめれそうじゃね？
-    let heartsDiv = suitMake('hearts', type);
-    appearDiv.appendChild(heartsDiv);
+    ['hearts', 'spades', 'diamonds', 'clubs', 'elses'].forEach(suit => {
+        appearDiv.appendChild(suitMake(suit, type));
+    });
 
-    let spadesDiv = suitMake('spades', type);
-    appearDiv.appendChild(spadesDiv);
-
-    let diamondsDiv = suitMake('diamonds', type);
-    appearDiv.appendChild(diamondsDiv);
-    
-    let clubsDiv = suitMake('clubs', type);
-    appearDiv.appendChild(clubsDiv);
-
-    let elsesDiv = suitMake('elses', type);
-    appearDiv.appendChild(elsesDiv);
 
     appearDiv.style.display = 'flex';  
     appearDiv.style.pointerEvents = 'all';
@@ -332,6 +326,12 @@ function suitMake(suit, type){
     let player = humans['player'];
     let mark = suit == 'hearts' ? '♡' : suit == 'spades' ? '♤' : suit == 'diamonds' ? '♢' : suit == 'clubs' ? '♧' : 'X';
     let suits = player[type].filter(c => c.suit == mark);
+    let order = Object.keys(Cards);
+    order.splice(order.findIndex(card => card == 'A'), 1);
+    order.unshift('A');//一旦の策。そのうちどーにかしよう
+    suits.sort((a, b) => {
+        return order.indexOf(a.name) - order.indexOf(b.name);
+    });
 
     let suitsDiv = document.createElement("div");
     suitsDiv.className = suit;
@@ -344,28 +344,18 @@ function suitMake(suit, type){
         suitsDiv.appendChild(cardDiv);
     });
 
-    // // カード以外の場所クリックで戻す
-    // if (!document._cardResetListenerAdded) {
-    //     document.addEventListener("click", function () {
-    //         resetCard();
-    //     });
-    //     document._cardResetListenerAdded = true;
-    // }
     return suitsDiv;
 }
 document.addEventListener("click", function (e) {
-    console.log(e.target)
     // すでに拡大してるカードがあるなら閉じるだけで終わり
     if(document.querySelector('#upperLayer .card.active')) {
-        console.log('cardResetの5やつ')
         resetCard();
         return;
     }
 
     // 拡大カードもない＝deck/meltを閉じたい
     // && 
-    if(e.target.closest('#upperLayer .deck') || e.target.closest('#upperLayer .melt') && deckDiv.style.display == 'flex' || meltDiv.style.display == 'flex' && !e.target.closest('.card')) {
-        console.log('閉じるやつ')
+    if(e.target.closest('#upperLayer .deck') && deckDiv.style.display == 'flex' || e.target.closest('#upperLayer .melt') && meltDiv.style.display == 'flex' && !e.target.closest('.card')) {
         deckDiv.style.display = 'none';
         deckDiv.style.pointerEvents = 'none';
         meltDiv.style.display = 'none';
@@ -412,8 +402,7 @@ function zoomCard(event,card,cardDiv) {
         <p>Suit: ${card.suit}</p>
         <p>${Cards[card.name].description}</p>
     `;
-    event.stopPropagation();
-    
+    event.stopPropagation()
 }
 function resetCard() {
     document.querySelectorAll('#upperLayer .card.active').forEach(c => {
@@ -430,18 +419,35 @@ function resetCard() {
     detailDiv.style.display = 'none';
 }
 
-function cardDraw(cam){
+function cardDraw(cam, name = null, value = null, suit = null, prop = []){
     let deck = humans[cam].deck;
     if(deck.length === 0) return null;
 
-    let i = Math.floor(Math.random() * deck.length);
-    let card = deck.splice(i, 1)[0];
+    let card = null;
+
+    if(name != null && value != null && suit != null){
+        card = {
+            name: name,
+           value: value,
+            suit: suit,
+            prop: prop,
+            data: Cards[name]
+        }
+        console.log('オーダー織田「カード作っといたわ笑」', card);
+    }
+
+    card = deck.shift();
+    
+
+    //console.log(card)
+
     let cardData = Cards[card.name];
 
     let drawCard = {
         name: card.name,
         value: card.value,
         suit: card.suit,
+        prop: card.prop,
         data: cardData
     };
     humans[cam].cards.push(drawCard);
@@ -509,11 +515,15 @@ hitButton.addEventListener("click", async function (){
         await delay(750);
         if(isburst) return result('player');
 
+        console.log('dealerのturnくるかな〜？')
         if(!dealer.standed){
+            console.log('dealerのturn')
             drawCard = cardDraw('dealer');
             if(dealer.value >= 17) dealer.standed = 1;
             let isburst = isBurst('dealer');
             await delay(750);
+            turn += 1;
+
             if(isburst) return result('dealer');
         }
     }
@@ -554,15 +564,10 @@ function isBurst(cam){
             if(card.name == 'strength' && !card.happend){
                 card.happend = 1;
                 let disCard = human.cards.pop();
+                human.melt.push(disCard);
+
+                cardDraw(cam, 'A', 'A', '♡', ['vanish']); //vanish..つまりは消滅 そのラウンドの終了時meltに行かず消える
                 
-                let newCardData = Cards['A']
-                let newDrawCard = {
-                    name: 'A',
-                    value: '1',
-                    suit: '♡',
-                    data: newCardData
-                }
-                human.cards.push(newDrawCard);
                 return 0
                 //もしcardsの中にstrength(tarot,UR)があるのならば、今引いたカードをA(normal,N)に変化させる～って動き
                 //スツ金みたいな感じにさせたい
@@ -600,6 +605,7 @@ async function result(code = 'none'){
     //soldatoならばダメージ二倍とかあってもいいかも
     //相手バーストの自分soldatoだったら42っていう激ヤバなダメージになるわけだし いややばくね？それ
 
+    round += 1;
     if(res) reset(); //もし死んでいないならば、続行(reset)
 }
 async function damage(cam, dmg){
@@ -719,127 +725,133 @@ document.addEventListener("keydown", (e) =>{
 });
 
 
-function reset(){
-    document.querySelector("#cardPlaces .player").innerHTML = '';
-    document.querySelector("#cardPlaces .dealer").innerHTML = '';
-
+function reset() {
     let player = humans["player"];
     let dealer = humans["dealer"];
 
     player.standed = 0;
     dealer.standed = 0;
 
-    player.melt.push(...player.cards);
-    dealer.melt.push(...dealer.cards);
+    const playerDOM = document.querySelector("#cardPlaces .player");
+    const dealerDOM = document.querySelector("#cardPlaces .dealer");
 
-    player.cards = [];
-    dealer.cards = [];
+    // プレイヤー
+    while (player.cards.length > 0) {
+        const card = player.cards.shift(); // 先頭から1枚ずつ
+        if (!card.prop?.includes("vanish")) {
+            player.melt.push(card);
+        }
+        if (playerDOM.children.length > 0) {
+            playerDOM.children[0].remove();
+        }
+    }
+
+    // ディーラー
+    while (dealer.cards.length > 0) {
+        const card = dealer.cards.shift();
+        if (!card.prop?.includes("vanish")) {
+            dealer.melt.push(card);
+        }
+        if (dealerDOM.children.length > 0) {
+            dealerDOM.children[0].remove();
+        }
+    }
 
     tekiou();
-
-    // console.log("resetですわ～")
 }
 
 function battleStart(){
-    let names = Object.keys(Dealers)
-    humans['dealer'].name = arraySelect(names);
+    turn = 0;
+    round = 0;
+    humans['dealer'] = decideDealerName();
+
     addtext(`${humans['dealer'].name}「${Dealers[humans['dealer'].name].opening}」`);
+    
+    humans['player'].deck = arrayShuffle(humans['player'].deck);
     
     reset();
 }
 
 function decideDealerName(){
-    let names = Object.keys(Dealers).filter(a => Enemies[a].stage == stage).map(a => Enemies[a].name);
-    let enemyname = arraySelect(names);
+    let names = Object.keys(Dealers).filter(a => Dealers[a].stage == stage).map(a => Dealers[a].name);
+    let dealername = arraySelect(names);
+    let nameData = Dealers[dealername];
+    let dealer = {};
+
+    dealer.cam = 'dealer';
     
-    let nameData = Enemies[enemyname];
-    let enemy = {};
+    dealer.id = dealername; //nameは表示用、idは内部処理用
+    dealer.name = dealername;
 
-    enemy.status = 1;
-    enemy.cam = 'enemies';
-    enemy.num = target;
-
-    enemy.level = enemylv + Math.floor(Math.random() * 7)-3; 
-    if(enemy.level < 1){enemy.level = 1;}
+    dealer.value = 0;
+    dealer.cards = [];
+    dealer.deck = [];
+    dealer.melt = [];
+    dealer.standed = 0;
+    dealer.atk = 0;
+    dealer.def = 0;
+    dealer.shl = 0;
     
-    enemy.id = enemyname; //nameは表示用、idは内部処理用
-    enemy.name = enemyname;
-
-    enemy.attack = enemyatk;
-    enemy.defense = enemydef;
-    enemy.mattack = enemymatk;
-    enemy.mdefense = enemymdef;
-    enemy.maxhealth = enemyhp;
-    enemy.maxmp = enemymp;
-    enemy.critlate = enemycrla;
-    enemy.critdmg = enemycrdm;
-    enemy.critresist = enemycrrs;
-    enemy.speed = 50;
-
-    enemy.power = 1;
-    enemy.shell = 1;
-
-    enemy.buffs = [];
-    
-    enemy.weapon = {id:'none', lv:1};
-    enemy.armor  = {id:'none', lv:1};
-    enemy.ear    = {id:'none', lv:1};
-    enemy.ring   = {id:'none', lv:1};
-    enemy.neck   = {id:'none', lv:1};
-
-    enemy.ep = 0;
-    enemy.ex = 'null';
-    enemy.ns = 'null';
-    enemy.ps = 'null';
-
-    let statuses = ['attack','defense','mattack','mdefense','maxhealth','maxmp','critlate','critdmg','critresist','speed'];
-    statuses.forEach(statu => {
-    if(nameData[statu].startsWith('+') || nameData[statu].startsWith('-')){
-        let num = Number(nameData[statu].slice(1));
-        if(nameData[statu].startsWith('-')){num *= -1};
-        enemy[statu] += num;
-    }else if(nameData[statu].startsWith('=')){
-        let num = Number(nameData[statu].slice(1));
-        enemy[statu] = num;
-    }
-    //'0'なら変動無し
+    deckKinds[nameData.deckKind].deck.forEach(card => {
+        let cardName = card[0]
+        dealer.deck.push({
+            name: Cards[cardName].name,
+            value: Cards[cardName].val,
+            suit: card[1],
+            prop: Cards[cardName].prop,
+            data: Cards[cardName]
+        })
     })
+    dealer.deck = arrayShuffle(dealer.deck);
 
-    enemy.prefixe = '';
-    let prefixe = arraySelect(Object.keys(Prefixes));
-    if(Math.floor(Math.random() * 5) == 0){
-    enemy.prefixe = Prefixes[prefixe].name;
-    Prefixes[prefixe].process('enemies',target);
-    };
+    dealer.maxhp = nameData.maxhp;
+    dealer.buffs = [];
 
-    enemy.health = enemy.maxhealth;
-    enemy.mp = enemy.maxmp;
-    return enemy;
+    // ステータスの上下ありかどうかはファローズでよろっぷ
+    // let statuses = ['attack','defense','mattack','mdefense','maxhealth','maxmp','critlate','critdmg','critresist','speed'];
+    // statuses.forEach(statu => {
+    // if(nameData[statu].startsWith('+') || nameData[statu].startsWith('-')){
+    //     let num = Number(nameData[statu].slice(1));
+    //     if(nameData[statu].startsWith('-')){num *= -1};
+    //     dealer[statu] += num;
+    // }else if(nameData[statu].startsWith('=')){
+    //     let num = Number(nameData[statu].slice(1));
+    //     dealer[statu] = num;
+    // }
+    // //'0'なら変動無し
+    // })
+
+    //つける〜〜〜？？ まあ一旦保留で
+    // dealer.prefixe = '';
+    // let prefixe = arraySelect(Object.keys(Prefixes));
+    // if(Math.floor(Math.random() * 5) == 0){
+    //     dealer.prefixe = Prefixes[prefixe].name;
+    //     Prefixes[prefixe].process('enemies',target);
+    // };
+
+    dealer.hp = dealer.maxhp;
+    
+
+    return dealer;
 }
 
-
-//本来はダンジョン開始時にやるべき動きを！なんと贅沢にコードの1番下に描かせていただきます！！
-let nums = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-let suits = ['♡','♤','♢','♧'];
-humans.player.deck = [];
-humans.dealer.deck = [];
-nums.forEach(num => {
-    suits.forEach(suit => {
-        const card = {
-            name: num,
-            value: Cards[num].val,
-            suit: suit,
-            data: Cards[num]
-        };
-        humans.player.deck.push(card);
-        humans.dealer.deck.push(card);
-    });
-});
+deckKinds['normal'].deck.forEach(card => {
+    let cardName = card[0]
+    humans['player'].deck.push({
+        name: Cards[cardName].name,
+        value: Cards[cardName].val,
+        suit: card[1],
+        prop: Cards[cardName].prop,
+        data: Cards[cardName]
+    })
+})
+humans['player'].deck = arrayShuffle(humans['player'].deck);
 
 let card1 = {
     name: 'wheel of fourtune',
     value: 0,
     suit: '♡',
+    prop: [],
     data: Cards['wheel of fourtune']
 };
 humans.player.deck.push(card1);
@@ -847,6 +859,7 @@ let card2 = {
     name: 'strength',
     value: 0,
     suit: '♧',
+    prop: [],
     data: Cards['strength']
 };
 humans.player.deck.push(card2);
