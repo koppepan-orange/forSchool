@@ -63,6 +63,9 @@ function probability(num){
     return Math.random()*100 <= num;
     //例:num == 20 → randomが20以内ならtrue,elseならfalseを返す
 };
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 //#endregion
 //#region log&text
 let textDiv = document.querySelector('#text');
@@ -204,8 +207,6 @@ let humans = {
         standed: 0,
         hp: 40,
         maxhp: 40,
-        // mp: 10,
-        // maxmp: 10,
         shl: 0,
         atk: 0, //永続増加～みたいな用法予定
         def: 0, //上に同じく..いや強すぎるかも 
@@ -221,21 +222,20 @@ let humans = {
         standed: 0,
         hp: 20,
         maxhp: 20,
-        // mp: 10,
-        // maxmp: 10,
         shl: 0,
         atk: 0,
         def: 0,
         buffs: [],
     }
 }
+
 let coin = 0;
 
 let stage = 1;
 let round = 0;
 let turn = 0;
 
-let spada = 21; //仮名。
+let spada = 21;
 
 function tekiou(){
     //playerとdealerのvalueとhealthのtekiou
@@ -307,6 +307,8 @@ function tekiou(){
     row2.appendChild(meltDivpre);
     elseInfo.appendChild(row2);
 }
+
+//#region deckかmeltの表示処理
 let deckDiv = document.querySelector('#upperLayer .deck');
 let meltDiv = document.querySelector('#upperLayer .melt');
 let detailDiv = document.querySelector('#upperLayer .detail')
@@ -363,7 +365,6 @@ document.addEventListener("click", function (e) {
         detailDiv.style.display = 'none';
     }
 });
-
 function zoomCard(event,card,cardDiv) {
     // すでに拡大中なら戻す
     if (cardDiv.classList.contains("active")) {
@@ -418,6 +419,67 @@ function resetCard() {
     });
     detailDiv.style.display = 'none';
 }
+//#endregion
+
+
+let executions = {
+    cardDraw,
+    cardMelt
+}
+async function execute(arr){
+    let [functionName, ...args] = arr;
+    await executions[functionName](...args);
+}
+
+const context = {};
+
+
+async function read(lines) {
+    for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('変数')) {
+            let [, varName, , expression] = line.split(/ +/); // 変数 x = 乱数生成(1,3)
+            if (expression.startsWith('乱数生成')) {
+                let args = expression.match(/\((.*?)\)/)[1].split(',').map(Number);
+                context[varName] = random(...args);
+            } else {
+                context[varName] = JSON.parse(expression);
+            }
+        }
+
+
+        else if (line.startsWith('if')) {
+            let [, varName, operator, value] = line.split(/ +/);
+            let left = context[varName];
+            let right = JSON.parse(value);
+            let condition = false;
+            switch(operator){
+                case '==': condition = left == right; break;
+                case '!=': condition = left != right; break;
+                case '<':  condition = left < right; break;
+                case '>':  condition = left > right; break;
+                case '<=': condition = left <= right; break;
+                case '>=': condition = left >= right; break;
+            }
+            // if (operator === '==') condition = left == right;
+            // else if (operator === '!=') condition = left != right;
+            if (!condition) continue;
+        }
+
+        else if (line.startsWith('wait')) {
+            let [, ms] = line.split(/ +/);
+            await delay(parseInt(ms));
+        }
+
+        else if (line.startsWith('log')) {
+            let match = line.match(/log +"(.*)"/);
+            console.log(match?.[1] ?? '???');
+        }
+
+        // ...必要に応じて他の命令追加
+    }
+}
+
 
 function cardDraw(cam, name = null, value = null, suit = null, prop = []){
     let deck = humans[cam].deck;
@@ -495,11 +557,13 @@ function cardMake(name, value, suit){
             img.src = `assets/cards/${cardData.kind}/${cardData.id}.png`;
             newCard.appendChild(img);
             break;
-        }
+        };
+        
     };
     
     return newCard;
 }
+
 
 //プレイヤーの操作
 let uiButtons = document.getElementById('buttons');
@@ -515,9 +579,7 @@ hitButton.addEventListener("click", async function (){
         await delay(750);
         if(isburst) return result('player');
 
-        console.log('dealerのturnくるかな〜？')
         if(!dealer.standed){
-            console.log('dealerのturn')
             drawCard = cardDraw('dealer');
             if(dealer.value >= 17) dealer.standed = 1;
             let isburst = isBurst('dealer');
@@ -686,10 +748,10 @@ async function damage(cam, dmg){
     return 1; //どちらかが死んだならば処理を停止するため0を、そうでなければ1をお返し申す
 }
 async function outcome(winner){
-    let thisRate = 1;
+    let rate = 2
     switch(winner){
         case 'player':
-            coin += (5 * humans['dealer'].coinRate);
+            coin += (5 * rate);
             break;
         case 'dealer':
             break;
@@ -697,7 +759,7 @@ async function outcome(winner){
     tekiou();
 
     //ここいらないゾーンです
-    addtext(`${humans['dealer'].name}「${winner == 'player' ? Dealers[humans['dealer'].name].lose : Dealers[humans['dealer'].name].win}」`);
+    await addtext(`${humans['dealer'].name}「${winner == 'player' ? Dealers[humans['dealer'].name].lose : Dealers[humans['dealer'].name].win}」`);
 
     await delay(3000);
     battleStart();
@@ -759,8 +821,33 @@ function reset() {
 
     tekiou();
 }
+function cardMelt(card){
+    let cards = [
+        {
+            name:'A',
+            suit:'♡',
+            prop:['vanish'],
+            attend:[],
+            melted:[],
+        },
+        {
+            name:'5',
+            suit:'♢',
+            prop:[],
+            attend:[['']],
+            melted:[],
+        },
+        {
+            name:'A',
+            suit:'♤',
+            prop:[],
+            attend:[],
+            melted:[],
+        }
+    ]
+}
 
-function battleStart(){
+async function battleStart(){
     turn = 0;
     round = 0;
     humans['dealer'] = decideDealerName();
