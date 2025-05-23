@@ -350,8 +350,10 @@ function suitMake(suit, type){
 }
 document.addEventListener("click", function (e) {
     // すでに拡大してるカードがあるなら閉じるだけで終わり
-    if(document.querySelector('#upperLayer .card.active')) {
+    if(document.querySelector('#upperLayer .card.active') && !e.target.closest('.card')) {
         resetCard();
+        return;
+    }else if(document.querySelector('#upperLayer .card.active') && e.target.closest('.card')){
         return;
     }
 
@@ -365,49 +367,48 @@ document.addEventListener("click", function (e) {
         detailDiv.style.display = 'none';
     }
 });
-function zoomCard(event,card,cardDiv) {
-    // すでに拡大中なら戻す
-    if (cardDiv.classList.contains("active")) {
-        resetCard();
+function zoomCard(event, card, cardDiv) {
+    // すでに拡大中なら→裏返しにする
+    if (cardDiv.classList.contains("active") && !cardDiv.classList.contains("flipped")) {
+        // detailDiv の中身を裏面に入れる
+        let rever = cardDiv.querySelector(".rever");
+        rever.innerHTML = `
+            <h3>${card.name}</h3>
+            <p>Value: ${card.value}</p>
+            <p>Suit: ${card.suit}</p>
+            <p>${Cards[card.name].description}</p>
+        `;
+
+        cardDiv.classList.add("flipped");
+        return;
+    } else if (cardDiv.classList.contains("flipped")) {
+        // 再度クリックで戻す（裏面→表面）
+        cardDiv.classList.remove("flipped");
         return;
     }
 
     resetCard();
 
-    // 元の位置とサイズ取得
-    let rect = cardDiv.getBoundingClientRect();
-
-    // 一時的に絶対配置に
-    cardDiv.style.position = "fixed";
-    cardDiv.style.left = rect.left + "px";
-    cardDiv.style.top = rect.top + "px";
-    cardDiv.style.width = rect.width + "px";
-    cardDiv.style.height = rect.height + "px";
-    cardDiv.style.zIndex = 105;
-
-    // 強制再描画（← transition動作させるためのトリック）
-    cardDiv.offsetWidth;
-
-    // 中央に移動＋拡大
-    cardDiv.style.transition = 'transform 0.3s ease, left 0.3s ease, top 0.3s ease';
-    cardDiv.style.left = '50%';
-    cardDiv.style.top = '50%';
-    cardDiv.style.transform = "translate(-50%, -50%) scale(2)";
+    // let rect = cardDiv.getBoundingClientRect();
+    // cardDiv.style.position = "fixed";
+    // cardDiv.style.left = rect.left + "px";
+    // cardDiv.style.top = rect.top + "px";
+    // cardDiv.style.width = rect.width + "px";
+    // cardDiv.style.height = rect.height + "px";
+    // cardDiv.style.zIndex = 105;
+    // cardDiv.offsetWidth;
+    // cardDiv.style.transition = 'transform 0.3s ease, left 0.3s ease, top 0.3s ease';
+    // cardDiv.style.left = '50%';
+    // cardDiv.style.top = '50%';
+    // cardDiv.style.transform = "translate(-50%, -50%) scale(4)";
     cardDiv.classList.add("active");
 
-    // 詳細表示
-    detailDiv.style.display = 'block';
-    detailDiv.innerHTML = `
-        <h3>${card.name}</h3>
-        <p>Value: ${card.value}</p>
-        <p>Suit: ${card.suit}</p>
-        <p>${Cards[card.name].description}</p>
-    `;
-    event.stopPropagation()
+    event.stopPropagation();
 }
+
 function resetCard() {
     document.querySelectorAll('#upperLayer .card.active').forEach(c => {
-        c.style.transition = "transform 0.3s ease, left 0.3s ease, top 0.3s ease, ";
+        c.style.transition = "transform 0.3s ease, left 0.3s ease, top 0.3s ease";
         c.style.left = '';
         c.style.top = '';
         c.style.transform = "translate(0, 0) scale(1)";
@@ -415,10 +416,10 @@ function resetCard() {
         c.style.width = '';
         c.style.height = '';
         c.style.zIndex = '';
-        c.classList.remove("active");
+        c.classList.remove("active", "flipped");
     });
-    detailDiv.style.display = 'none';
 }
+
 //#endregion
 
 
@@ -437,32 +438,35 @@ const context = {};
 async function read(lines) {
     for (let line of lines) {
         line = line.trim();
-        if (line.startsWith('変数')) {
+        if(line.startsWith('変数')) {
             let [, varName, , expression] = line.split(/ +/); // 変数 x = 乱数生成(1,3)
-            if (expression.startsWith('乱数生成')) {
+            if(expression.startsWith('乱数生成')) {
                 let args = expression.match(/\((.*?)\)/)[1].split(',').map(Number);
                 context[varName] = random(...args);
-            } else {
+            }else{
                 context[varName] = JSON.parse(expression);
             }
         }
 
 
-        else if (line.startsWith('if')) {
-            let [, varName, operator, value] = line.split(/ +/);
-            let left = context[varName];
-            let right = JSON.parse(value);
+   else if(line.startsWith('if')){
+            let [, leftSide, operator, rightSide] = line.split(/ +/);
+            let left = 0, right = 0;
+            function stringOrNumber(moto){
+                if(typeof(leftSide) == 'string') left = context[leftSide];
+           else if(typeof(leftSide) == 'number') left = JSON.parse(leftSide);         
+            }
+            // left = context[leftSide]
+            // right = JSON.parse(rightSide);
             let condition = false;
             switch(operator){
                 case '==': condition = left == right; break;
                 case '!=': condition = left != right; break;
-                case '<':  condition = left < right; break;
-                case '>':  condition = left > right; break;
+                case '<':  condition = left <  right; break;
+                case '>':  condition = left >  right; break;
                 case '<=': condition = left <= right; break;
                 case '>=': condition = left >= right; break;
             }
-            // if (operator === '==') condition = left == right;
-            // else if (operator === '!=') condition = left != right;
             if (!condition) continue;
         }
 
@@ -527,22 +531,25 @@ function cardMake(name, value, suit){
     let newCard = document.createElement("div");
     newCard.className = `card ${cardData.kind}`;
 
+    let front = document.createElement('div');
+    front.className = 'front'
+
     switch(cardData.kind){
         case 'normal':{
             let upper = document.createElement("div");
             upper.className = "upper";
             upper.textContent = suit
-            newCard.appendChild(upper)
+            front.appendChild(upper)
 
             let num = document.createElement("div");
             num.className = "num";
             num.textContent = name;
-            newCard.appendChild(num)
+            front.appendChild(num)
 
             let lower = document.createElement("div");
             lower.className = "lower";
             lower.textContent = suit
-            newCard.appendChild(lower)
+            front.appendChild(lower)
 
             break;
         };
@@ -550,16 +557,24 @@ function cardMake(name, value, suit){
             let upper = document.createElement("div");
             upper.className = "upper";
             upper.textContent = suit
-            newCard.appendChild(upper);
+            front.appendChild(upper);
             
             let img = document.createElement("img");
             img.className = 'img';
             img.src = `assets/cards/${cardData.kind}/${cardData.id}.png`;
-            newCard.appendChild(img);
+            front.appendChild(img);
             break;
         };
         
     };
+
+    newCard.appendChild(front);
+
+    let rever = document.createElement('div');
+    rever.className = 'rever';
+    rever.innerHTML = '';
+
+    newCard.appendChild(rever);
     
     return newCard;
 }
@@ -589,13 +604,13 @@ hitButton.addEventListener("click", async function (){
             if(isburst) return result('dealer');
         }
     }
-})
+});
 
 standButton.addEventListener("click", async function (){
     let player = humans['player'];
     let dealer = humans['dealer'];
 
-    player.standed = 1;
+    player.standed = 1;zz
 
     if(!dealer.standed){
         do{

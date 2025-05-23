@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scuro e Nero Soldato</title>
+    <link rel="stylesheet" href="mitame.css">
+</head>
+<body>
+    <div id="gameArea">
+        <div id="debug">
+            <div class="menu"></div>
+            <div class="data"></div>
+        </div>
+        <div id="text"></div>
+        <div id="log" style="right: -300px;">
+            <div class="opener">‹</div>
+            <div class="log"></div>
+        </div>
+        <div id="upperLayer">
+            <div class="deck" style="display: none;"></div>
+            <div class="melt" style="display: none;"></div>
+            <div class="detail"></div>
+        </div>
+        <div id="UIs">
+            <div class="dealer">
+                <div class="health"> <!--"健康"-->
+                    <div class="hp">
+                        <div class="img">♡</div>
+                        <div class="num">
+                            <div class="now">20</div>
+                            <div class="max">/20</div>
+                        </div>
+                    </div>
+                    <div class="shl">
+                        <div class="img">♤</div>
+                        <div class="num">
+                            <div class="now">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="point">0</div>
+            </div>
+            <div class="player">
+                <div class="health"> <!--"健康"-->
+                    <div class="hp">
+                        <div class="img">♡</div>
+                        <div class="num">
+                            <div class="now">20</div>
+                            <div class="max">/20</div>
+                        </div>
+                    </div>
+                    <div class="shl">
+                        <div class="img">♤</div>
+                        <div class="num">
+                            <div class="now">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="point">0</div>
+            </div>
+            <div id="else">
+                <div class="info">
+                    <div class="row">
+                        <div class="item coin">1</div>
+                        <div class="item spada">52</div>
+                    </div>
+                    <div class="row">
+                        <div class="item deck">52</div>
+                        <div class="item melt">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="cardPlaces">
+            <div class="dealer"></div>
+            <div class="player"></div>
+            <div id="buttons">
+                <div class="hit">hit</div>
+                <div class="stand">stand</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="nakami.js" defer></script>
+</body>
+</html>
