@@ -388,19 +388,7 @@ function zoomCard(event, card, cardDiv) {
     }
 
     resetCard();
-
-    // let rect = cardDiv.getBoundingClientRect();
-    // cardDiv.style.position = "fixed";
-    // cardDiv.style.left = rect.left + "px";
-    // cardDiv.style.top = rect.top + "px";
-    // cardDiv.style.width = rect.width + "px";
-    // cardDiv.style.height = rect.height + "px";
-    // cardDiv.style.zIndex = 105;
-    // cardDiv.offsetWidth;
-    // cardDiv.style.transition = 'transform 0.3s ease, left 0.3s ease, top 0.3s ease';
-    // cardDiv.style.left = '50%';
-    // cardDiv.style.top = '50%';
-    // cardDiv.style.transform = "translate(-50%, -50%) scale(4)";
+    
     cardDiv.classList.add("active");
 
     event.stopPropagation();
