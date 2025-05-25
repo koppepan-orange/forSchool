@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>集計できるやつ</title>
+  <style>
+    @font-face {font-family:comicsans; src:url("Scuro_e_Nero_Soldato/assets/fonts/comicsans.ttf");}
+    html{
+      scrollbar-width: none;
+    }
+    #zentai{
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      background-color: #f0f8ff;
+      user-select: none;
+    }
+    #text {
+      width: 100%;
+      height: 40px;
+      padding: 5px;
+      font-size: 30px;
+      border: 2px solid #cfe9ff;
+      background-color: #def0ff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #list {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 5px;
+      width: 100%;
+      padding: 5px;
+      border: 2px solid #cfe9ff;
+    }
+    .select{
+      display: flex;
+      flex-direction: row;
+      justify-content: left;
+      align-items: center;
+      gap: 5px;
+      padding: 5px;
+      border: 1px solid #b5dcff;
+      position: relative;
+    }
+    .select .name{
+      display: block;
+      height: 100%;
+      flex-wrap: nowrap;
+    }
+    .select .max, .select .min{
+      display: block;
+      height: 100%;
+      padding: 0px 3px;
+      border-left: 1px solid #b5dcff;
+      border-right: 1px solid #b5dcff;
+      cursor: pointer;
+    }
+    .select .img{
+      display: block;
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .explode {
+      animation: explode 3s forwards;
+    }
+    @keyframes explode {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(20);
+      }
+      100% {
+        transform: scale(20);
+      }
+    }
+    
+    .vanish{
+      animation: vanish 3s forwards;
+    }
+    @keyframes vanish {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div id="zentai">
+    <div id="text" contenteditable></div>
+    <div id="list"></div>
+  </div>
+  
+  <script>
+    let textDiv = document.querySelector('#text');
+    let listDiv = document.querySelector('#list');
+    document.getElementById('text').addEventListener('keyup', async function(){
+      if(event.key !== 'Enter')return;
+
+      let text = document.getElementById('text').innerText.trim();
+
+      textDiv.innerText = '';
+
+      if(text == '')return;
+      
+      let selectDiv = document.createElement('div');
+      selectDiv.className = 'select';
+
+      let nameDiv = document.createElement('div');
+      nameDiv.textContent = text;
+      selectDiv.appendChild(nameDiv);
+
+      let now = 1;
+
+      let minDiv = document.createElement('div');
+      minDiv.className = 'min';
+      minDiv.textContent = 'ー';
+      minDiv.addEventListener('click', async function(){
+        now -= 1;
+        tekiou();
+      })
+      selectDiv.appendChild(minDiv);
+
+      let nowDiv = document.createElement('div');
+      nowDiv.className = 'now';
+      nowDiv.textContent = now;
+      selectDiv.appendChild(nowDiv);
+
+      let maxDiv = document.createElement('div');
+      maxDiv.className = 'max';
+      maxDiv.textContent = '＋';
+      maxDiv.addEventListener('click', async function(){
+        now += 1;
+        tekiou();
+      })
+      selectDiv.appendChild(maxDiv);
+
+      function tekiou() {
+        nowDiv.textContent = now;
+
+        if (now <= 0) {
+          // 爆発演出
+          let imgDiv = document.createElement('img');
+          imgDiv.className = 'img';
+          imgDiv.src = 'explosion.png'; // あんたが用意しとけよ
+
+          selectDiv.appendChild(imgDiv);
+          imgDiv.classList.add('explode');
+          selectDiv.classList.add('vanish');
+
+          setTimeout(() => {
+            selectDiv.remove();
+          }, 3000);
+        }
+      }
+
+      listDiv.appendChild(selectDiv);
+    })
+  </script>
+</body>
+</html>

@@ -339,9 +339,9 @@ function suitMake(suit, type){
     suitsDiv.className = suit;
 
     suits.forEach(card => {
-        let cardDiv = cardMake(card.name, card.value, card.suit);
+        let cardDiv = cardMake(card);
 
-        cardDiv.addEventListener("click", (event) => zoomCard(event,card,cardDiv));
+        cardDiv.addEventListener("click", (event) => zoomCard(event, card, cardDiv));
 
         suitsDiv.appendChild(cardDiv);
     });
@@ -371,14 +371,6 @@ function zoomCard(event, card, cardDiv) {
     // すでに拡大中なら→裏返しにする
     if (cardDiv.classList.contains("active") && !cardDiv.classList.contains("flipped")) {
         // detailDiv の中身を裏面に入れる
-        let rever = cardDiv.querySelector(".rever");
-        rever.innerHTML = `
-            <h3>${card.name}</h3>
-            <p>Value: ${card.value}</p>
-            <p>Suit: ${card.suit}</p>
-            <p>${Cards[card.name].description}</p>
-        `;
-
         cardDiv.classList.add("flipped");
         return;
     } else if (cardDiv.classList.contains("flipped")) {
@@ -411,109 +403,59 @@ function resetCard() {
 //#endregion
 
 
-let executions = {
-    cardDraw,
-    cardMelt
-}
-async function execute(arr){
-    let [functionName, ...args] = arr;
-    await executions[functionName](...args);
-}
+async function cardAdd(cam, name, suit, prop = [], attend = [], melted = [], elseed = []){
+    let cardData = Cards[name]
+    let card = {
+        name: name,
+        value: cardData.val,
+        suit: suit,
+        prop: cardData.prop??[].concat(prop),
+        attend: cardData.attend??[].concat(attend),
+        melted: cardData.melted??[].concat(melted),
+        elseed: cardData.elseed??[].concat(elseed),
+        data: cardData
+    };
 
-const context = {};
+    humans[cam].deck.push(card);
 
-
-async function read(lines) {
-    for (let line of lines) {
-        line = line.trim();
-        if(line.startsWith('変数')) {
-            let [, varName, , expression] = line.split(/ +/); // 変数 x = 乱数生成(1,3)
-            if(expression.startsWith('乱数生成')) {
-                let args = expression.match(/\((.*?)\)/)[1].split(',').map(Number);
-                context[varName] = random(...args);
-            }else{
-                context[varName] = JSON.parse(expression);
-            }
-        }
-
-
-   else if(line.startsWith('if')){
-            let [, leftSide, operator, rightSide] = line.split(/ +/);
-            let left = 0, right = 0;
-            function stringOrNumber(moto){
-                if(typeof(leftSide) == 'string') left = context[leftSide];
-           else if(typeof(leftSide) == 'number') left = JSON.parse(leftSide);         
-            }
-            // left = context[leftSide]
-            // right = JSON.parse(rightSide);
-            let condition = false;
-            switch(operator){
-                case '==': condition = left == right; break;
-                case '!=': condition = left != right; break;
-                case '<':  condition = left <  right; break;
-                case '>':  condition = left >  right; break;
-                case '<=': condition = left <= right; break;
-                case '>=': condition = left >= right; break;
-            }
-            if (!condition) continue;
-        }
-
-        else if (line.startsWith('wait')) {
-            let [, ms] = line.split(/ +/);
-            await delay(parseInt(ms));
-        }
-
-        else if (line.startsWith('log')) {
-            let match = line.match(/log +"(.*)"/);
-            console.log(match?.[1] ?? '???');
-        }
-
-        // ...必要に応じて他の命令追加
-    }
+    return card
 }
 
-
-function cardDraw(cam, name = null, value = null, suit = null, prop = []){
+async function cardDraw(cam, name = null, value, suit, prop, attend, melted, elseed){
     let deck = humans[cam].deck;
     if(deck.length === 0) return null;
 
     let card = null;
-
     if(name != null && value != null && suit != null){
         card = {
             name: name,
-           value: value,
+            value: Cards[name].val,
             suit: suit,
             prop: prop,
+            attend: attend,
+            melted: melted,
+            elseed: elseed,
             data: Cards[name]
         }
         console.log('オーダー織田「カード作っといたわ笑」', card);
+    }else{
+        card = deck.shift();
+        //console.log(card)
     }
 
-    card = deck.shift();
-    
+        humans[cam].cards.push(card);
 
-    //console.log(card)
+        let cardDiv = cardMake(card);
 
-    let cardData = Cards[card.name];
+        document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
 
-    let drawCard = {
-        name: card.name,
-        value: card.value,
-        suit: card.suit,
-        prop: card.prop,
-        data: cardData
-    };
-    humans[cam].cards.push(drawCard);
-
-    let cardDiv = cardMake(card.name, card.value, card.suit);
-    document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
-
-    tekiou();
-    return [card.name, card.value, card.suit];
+        tekiou();
+    return card
 }
-function cardMake(name, value, suit){
-    //description とか用にvalue使え
+function cardMake(card){
+    let name = card.name;
+    let value = card.value;
+    let suit = card.suit;
     let cardData = Cards[name];
 
     let newCard = document.createElement("div");
@@ -560,7 +502,26 @@ function cardMake(name, value, suit){
 
     let rever = document.createElement('div');
     rever.className = 'rever';
-    rever.innerHTML = '';
+
+    let reTitle = document.createElement('div');
+    reTitle.className = 'title';
+    reTitle.textContent = name;
+    rever.appendChild(reTitle);
+
+    let reDetail = document.createElement('div');
+    reDetail.className = 'detail';
+    reDetail.innerHTML = Cards[card.name].description;
+    rever.appendChild(reDetail);
+
+    let reProps = document.createElement('div'); //こいつらをそれぞれでやるようにして、 if length != 0 で作成〜って感じに
+    reProps.className = 'attributi';
+    reProps.innerHTML = `
+        <span class="prop">prop:${card.prop}</span><br>
+        <span class="attend">attend:${card.attend}</span><br>
+        <span class="melted">melted:${card.melted}</span><br>
+        <span class="else">else:${card.elseed}</span><br>
+    `;
+    rever.appendChild(reProps);
 
     newCard.appendChild(rever);
     
@@ -577,15 +538,15 @@ hitButton.addEventListener("click", async function (){
     let player = humans['player'];
     let dealer = humans['dealer'];
     if(!player.standed){
-        let drawCard = cardDraw('player')
-        let isburst = isBurst('player');
+        let drawCard = await cardDraw('player')
+        let isburst = await isBurst('player');
         await delay(750);
         if(isburst) return result('player');
 
         if(!dealer.standed){
-            drawCard = cardDraw('dealer');
+            drawCard = await cardDraw('dealer');
             if(dealer.value >= 17) dealer.standed = 1;
-            let isburst = isBurst('dealer');
+            let isburst = await isBurst('dealer');
             await delay(750);
             turn += 1;
 
@@ -598,7 +559,7 @@ standButton.addEventListener("click", async function (){
     let player = humans['player'];
     let dealer = humans['dealer'];
 
-    player.standed = 1;zz
+    player.standed = 1;
 
     if(!dealer.standed){
         do{
@@ -618,8 +579,41 @@ standButton.addEventListener("click", async function (){
     result()
 });
 
+function hasAttributo(card, type, name){
+    let attributi = card[type];
+    attributi.forEach(a => {
+        if(a[0] == name){
+            return 1
+        }
+    })
 
-function isBurst(cam){
+    return 0;
+}
+
+function checkAttributo(card, type, name, num){
+    let attributi = card[type];
+    let attributo = attributi.find(a => a[0] == name);
+    let value = attributo[num];
+
+    return value;
+}
+
+let executions = {
+    cardDraw,
+    cardMelt
+}
+async function executeAttributo(card, type, name){
+    let attributi = card[type];
+    let attributo = attributi.find(a => a[0] == name);
+
+    let [functionName, ...args] = attributo;
+    let result = await executions[functionName](...args);
+
+    return result
+}
+
+
+async function isBurst(cam){
     let human = humans[cam];
 
     if(human.value > spada){
@@ -631,7 +625,7 @@ function isBurst(cam){
                 let disCard = human.cards.pop();
                 human.melt.push(disCard);
 
-                cardDraw(cam, 'A', 'A', '♡', ['vanish']); //vanish..つまりは消滅 そのラウンドの終了時meltに行かず消える
+                cardDraw(cam, 'A', 'A', '♡', [['vanish']]); //vanish..つまりは消滅 そのラウンドの終了時meltに行かず消える
                 
                 return 0
                 //もしcardsの中にstrength(tarot,UR)があるのならば、今引いたカードをA(normal,N)に変化させる～って動き
@@ -790,7 +784,7 @@ document.addEventListener("keydown", (e) =>{
 });
 
 
-function reset() {
+async function reset() {
     let player = humans["player"];
     let dealer = humans["dealer"];
 
@@ -800,64 +794,56 @@ function reset() {
     const playerDOM = document.querySelector("#cardPlaces .player");
     const dealerDOM = document.querySelector("#cardPlaces .dealer");
 
-    // プレイヤー
-    while (player.cards.length > 0) {
+
+    while(player.cards.length > 0){
         const card = player.cards.shift(); // 先頭から1枚ずつ
-        if (!card.prop?.includes("vanish")) {
-            player.melt.push(card);
+        if(hasAttributo(card, 'prop', 'vanish') == 0){//vanishがないならば
+            await cardMelt('player', card);
         }
-        if (playerDOM.children.length > 0) {
+        if(playerDOM.children.length > 0){
             playerDOM.children[0].remove();
         }
     }
 
-    // ディーラー
-    while (dealer.cards.length > 0) {
+    while(dealer.cards.length > 0){
         const card = dealer.cards.shift();
-        if (!card.prop?.includes("vanish")) {
-            dealer.melt.push(card);
+        if(hasAttributo(card, 'prop', 'vanish') == 0){
+            await cardMelt('dealer', card);
         }
-        if (dealerDOM.children.length > 0) {
+        if(dealerDOM.children.length > 0){
             dealerDOM.children[0].remove();
         }
     }
 
     tekiou();
 }
-function cardMelt(card){
-    let cards = [
-        {
-            name:'A',
-            suit:'♡',
-            prop:['vanish'],
-            attend:[],
-            melted:[],
-        },
-        {
-            name:'5',
-            suit:'♢',
-            prop:[],
-            attend:[['']],
-            melted:[],
-        },
-        {
-            name:'A',
-            suit:'♤',
-            prop:[],
-            attend:[],
-            melted:[],
-        }
-    ]
+async function cardMelt(cam, card){
+    //cardMelt == カードをmeltに移動する
+    //つまるところcardMelt使う前にcardsから消えてるんだから、cardをcardMeltにpushするだけの動き
+
+    if(card.melted.length != 0){
+        let results = [];
+        card.melted.forEach(thing => async function(){
+            let [functionName, ...args] = thing;
+            let result = await executions[functionName](...args);
+            results.push(result);
+        })
+    }
+
+    humans[cam].melt.push(card);
 }
 
 async function battleStart(){
     turn = 0;
     round = 0;
-    humans['dealer'] = decideDealerName();
-
-    addtext(`${humans['dealer'].name}「${Dealers[humans['dealer'].name].opening}」`);
+    
+    let dealer = decideDealerName();
     
     humans['player'].deck = arrayShuffle(humans['player'].deck);
+    dealer.deck = arrayShuffle(dealer.deck);
+
+
+    addtext(`${dealer.name}「${Dealers[dealer.name].opening}」`);
     
     reset();
 }
@@ -866,7 +852,8 @@ function decideDealerName(){
     let names = Object.keys(Dealers).filter(a => Dealers[a].stage == stage).map(a => Dealers[a].name);
     let dealername = arraySelect(names);
     let nameData = Dealers[dealername];
-    let dealer = {};
+    let dealer = humans['dealer'];
+    dealer = {};
 
     dealer.cam = 'dealer';
     
@@ -881,20 +868,12 @@ function decideDealerName(){
     dealer.atk = 0;
     dealer.def = 0;
     dealer.shl = 0;
+    dealer.maxhp = nameData.maxhp;
     
     deckKinds[nameData.deckKind].deck.forEach(card => {
-        let cardName = card[0]
-        dealer.deck.push({
-            name: Cards[cardName].name,
-            value: Cards[cardName].val,
-            suit: card[1],
-            prop: Cards[cardName].prop,
-            data: Cards[cardName]
-        })
+        cardAdd('dealer', ...card);
     })
-    dealer.deck = arrayShuffle(dealer.deck);
 
-    dealer.maxhp = nameData.maxhp;
     dealer.buffs = [];
 
     // ステータスの上下ありかどうかはファローズでよろっぷ
@@ -926,33 +905,12 @@ function decideDealerName(){
 }
 
 deckKinds['normal'].deck.forEach(card => {
-    let cardName = card[0]
-    humans['player'].deck.push({
-        name: Cards[cardName].name,
-        value: Cards[cardName].val,
-        suit: card[1],
-        prop: Cards[cardName].prop,
-        data: Cards[cardName]
-    })
+    cardAdd('player', card[0], card[1])
 })
-humans['player'].deck = arrayShuffle(humans['player'].deck);
 
-let card1 = {
-    name: 'wheel of fourtune',
-    value: 0,
-    suit: '♡',
-    prop: [],
-    data: Cards['wheel of fourtune']
-};
-humans.player.deck.push(card1);
-let card2 = {
-    name: 'strength',
-    value: 0,
-    suit: '♧',
-    prop: [],
-    data: Cards['strength']
-};
-humans.player.deck.push(card2);
+cardAdd('player', 'wheel of fourtune', '♡');
+cardAdd('player', 'strength', '♧');
+
 
 //一旦のやつ
 battleStart();

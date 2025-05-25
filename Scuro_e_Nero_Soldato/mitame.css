@@ -1,5 +1,6 @@
 @font-face {font-family:hangyaku; src:url("assets/fonts/hangyaku.ttf");}
 @font-face {font-family:comicsans; src:url("assets/fonts/comicsans.ttf");}
+::-webkit-scrollbar {display: none;}
 /* ここ変えといて */
 #gameArea{
     display:flex;
@@ -12,7 +13,7 @@
     padding: 10px;
     background-color: #f0f8ff;
     user-select: none;
-    
+    scrollbar-width: none;
 }
 
 /*logとtext*/
@@ -31,7 +32,6 @@
     overflow-y: hidden;
     transition: right 0.3s;
     z-index: 254;
-    scrollbar-width: none;
 }
 #log .opener{
     width: 20px;
@@ -380,12 +380,31 @@
 
 .card .rever {
     transform: rotateY(180deg);
-    padding: 10px;
-    font-size: 14px;
-    text-align: center;
+    white-space: nowrap;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
-.card .rever .name{
-    font-size: 12px;
+.card .rever .title{
+    width: 80%;
+    text-align: center;
+    font-size: 6px;
+    overflow-x: scroll;
+    white-space: nowrap;
+    padding: 5px 3px;
+    border-bottom: #cfe9ff 1px solid;
+}
+.card .rever .detail{
+    width: 80%;
+    text-align: left;
+    font-size: 4px;
+    padding: 5px 3px;
+    border-bottom: #cfe9ff 1px solid;
+}
+.card .rever .attributi{
+    width: 80%;
+    text-align: left;
+    font-size: 4px;
+    padding: 5px 3px;
 }
 
 .card.active{
@@ -398,4 +417,4 @@
 }
 .card.active.flipped {
     transform: translate(-50%, -50%) scale(4) rotateY(180deg);
-}
+}   
