@@ -213,7 +213,7 @@ let humans = {
         buffs: [],
     },
     dealer:{
-        name: "dealer",
+        name: "コッペ",
         coinRate: 1,
         deck: [],
         melt: [],
@@ -403,7 +403,7 @@ function resetCard() {
 //#endregion
 
 
-async function cardAdd(cam, name, suit, prop = [], attend = [], melted = [], elseed = []){
+async function cardAdd(cam, type, name, suit, prop = [], attend = [], melted = [], elseed = []){
     let cardData = Cards[name]
     let card = {
         name: name,
@@ -416,7 +416,7 @@ async function cardAdd(cam, name, suit, prop = [], attend = [], melted = [], els
         data: cardData
     };
 
-    humans[cam].deck.push(card);
+    humans[cam][type].push(card);
 
     return card
 }
@@ -755,8 +755,8 @@ async function outcome(winner){
     }
     tekiou();
 
-    //ここいらないゾーンです
-    await addtext(`${humans['dealer'].name}「${winner == 'player' ? Dealers[humans['dealer'].name].lose : Dealers[humans['dealer'].name].win}」`);
+    let dealer = humans['dealer'];
+    await addtext(`${dealer.name}「${winner == 'player' ? Dealers[dealer.name].lose : Dealers[dealer.name].win}」`);
 
     await delay(3000);
     battleStart();
@@ -838,6 +838,9 @@ async function battleStart(){
     round = 0;
     
     let dealer = decideDealerName();
+    Object.keys(dealer).forEach(key => {
+        humans['dealer'][key] = dealer[key]
+    })
     
     humans['player'].deck = arrayShuffle(humans['player'].deck);
     dealer.deck = arrayShuffle(dealer.deck);
@@ -852,29 +855,29 @@ function decideDealerName(){
     let names = Object.keys(Dealers).filter(a => Dealers[a].stage == stage).map(a => Dealers[a].name);
     let dealername = arraySelect(names);
     let nameData = Dealers[dealername];
-    let dealer = humans['dealer'];
-    dealer = {};
-
-    dealer.cam = 'dealer';
     
-    dealer.id = dealername; //nameは表示用、idは内部処理用
-    dealer.name = dealername;
+    let dealer = {
+        cam: 'dealer',
+        id: dealername,
+        name: dealername,
+        value: 0,
+        cards: [],
+        deck: [],
+        melt: [],
+        standed: 0,
+        atk: 0,
+        def: 0,
+        shl: 0,
+        hp: nameData.maxhp,
+        maxhp: nameData.maxhp,
+        buffs: [],
+    };
 
-    dealer.value = 0;
-    dealer.cards = [];
-    dealer.deck = [];
-    dealer.melt = [];
-    dealer.standed = 0;
-    dealer.atk = 0;
-    dealer.def = 0;
-    dealer.shl = 0;
-    dealer.maxhp = nameData.maxhp;
-    
+    humans['dealer'].deck = [];
     deckKinds[nameData.deckKind].deck.forEach(card => {
-        cardAdd('dealer', ...card);
+        cardAdd('dealer', 'deck', ...card);
     })
-
-    dealer.buffs = [];
+    dealer.deck = humans['dealer'].deck
 
     // ステータスの上下ありかどうかはファローズでよろっぷ
     // let statuses = ['attack','defense','mattack','mdefense','maxhealth','maxmp','critlate','critdmg','critresist','speed'];
@@ -897,19 +900,17 @@ function decideDealerName(){
     //     dealer.prefixe = Prefixes[prefixe].name;
     //     Prefixes[prefixe].process('enemies',target);
     // };
-
-    dealer.hp = dealer.maxhp;
     
 
     return dealer;
 }
 
 deckKinds['normal'].deck.forEach(card => {
-    cardAdd('player', card[0], card[1])
+    cardAdd('player', 'deck', card[0], card[1])
 })
 
-cardAdd('player', 'wheel of fourtune', '♡');
-cardAdd('player', 'strength', '♧');
+cardAdd('player', 'deck', 'wheel of fourtune', '♡');
+cardAdd('player', 'deck', 'strength', '♧');
 
 
 //一旦のやつ

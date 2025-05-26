@@ -76,7 +76,7 @@ let Cards = {
         val:9,
         suits:['♡','♤','♢','♧'],
         kind:'normal',
-        description:'キュ〜(伝統芸能)<br>計算しやすい..ランキング..1位',
+        description:'キュ〜(伝統芸能)<br>⑨さんです(誰がわかるんだよ)',
         rare:'N',
         buyable:1,
     },
@@ -189,7 +189,7 @@ let Dealers = {
         name:'ストルテ',
         stage: 1,
         opening:'おw兄さんが相手？あてぃしはストルテ、よろしくね〜♪',
-        win:'は〜いあてぃしの勝ち〜 また遊ぼうね〜ん♪',
+        win:'は〜いあてぃしの勝ち〜w また遊ぼうね〜ん♪',
         lose:'え〜まじぃ〜？ 次はぜってー負けねぇかんナ〜', //ちょっと藤田ことね味入っちゃったかも まあいいか
         maxhp: 30,
         deckKind: 'normal'
