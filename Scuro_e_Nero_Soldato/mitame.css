@@ -1,6 +1,7 @@
 @font-face {font-family:hangyaku; src:url("assets/fonts/hangyaku.ttf");}
 @font-face {font-family:comicsans; src:url("assets/fonts/comicsans.ttf");}
 ::-webkit-scrollbar {display: none;}
+.invisibility{opacity: 0;}
 /* ここ変えといて */
 #gameArea{
     display:flex;
@@ -365,8 +366,6 @@
     height: 100%;
 }
 
-
-
 .card .front, .card .rever {
     position: absolute;
     width: 100%;
@@ -377,7 +376,6 @@
     justify-content: center;
     align-items: center;
 }
-
 .card .rever {
     transform: rotateY(180deg);
     white-space: nowrap;
@@ -396,9 +394,10 @@
 .card .rever .detail{
     width: 80%;
     text-align: left;
-    font-size: 4px;
+    font-size: 3.5px;
     padding: 5px 3px;
     border-bottom: #cfe9ff 1px solid;
+    overflow-x: scroll;
 }
 .card .rever .attributi{
     width: 80%;
@@ -417,4 +416,12 @@
 }
 .card.active.flipped {
     transform: translate(-50%, -50%) scale(4) rotateY(180deg);
-}   
+}
+
+.card.clone{
+    position: absolute;
+    z-index: 101;
+    margin: 0;
+    transition: left 0.5s ease, top 0.5s ease;
+    opacity: 1;
+}

@@ -403,58 +403,66 @@ function resetCard() {
 //#endregion
 
 
-async function cardAdd(cam, type, name, suit, prop = [], attend = [], melted = [], elseed = []){
+//カードを成型する
+function cardMold(name, suit, prop, attend, melted, elseed){ 
     let cardData = Cards[name]
     let card = {
         name: name,
         value: cardData.val,
         suit: suit,
-        prop: cardData.prop??[].concat(prop),
-        attend: cardData.attend??[].concat(attend),
-        melted: cardData.melted??[].concat(melted),
-        elseed: cardData.elseed??[].concat(elseed),
+        prop: cardData.prop??[].concat(prop??[]),
+        attend: cardData.attend??[].concat(attend??[]),
+        melted: cardData.melted??[].concat(melted??[]),
+        elseed: cardData.elseed??[].concat(elseed??[]),
         data: cardData
     };
 
+    return card;
+}
+
+//カードを素材の状態からMoldを通して正式なカードにする
+async function cardBecome(cam, type, cardOrigin){
+    let [name, suit, prop, attend, melted, elseed] = cardOrigin
+
+    let card = cardMold(name, suit, prop, attend, melted, elseed);
+    humans[cam][type].push(card);
+}
+
+//カードをdeck/melt/cardsに入れる(だけ～ 歩いて～走って～ 日の光浴びながぁら～～～)
+async function cardAdd(cam, type, card){
+    
+    
     humans[cam][type].push(card);
 
     return card
 }
 
-async function cardDraw(cam, name = null, value, suit, prop, attend, melted, elseed){
+//カードをデッキから引く
+async function cardDraw(cam, name = null, suit = null, prop, attend, melted, elseed){
     let deck = humans[cam].deck;
     if(deck.length === 0) return null;
 
     let card = null;
-    if(name != null && value != null && suit != null){
-        card = {
-            name: name,
-            value: Cards[name].val,
-            suit: suit,
-            prop: prop,
-            attend: attend,
-            melted: melted,
-            elseed: elseed,
-            data: Cards[name]
-        }
-        console.log('オーダー織田「カード作っといたわ笑」', card);
+    if(name != null && suit != null){
+        card = cardMold(name, suit, prop, attend, melted, elseed)
+        console.log('オーダー織田「カード作っといたわ笑」', `['${name}','${suit}']`);
     }else{
         card = deck.shift();
-        //console.log(card)
+        // card = cardMold(cardPre[0], cardPre[1])
     }
 
-        humans[cam].cards.push(card);
+    cardAdd(cam, 'cards', card)
 
-        let cardDiv = cardMake(card);
+    let cardDiv = cardMake(card);
+    cardPlace(cam, cardDiv)
 
-        document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
-
-        tekiou();
+    tekiou();
     return card
 }
+
+//カードをDivにする
 function cardMake(card){
     let name = card.name;
-    let value = card.value;
     let suit = card.suit;
     let cardData = Cards[name];
 
@@ -528,11 +536,44 @@ function cardMake(card){
     return newCard;
 }
 
+//Divになったカードをデッキから置き場に置く動き
+function cardPlace(cam, cardDiv){
+    document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
+    
+    let fromRect = document.querySelector('#else .info .deck').getBoundingClientRect();
+    
+    let toRect = cardDiv.getBoundingClientRect();
+    
+    let cloneKun = cardDiv.cloneNode(true);
+    cloneKun.classList.add('clone')
+    cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+    cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
+    cloneKun.style.width = `${toRect.width}px`;
+    cloneKun.style.height = `${toRect.height}px`;
 
-//プレイヤーの操作
-let uiButtons = document.getElementById('buttons');
-let hitButton = uiButtons.querySelector(".hit");
-let standButton = uiButtons.querySelector(".stand");
+    document.body.appendChild(cloneKun);
+
+    cardDiv.classList.add('invisibility')
+    
+    // console.log(`${fromRect.left}, ${fromRect.top} => ${toRect.left}, ${toRect.top}`)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${toRect.left + window.scrollX}px`;
+        cloneKun.style.top = `${toRect.top + window.scrollY}px`;
+    });
+    
+    cloneKun.addEventListener('transitionend', () => {
+        cloneKun.remove();
+        cardDiv.style.opacity = '1';  
+    });
+
+    return 1;
+}
+
+
+//プレイヤーの操作s
+let hitButton = document.querySelector("#buttons .hit");
+let standButton = document.querySelector("#buttons .stand");
 
 hitButton.addEventListener("click", async function (){
     let player = humans['player'];
@@ -625,7 +666,7 @@ async function isBurst(cam){
                 let disCard = human.cards.pop();
                 human.melt.push(disCard);
 
-                cardDraw(cam, 'A', 'A', '♡', [['vanish']]); //vanish..つまりは消滅 そのラウンドの終了時meltに行かず消える
+                cardDraw(cam, 'A', '♡', [['vanish']]); //vanish..つまりは消滅 そのラウンドの終了時meltに行かず消える
                 
                 return 0
                 //もしcardsの中にstrength(tarot,UR)があるのならば、今引いたカードをA(normal,N)に変化させる～って動き
@@ -838,9 +879,11 @@ async function battleStart(){
     round = 0;
     
     let dealer = decideDealerName();
+    humans['dealer'] = {};
     Object.keys(dealer).forEach(key => {
         humans['dealer'][key] = dealer[key]
     })
+
     
     humans['player'].deck = arrayShuffle(humans['player'].deck);
     dealer.deck = arrayShuffle(dealer.deck);
@@ -852,6 +895,8 @@ async function battleStart(){
 }
 
 function decideDealerName(){
+    //一応
+    document.querySelector('#cardPlaces .dealer').innerHTML = '';
     let names = Object.keys(Dealers).filter(a => Dealers[a].stage == stage).map(a => Dealers[a].name);
     let dealername = arraySelect(names);
     let nameData = Dealers[dealername];
@@ -875,7 +920,7 @@ function decideDealerName(){
 
     humans['dealer'].deck = [];
     deckKinds[nameData.deckKind].deck.forEach(card => {
-        cardAdd('dealer', 'deck', ...card);
+        cardBecome('dealer', 'deck', card);
     })
     dealer.deck = humans['dealer'].deck
 
@@ -906,11 +951,15 @@ function decideDealerName(){
 }
 
 deckKinds['normal'].deck.forEach(card => {
-    cardAdd('player', 'deck', card[0], card[1])
+    cardBecome('player', 'deck', card)
 })
 
-cardAdd('player', 'deck', 'wheel of fourtune', '♡');
-cardAdd('player', 'deck', 'strength', '♧');
+cardBecome('player', 'deck', ['wheel of fourtune','♡']);
+cardBecome('player', 'deck', ['strength', '♧']);
+cardBecome('player', 'deck', ['emperor', '♢']);
+cardBecome('player', 'deck', ['empress', '♢']);
+cardBecome('player', 'deck', ['justice', '♤']);
+cardBecome('player', 'deck', ['hermit', '♡']);
 
 
 //一旦のやつ

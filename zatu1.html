@@ -1,110 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>カード移動テスト</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 50px;
-    }
-
-    #A {
-      border: 2px solid #aaa;
-      padding: 20px;
-      width: 400px;
-      position: relative;
-    }
-
-    #cardPlaces {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-      border: 1px dashed #888;
-      padding: 10px;
-      min-height: 120px;
-    }
-
-    .card {
-      width: 60px;
-      height: 80px;
-      background: #f0f0f0;
-      border: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .moving {
-      position: absolute;
-      transition: all 0.5s ease;
-      z-index: 999;
-      pointer-events: none;
-    }
-
-    #spawn-button {
-      margin-bottom: 20px;
-      padding: 8px 16px;
-    }
-  </style>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zatu</title>
 </head>
 <body>
-
-  <button id="spawn-button">要素Aからカード追加</button>
-
-  <div id="A">
-    <div id="cardPlaces"></div>
-  </div>
-
-  <script>
-    const button = document.getElementById('spawn-button');
-    const container = document.getElementById('cardPlaces');
-
-    function createCard() {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.textContent = Math.floor(Math.random() * 10) + 1;
-      return card;
-    }
-
-    function moveCard(card, targetContainer) {
-      document.body.appendChild(card);
-      card.classList.add('moving');
-
-      const fromRect = button.getBoundingClientRect();
-
-      
-      card.style.left = `${fromRect.left}px`;
-      card.style.top = `${fromRect.top}px`;
-
-      // Append to container to get target position
-      targetContainer.appendChild(card);
-      const toRect = card.getBoundingClientRect();
-
-      // Back to body for movement
-      document.body.appendChild(card);
-
-      // trigger transition
-      requestAnimationFrame(() => {
-        card.style.left = `${toRect.left}px`;
-        card.style.top = `${toRect.top}px`;
-
-        card.addEventListener('transitionend', () => {
-          card.classList.remove('moving');
-          card.style = '';
-          targetContainer.appendChild(card);
-        }, { once: true });
-      });
-    }
-
-    button.addEventListener('click', () => {
-      const card = createCard();
-      moveCard(card, container);
-    });
-  </script>
-
+  
 </body>
 </html>

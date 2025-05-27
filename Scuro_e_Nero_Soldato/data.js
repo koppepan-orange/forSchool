@@ -120,9 +120,8 @@ let Cards = {
         name:'strength',
         id:'strength',
         val:0,
-        suits:['♡','♤','♢','♧'],
         kind:'tarot',
-        description:'このカードが自分の場にあるならば、<br>一回バーストしそうになっても<br>　そのカードを♡のAに変えてくれる<br>力でねじ伏せる..ってイメージ<br>絵が酷いね',
+        description:'このカードが自分の場にあるならば、<br>一回バーストしそうになっても<br>そのカードを♡のAに変えてくれる<br>力でねじ伏せる..ってイメージ<br>絵が酷いね',
         rare:'UR',
         buyable:1,
     },
@@ -130,12 +129,49 @@ let Cards = {
         name:'wheel of fourtune',
         id:'wheel_of_fourtune',
         val:0,
-        suits:['♡','♤','♢','♧'],
         kind:'tarot',
-        attend:['trade', 'all'],
+        attend:[['cardTrade', 'all']],
         description:'登場時、相手と自分の手札を全交換します<br>吉と出るか凶と出るか...<br>右の犬の顔好き まじかわいい',
         rare:'UR',
         buyable:1
+    },
+    'emperor':{
+        name:'emperor',
+        id:'emperor',
+        val:0,
+        kind:'tarot',
+        attend:[['result','emperor']],
+        description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が負けていたならば、<br>その勝利を奪い自分の攻撃力として攻撃する。<br>これが皇帝だよ',
+        rare:'UR',
+        buyable:1
+    },
+    'empress':{
+        name:'empress',
+        id:'empress',
+        val:0,
+        kind:'tarot',
+        description:'ラウンドが終了したときにこのカードが場にあるプレイヤーは、<br>バーストしていなければ自身の値分回復する。<br>女帝..4つくらいの国を統一したエリザベス女王とか？<br>懐かしいね～～テラリア',
+        rare:'UR',
+        buyable:1
+    },
+    'justice':{
+        name:'justice',
+        id:'justice',
+        val:0,
+        kind:'tarot',
+        attend:[['cardMelt','all']],
+        description:'このカードが場に出たとき、<br>お互いは場にあるカードをすべてmeltする。<br>その後もまだラウンドは継続している扱いとなる。<br>明るい未来のため犠牲は仕方ない..ベタにそうなっちゃいましたよ',
+        rare:'UR',
+        buyable:1
+    },
+    'hermit':{
+        name:'hermit',
+        id:'hermit',
+        val:0,
+        kind:'tarot',
+        description:'隠者。このイラストは第五人格モチーフ。<br>元のやつ見たけど結構似てるね 正規採用です<br>どんな効果にしようかねぇ....',
+        rare:'UR',
+        buyable:0
     }
 }
 
