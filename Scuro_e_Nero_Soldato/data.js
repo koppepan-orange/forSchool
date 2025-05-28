@@ -116,6 +116,16 @@ let Cards = {
         rare:'N',
         buyable:1,
     },
+    'death':{
+        name:'strength',
+        id:'strength',
+        val:0,
+        kind:'tarot',
+        elseed:[[['endRound'],['statusIndec','me','power','+',1]]],
+        description:'このカードが場にある状態でラウンド終了時に<br>自身がsoldatoだったならば、<br>相手に与えるダメージが2倍になる。<br>ハングリーであれ、ネコであれ。',
+        rare:'UR',
+        buyable:1,
+    },
     'strength':{
         name:'strength',
         id:'strength',
@@ -130,7 +140,7 @@ let Cards = {
         id:'wheel_of_fourtune',
         val:0,
         kind:'tarot',
-        attend:[['cardTrade', 'all']],
+        // attend:[['cardTrade', 'all']],
         description:'登場時、相手と自分の手札を全交換します<br>吉と出るか凶と出るか...<br>右の犬の顔好き まじかわいい',
         rare:'UR',
         buyable:1
@@ -140,7 +150,7 @@ let Cards = {
         id:'emperor',
         val:0,
         kind:'tarot',
-        attend:[['result','emperor']],
+        // attend:[['result','emperor']],
         description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が負けていたならば、<br>その勝利を奪い自分の攻撃力として攻撃する。<br>これが皇帝だよ',
         rare:'UR',
         buyable:1
@@ -160,7 +170,7 @@ let Cards = {
         val:0,
         kind:'tarot',
         attend:[['cardMelt','all']],
-        description:'このカードが場に出たとき、<br>お互いは場にあるカードをすべてmeltする。<br>その後もまだラウンドは継続している扱いとなる。<br>明るい未来のため犠牲は仕方ない..ベタにそうなっちゃいましたよ',
+        description:'このカードが場に出たとき、<br>お互いは場にあるカードをすべてmeltする。<br>その後もまだラウンドは継続している扱いとなる。<br>明るい未来のため犠牲は仕方ない..ベタにそうなっちゃった？<br>俺はここにいるぞー！！',
         rare:'UR',
         buyable:1
     },
@@ -172,7 +182,7 @@ let Cards = {
         description:'隠者。このイラストは第五人格モチーフ。<br>元のやつ見たけど結構似てるね 正規採用です<br>どんな効果にしようかねぇ....',
         rare:'UR',
         buyable:0
-    }
+    },
 }
 
 let Dealers = {

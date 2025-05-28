@@ -576,6 +576,9 @@ let hitButton = document.querySelector("#buttons .hit");
 let standButton = document.querySelector("#buttons .stand");
 
 hitButton.addEventListener("click", async function (){
+    if(!actable) return;
+    
+    actable = 0;
     let player = humans['player'];
     let dealer = humans['dealer'];
     if(!player.standed){
@@ -594,9 +597,14 @@ hitButton.addEventListener("click", async function (){
             if(isburst) return result('dealer');
         }
     }
+
+    actable = 1;
 });
 
 standButton.addEventListener("click", async function (){
+    if(!actable) return;
+
+    actable = 0;
     let player = humans['player'];
     let dealer = humans['dealer'];
 
@@ -604,9 +612,11 @@ standButton.addEventListener("click", async function (){
 
     if(!dealer.standed){
         do{
-            let drawCard = cardDraw('dealer');
-            let isburst = isBurst('dealer');
+            let drawCard = await cardDraw('dealer');
+            let isburst = await isBurst('dealer');
             await delay(750);
+            turn += 1;
+            
             if(isburst) return result('dealer');
         }while(humans["dealer"].value < 17);
 
@@ -681,6 +691,7 @@ async function isBurst(cam){
     }
 }
 
+//勝敗、ドローか、バーストかどうか whetherですね
 async function result(code = 'none'){
     //codeが${cam}ならば、${cam}がburstしたということ。!${cam}のvalueをそのままdamage
     let player = humans["player"];
@@ -708,6 +719,13 @@ async function result(code = 'none'){
     round += 1;
     if(res) reset(); //もし死んでいないならば、続行(reset)
 }
+
+//ステータスを増減させるやつ increase/decreaseのindec
+async function buffAdd(cam, buff, val){
+    human = humans[cam];
+    
+}
+
 async function damage(cam, dmg){
     if(!cam) return 1;
     let attacker = humans[cam == 'player' ? 'dealer' : 'player'];
@@ -857,6 +875,8 @@ async function reset() {
     }
 
     tekiou();
+
+    actable = 1;
 }
 async function cardMelt(cam, card){
     //cardMelt == カードをmeltに移動する
@@ -884,10 +904,8 @@ async function battleStart(){
         humans['dealer'][key] = dealer[key]
     })
 
-    
     humans['player'].deck = arrayShuffle(humans['player'].deck);
     dealer.deck = arrayShuffle(dealer.deck);
-
 
     addtext(`${dealer.name}「${Dealers[dealer.name].opening}」`);
     
