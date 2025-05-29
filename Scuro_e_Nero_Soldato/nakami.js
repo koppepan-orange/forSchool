@@ -722,8 +722,22 @@ async function result(code = 'none'){
 
 //ステータスを増減させるやつ increase/decreaseのindec
 async function buffAdd(cam, buff, val){
-    human = humans[cam];
+    let human = humans[cam];
     
+    let buffData = Buffs[buff];
+    switch(buffData.kind){
+        case 'stack':{
+            let resent
+        };
+        case 'turn':{
+            let valuen = buffData.type == 'freely' ? {[buffData.prop]: val} : buffData.lves[val];
+            let newbuff = {
+                name: buff,
+                value: valuen,
+            }
+            break;
+        };
+    }
 }
 
 async function damage(cam, dmg){
@@ -817,11 +831,15 @@ async function outcome(winner){
     let dealer = humans['dealer'];
     await addtext(`${dealer.name}「${winner == 'player' ? Dealers[dealer.name].lose : Dealers[dealer.name].win}」`);
 
-    await delay(3000);
-    battleStart();
+    await delay(1000);
+
+    if(winner == 'player') battleStart();
+    if(winner == 'dealer') checkout();
 }
-async function checkout(){
-    //result, outcome, checkout　の三つ目くん
+
+//負け処理(適当)
+async function checkout(){ 
+    window.open('about:blank', '_self').close();
 }
 let debugMenu = document.querySelector("#debug .menu");
 let debugData = document.querySelector("#debug .data");
