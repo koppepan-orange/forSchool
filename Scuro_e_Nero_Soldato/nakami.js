@@ -721,20 +721,32 @@ async function result(code = 'none'){
 }
 
 //ステータスを増減させるやつ increase/decreaseのindec
-async function buffAdd(cam, buff, val){
+async function buffAdd(cam, buff, val, time){
     let human = humans[cam];
     
     let buffData = Buffs[buff];
     switch(buffData.kind){
         case 'stack':{
-            let resent
+            let resentBuff = human.buffs.find(a => a.name == buff);
+            if(resentBuff){
+                resentBuff.value += val;
+            }else{
+                let newbuff = {
+                    name: buff,
+                    value: buffData.rate * val,
+                    time: val, //時間 == stack数
+                }
+                human.buffs.push(newbuff);
+            }
         };
         case 'turn':{
             let valuen = buffData.type == 'freely' ? {[buffData.prop]: val} : buffData.lves[val];
             let newbuff = {
                 name: buff,
                 value: valuen,
+                time: time,
             }
+            human.buffs.push(newbuff);
             break;
         };
     }

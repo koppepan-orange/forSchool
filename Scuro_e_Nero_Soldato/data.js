@@ -185,6 +185,8 @@ let Cards = {
     },
 }
 
+
+
 let Dealers = {
     'ギルガメッシュ':{
         name: 'ギルガメッシュ',
