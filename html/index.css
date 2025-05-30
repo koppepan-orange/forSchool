@@ -1,0 +1,30 @@
+html{
+    background-color: #f0f8ff;
+}
+#clown{
+    cursor: pointer;
+}
+#explosion{
+    width: 15vw;
+    height: 15vh;
+    transition: width 4.0s ease, height 4.0s ease;
+    position: fixed;
+}
+@keyframes stretch {
+    0% {
+      width: 15vw;
+      height: 15vh;
+    }
+    50% {
+      width: 60vw;
+      height: 60vh;
+    }
+    100% {
+      width: 15vw;
+      height: 15vh;
+    }
+  }
+  
+  .stretch {
+    animation: stretch 1s ease;
+  }

@@ -817,6 +817,8 @@ async function damage(cam, dmg){
     
     return 1; //どちらかが死んだならば処理を停止するため0を、そうでなければ1をお返し申す
 }
+
+//負け/勝ちのセリフの表示、次のバトルへ
 async function outcome(winner){
     let rate = 2
     switch(winner){
@@ -841,6 +843,8 @@ async function outcome(winner){
 async function checkout(){ 
     window.open('about:blank', '_self').close();
 }
+
+
 let debugMenu = document.querySelector("#debug .menu");
 let debugData = document.querySelector("#debug .data");
 document.addEventListener("keydown", (e) =>{
@@ -986,10 +990,10 @@ function decideDealerName(){
     return dealer;
 }
 
+//雑々デッキ作成
 deckKinds['normal'].deck.forEach(card => {
     cardBecome('player', 'deck', card)
 })
-
 cardBecome('player', 'deck', ['wheel of fourtune','♡']);
 cardBecome('player', 'deck', ['strength', '♧']);
 cardBecome('player', 'deck', ['emperor', '♢']);
@@ -1000,3 +1004,4 @@ cardBecome('player', 'deck', ['hermit', '♡']);
 
 //一旦のやつ
 battleStart();
+
