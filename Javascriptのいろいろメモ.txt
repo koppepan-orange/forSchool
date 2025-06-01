@@ -1,0 +1,224 @@
+変数について
+宣言には、const, let, varが使用可能です。
+それぞれに特徴があるので授けましょう！
+const 再宣言不可　　再代入不可 // 短縮くらいにしか使えなさそう
+let   再宣言不可　　再代入可能 // これが一番使いやすい(個人差)
+var   再宣言可能　　再代入可能 // これはバグが増えるらしい
+変数の再代入には、宣言は不必要です。
+変数はxだとしましょう。
+x = 10 // xを10にしました。
+x += 10 // xに10が増えました。
+x -= 10 // xから10減りました。
+こんなもん？
+
+繰り返し
+Scratchで例えていくね
+・if　もし[  ]なら
+let x = 0;
+if (x == 0) {
+  console.log(x); // 0が1回出力される
+}
+・for (  )まで繰り返す
+let x = 0;
+for (x < 5; x++) {
+  console.log(x); // 0, 1, 2, 3 ,4 が出力される
+}
+・while (  )まで繰り返す
+let x = 0;
+while (x < 5) {
+  console.log(count); // 0, 1, 2, 3, 4 と出力される
+  count++;
+}
+forとwhileはほぼ一緒。
+でも、回数が決まっているならforの方が簡潔になり、
+ユーザーによって回数が異なるならばwhileの方が簡潔になります。
+
+ー応用ー
+do...while (  )まで繰り返す
+do {
+  console.log(x); // 0, 1, 2, 3, 4 と出力される
+  x++;
+} while (x < 5); // 条件式が下に移動！ちょっとスマートに見えるよね
+
+
+.系のやつ(メソッドっていうらしい)について
+.filter
+条件に合うやつだけを抜き出す。超スーパー便利
+let array = [1,6,3,2,9,5,8]
+console.log(array.filter(a => a > 4)) // [6,9,5,8]
+複数(かつ、または)ならいつも通りに&&とか||で
+
+.sort
+並び替える。優秀
+let array = [1,6,3,2,9,5,8]
+console.log(array.sort((a,b) => a - b)) // [1,2,3,5,6,8,9]
+a - bで昇順(小さい順),b - aで降順(大きい順)
+文字版ならアルファベット順になる
+let array = ['koppepan','orange','apple']
+console.log(array.sort((a,b) => a - b)) // ['apple','koppepan','orange']
+
+.map
+新しい配列として作成する。意味わからんけどとりま便利
+let array = [1,6,3,2,9,5,8]
+console.log(array.map(a => a - 1)) // [0,5,2,1,8,4,7]
+まあ一番シンプルかも
+使い所は..あんまないかもだけど、
+一気に値を変えたい時に便利 bufftimeのdecreaseとかこれ使ってたり
+
+*aとかbは変数と思えばおk forEach(snapshot)のsnapshotと同じ
+
+.every
+配列のすべての要素が条件を満たしているかどうかを確認するやつ
+一個でも違ったらfalseになる 鬼畜
+let array = [2, 4, 6, 8];
+let kekka = array.every(num => num % 2 == 0); //偶数かそうでないか
+console.log(kekka); // true
+こんな感じ。簡略化ってイメージでおk
+kekka = [1,2,3,4].every(id => { //arrayみたいに変数である必要はないよ
+ let enemy = humans.enemies[id];
+ return enemy.execute == 1;
+}
+みたいに別の配列に向かってやることもできる 優秀
+
+.reduce
+配列の全ての要素を合計することができるやつ
+累積値ってやつをずっと保持してるのが特徴
+let array = [1, 2, 3, 4];
+let kekka = array.reduce((ruiseki, imano) => {
+   return ruiseki + imano;
+}, 0); // この0はruisekiの初期値
+console.log(kekka); // 10
+ってな感じに使う。正味わからん
+合計したり平均値求めたりするときに役立つ
+これもeveryと同じように他の配列に向かってできるよ humans.enemies達のlevelとか
+
+.unshift
+配列の一番最初に強制的にpushするやつ。
+let array = [2,3,4]
+array.unshift(1)
+console.log(array) // [1,2,3,4]
+こんな感じ。シンプルだけどshiftと間違えないように注意(経験者は語る)
+
+.shift
+配列の一番最初の要素を削除してそれを取得するやつ
+let array = [2,3,4]
+let x = array.shift()
+console.log(array) // [3,4]
+console.log(x) // 2
+こんな感じ。まあsliceと取得が合わさったって考えたら楽かな
+使う機会ほぼなさそう //一回使ったわこれ
+ちなみに()の中に何入れても無駄だぞい
+
+.pop
+配列の一番最後の要素を削除してそれを取得するやつ
+let array = [2,3,4]
+let x = array.pop()
+console.log(array) // [3,4]
+console.log(x) // 2
+こんな感じ。まあsliceと取得が合わさったって考えたら楽かな
+使う機会ほぼなさそう //一回使ったわこれ
+ちなみに()の中に何入れても無駄だぞい
+
+.flat
+平坦化してくれるやつ
+内側から括弧を外していくっていう感覚大事かも
+let array = [[[1,2], [2,4]]]
+let result = array.flat(1)
+console.log(result); // [[1, 2], [2, 4]]
+let result2 = array.flat(2)
+console.log(result2); // [1, 2, 2, 4]
+
+.flatMap
+mapで変換した配列を自動的にflatする
+まあ要は略式。mapとflatを同時に使ってくれるからちょっとお得
+礼砲は略式で。ですが、敬意をお忘れなく〜
+let array = [1, 2, 3];
+let result = array.flatMap(x => [x, x * 2]); //xとx2倍を入れた配列
+console.log(result); // [1, 2, 2, 4, 3, 6]  //mapだけだと[[1,2],[2,4],[3,6]]になる
+平坦化の深さは" 1 "で固定なのでそこだけ注意
+
+
+ー　ー　ー　ー
+雑々メモゾーン・ユーリエフ
+
+↓これでなかったら0になるらしい
+ euro = userData.euro ?? 0
+ euro = userData?.forrpg?.euro ?? 0 //でforrpgがなくても0になる
+ document.cookieでcookie取得できるってよ
+
+styleにuser-select:none;ってやると選択ができんくなるらしい
+
+database.ref().once('value').then(snapshot=>{console.log(snapshot.val())})
+
+forEachAsync(array, async nanka => {
+  console.log(nanka)
+  await delay(1000)
+  //この中ならawait使いたい放題キャンパイグンです campign
+})
+
+配列の要素それぞれから実行したいがawaitも使いたい！！
+→for ofを使いましょう
+for (const a of arr) {
+        await delay(1000);
+        await execute(a);
+};
+// forEach(a => async function(){})　じゃだめらしい
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+setInterval(()=>{
+            const onlineUsersRef = database.ref('users');
+            onlineUsersRef.on('value', function(snapshot) {
+                let delay = 0;
+                snapshot.forEach(function(childSnapshot) {
+                    const auserData = childSnapshot.val();
+                    if (auserData.status === 'online') {
+                        // インデックスを利用して遅延させる
+                        window.setTimeout(() => {
+                            NicoNicoText(childSnapshot.key + 'さん');
+                        })
+                    }
+                })
+            })}
+    ,1)
+
+
+
+
+
+for ... of //=>要素そのものが返される
+
+const array = [1, 2, 3, 4];
+
+for (const num of array) {
+    console.log(num); // 1, 2, 3, 4 が順番に出力される
+}
+
+const str = "hello";
+
+for (const char of str) {
+    console.log(char); // 'h', 'e', 'l', 'l', 'o' が順番に出力される
+}
+
+
+
+
+for ... in //=>objectだとキーが、arrayだとインデックスが返される
+
+const obj = {
+    name: "Alice", //おそらく青春だろう うれしいね
+    age: 25,
+    occupation: "Engineer"
+};
+
+for (const key in obj) {
+    console.log(`${key}: ${obj[key]}`); 
+    // "name: Alice", "age: 25", "occupation: Engineer" が順番に出力される
+}
+
+const array = [10, 20, 30];
+
+for (const index in array) {
+    console.log(index); // 0, 1, 2 が順番に出力される（インデックスを出力）
+}

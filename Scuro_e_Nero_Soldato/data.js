@@ -1,3 +1,12 @@
+//#region システムとかのいらんやつ
+let Tips = [
+    '倍率とかでダメージがノット整数になったなら、<br>勝手に切り捨てされちゃうからご了承〜',
+    'ラウンドが終了したら、場のカードは全部焼却されるよ〜ん',
+    'デッキのカードがなくなったら、それ以上はhitできないよ〜ん<br>ま、ラウンド終了後には焼却したカードが全部デッキに入るけどネ〜',
+    'タロットカードは強力だけど、所持数制限がある...<br>なんてことはないからたくさん持っちゃお〜う！',
+]
+//#endregion
+//#region バトル中のことに関して
 let Cards = {
     //normal
     'A':{
@@ -121,7 +130,7 @@ let Cards = {
         id:'strength',
         val:0,
         kind:'tarot',
-        elseed:[[['endRound'],['statusIndec','me','power','+',1]]],
+        elseed:[[['endRound'],['buffAdd','me','power-up',1,1]]],
         description:'このカードが場にある状態でラウンド終了時に<br>自身がsoldatoだったならば、<br>相手に与えるダメージが2倍になる。<br>ハングリーであれ、ネコであれ。',
         rare:'UR',
         buyable:1,
@@ -140,7 +149,7 @@ let Cards = {
         id:'wheel_of_fourtune',
         val:0,
         kind:'tarot',
-        // attend:[['cardTrade', 'all']],
+        attend:[['cardTrade', 'all']],
         description:'登場時、相手と自分の手札を全交換します<br>吉と出るか凶と出るか...<br>右の犬の顔好き まじかわいい',
         rare:'UR',
         buyable:1
@@ -185,8 +194,52 @@ let Cards = {
     },
 }
 
-
-
+let Buffs = {
+    'power-up':{
+        name:'power-up',
+        kind:'turn',
+        type:'freely',
+        prop:'power',
+        description:'攻撃力の倍率を上げる。'
+    },
+    'suffer-up':{
+        name:'suffer-up',
+        kind:'turn',
+        type:'freely',
+        prop:'suffer',
+        description:'受けるダメージの倍率を上げる。'
+    },
+    'atk-up':{
+        name:'atk-up',
+        kind:'turn',
+        type:'freely',
+        prop:'attack',
+        description:'攻撃力の基礎量を上げる。'
+    },
+    'atk-down':{
+        name:'attack-down',
+        kind:'turn',
+        type:'freely',
+        prop:'attack',
+        description:'攻撃力の基礎量を下げる。'
+    },
+    'def-up':{
+        name:'def-up',
+        kind:'turn',
+        type:'freely',
+        prop:'defence',
+        description:'防御力の基礎量を上げる。'
+    },
+    'def-down':{
+        name:'def-down',
+        kind:'turn',
+        type:'freely',
+        prop:'defence',
+        description:'防御力の基礎量を下げる。'
+    }
+}
+//#endregion
+//#region Dealerのやつとかレンタルデッキ構成とか
 let Dealers = {
     'ギルガメッシュ':{
         name: 'ギルガメッシュ',
@@ -279,7 +332,7 @@ let Dealers = {
     }
 }
 
-let deckKinds = {
+let rentalDecks = {
     'normal':{
         name: 'normal',
         deck: [['A','♡'],['2','♡'],['3','♡'],['4','♡'],['5','♡'],['6','♡'],['7','♡'],['8','♡'],['9','♡'],['10','♡'],['J','♡'],['Q','♡'],['K','♡'],
@@ -288,3 +341,4 @@ let deckKinds = {
                ['A','♧'],['2','♧'],['3','♧'],['4','♧'],['5','♧'],['6','♧'],['7','♧'],['8','♧'],['9','♧'],['10','♧'],['J','♧'],['Q','♧'],['K','♧'],]
     }
 }
+//#endregion

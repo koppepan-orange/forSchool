@@ -2,6 +2,7 @@
 @font-face {font-family:comicsans; src:url("assets/fonts/comicsans.ttf");}
 ::-webkit-scrollbar {display: none;}
 .invisibility{opacity: 0;}
+.overFlow{overflow-x: scroll!important; overflow-y: scroll!important;}
 /* ここ変えといて */
 #gameArea{
     display:flex;
@@ -74,7 +75,6 @@
     width: fit-content; /* 文字の長さに応じた幅 */
     animation: fadeIn 0.5s ease forwards;
 }
-
 @keyframes fadeIn {
     0%{
         opacity: 0;
@@ -92,6 +92,7 @@
 .color-blue{
     color: #1919ff;
 }
+
 
 #debug .data{
     display: none;
@@ -293,6 +294,11 @@
     background-color: #def0ff;
     font-size: 30px;
 }
+#buttons .hit.wait, #buttons .stand.wait{
+    border: 4px solid #cfe9ff;
+    color: #def0ff;
+    opacity: 0.4;
+}
 
 
 #cardPlaces{
@@ -301,7 +307,8 @@
     justify-content: center;
     flex-wrap: wrap;
     align-items: center;
-    gap:30px
+    gap:30px;
+    position: relative;
 }
 #cardPlaces .player, #cardPlaces .dealer{
     display: flex;
@@ -316,9 +323,15 @@
     background-color: #eaf5ff;
     border-radius: 35px;
     margin: 15px;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
 }
+#cardPlaces .player.clone, #cardPlaces .dealer.clone{
+    position: fixed;
+    transition: left 0.8s ease, top 0.8s ease;
+}
+
+
 .card{
     display: block;
     height: 90px;
@@ -328,7 +341,8 @@
     background-color: #def0ff;
     flex-shrink: 0; /*勝手に縮減するのを防ぐやつ*/
     transform-style: preserve-3d;
-    transition: transform 0.9s ease;
+    transition: transform 0.9s ease, left 0.3s ease, top 0.3s ease;
+    transform: translate(0, 0) scale(1);
 }
 .card.normal .front .upper{
     position: absolute;
@@ -412,7 +426,7 @@
     top: 50vh;
     transition: transform 0.3s ease, left 0.3s ease, top 0.3s ease;
     transform: translate(-50%, -50%) scale(4);
-    z-index: 105;
+    z-index: 255;
 }
 .card.active.flipped {
     transform: translate(-50%, -50%) scale(4) rotateY(180deg);
@@ -420,7 +434,7 @@
 
 .card.clone{
     position: absolute;
-    z-index: 101;
+    z-index: 254;
     margin: 0;
     transition: left 0.5s ease, top 0.5s ease;
     opacity: 1;
