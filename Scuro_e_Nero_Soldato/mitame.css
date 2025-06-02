@@ -3,7 +3,9 @@
 ::-webkit-scrollbar {display: none;}
 .invisibility{opacity: 0;}
 .overFlow{overflow-x: scroll!important; overflow-y: scroll!important;}
-/* ここ変えといて */
+html{
+    margin: -8px;
+}
 #gameArea{
     display:flex;
     flex-direction: row;
@@ -225,7 +227,26 @@
     height: 30px;
     font-size: 23px;
     padding: 2px;
+    background-color: #eaf5ff;
     border: 2px solid #cfe9ff;
+}
+#else .info .upper{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5%;
+    width: 50%;
+    height: 50px;
+    position: fixed;
+    top: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+#else .info .upper .item{
+    width: 100px;
+    height: 25px;
+    font-size: 18px;
 }
 #upperLayer{
     position: fixed;

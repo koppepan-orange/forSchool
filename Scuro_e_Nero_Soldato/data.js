@@ -125,9 +125,9 @@ let Cards = {
         rare:'N',
         buyable:1,
     },
-    'death':{
-        name:'strength',
-        id:'strength',
+    'fool':{
+        name:'fool',
+        id:'fool',
         val:0,
         kind:'tarot',
         elseed:[[['endRound'],['buffAdd','me','power-up',1,1]]],
@@ -154,12 +154,22 @@ let Cards = {
         rare:'UR',
         buyable:1
     },
+    'death':{
+        name:'strength',
+        id:'strength',
+        val:0,
+        kind:'tarot',
+        //attend:[['results','death']],
+        description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が勝っていたならば、<br>その勝利を奪われ相手の攻撃力として攻撃される。',
+        rare:'UR',
+        buyable:1,
+    },
     'emperor':{
         name:'emperor',
         id:'emperor',
         val:0,
         kind:'tarot',
-        // attend:[['result','emperor']],
+        // attend:[['results','emperor']],
         description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が負けていたならば、<br>その勝利を奪い自分の攻撃力として攻撃する。<br>これが皇帝だよ',
         rare:'UR',
         buyable:1

@@ -227,9 +227,13 @@ let humans = {
 
 let coin = 0;
 
-let stage = 1;
+let floor = 1;
+let stage = 1; //訳: 1-1
+let battle = 1; //if バトル中(バトル中かどうか)
 let round = 0;
 let turn = 0;
+
+let piano = 0;
 
 let spada = 21;
 
@@ -261,6 +265,11 @@ function tekiou(){
         div.querySelector(".health .hp .num .max").textContent = `/${human.maxhp}`;
         div.querySelector(".health .shl .num .now").textContent = human.shl;
         div.querySelector(".point").textContent = human.value;
+
+        //deck/melt内の要素への番号振り(意味あるかは不明)
+        for(let i = 0; i < human.deck.length; i++){human.deck[i].id = i;}
+        for(let i = 0; i < human.melt.length; i++){human.melt[i].id = i;}
+        for(let i = 0; i < human.cards.length; i++){human.cards[i].id = i;}
     });
     
     //playerのその他の要素のtekiou
@@ -270,20 +279,6 @@ function tekiou(){
     let row1 = document.createElement("div");
     row1.className = "row";
     
-    let coinDivpre = document.createElement("div");
-    coinDivpre.className = "item coin";
-    coinDivpre.textContent = `Coin: ${coin}`;
-    row1.appendChild(coinDivpre);
-    
-    let spadaDivpre = document.createElement("div");
-    spadaDivpre.className = "item spada";
-    spadaDivpre.textContent = `Spada: ${spada}`;
-    row1.appendChild(spadaDivpre);
-    elseInfo.appendChild(row1);
-    
-    let row2 = document.createElement("div");
-    row2.className = "row";
-
     let deckDivpre = document.createElement("div");
     deckDivpre.className = "item deck";
     deckDivpre.dataset.type = 'deck';
@@ -291,7 +286,7 @@ function tekiou(){
     deckDivpre.addEventListener("click", function(){
         DecksShow('deck');
     });
-    row2.appendChild(deckDivpre);
+    row1.appendChild(deckDivpre);
     
     let meltDivpre = document.createElement("div"); //めーると とけてしまいそう〜〜〜〜
     meltDivpre.className = "item melt";
@@ -300,8 +295,44 @@ function tekiou(){
     meltDivpre.addEventListener("click", function(){
         DecksShow('melt');   
     })
-    row2.appendChild(meltDivpre);
+    row1.appendChild(meltDivpre);
+    
+    elseInfo.appendChild(row1);
+    
+    let row2 = document.createElement("div");
+    row2.className = "row";
+
+    let coinDivpre = document.createElement("div");
+    coinDivpre.className = "item coin";
+    coinDivpre.textContent = `Coin: ${coin}`;
+    row2.appendChild(coinDivpre);
+    
+    let pianoDivpre = document.createElement("div");
+    pianoDivpre.className = "item piano";
+    pianoDivpre.textContent = `Piano: ${piano}`;
+    row2.appendChild(pianoDivpre);
+    
     elseInfo.appendChild(row2);
+
+    let upperEngine = document.createElement('div');
+    upperEngine.className = 'upper';
+
+    let turnDivpre = document.createElement("div");
+    turnDivpre.className = "item turn";
+    turnDivpre.textContent = `Turn: ${turn}`;
+    upperEngine.appendChild(turnDivpre);
+
+    let spadaDivpre = document.createElement("div");
+    spadaDivpre.className = "item spada";
+    spadaDivpre.textContent = `Spada: ${spada}`;
+    upperEngine.appendChild(spadaDivpre);
+    
+    let roundDivpre = document.createElement("div");
+    roundDivpre.className = "item round";
+    roundDivpre.textContent = `Round: ${round}`;
+    upperEngine.appendChild(roundDivpre);
+    
+    elseInfo.appendChild(upperEngine);
 }
 
 //#region deckかmeltの表示処理
@@ -415,6 +446,10 @@ async function cardBecome(cam, type, cardOrigin){
 
 //カードをdeck/melt/cardsに入れる(だけ～ 歩いて～走って～ 日の光浴びながぁら～〜～～)
 async function cardAdd(cam, type, card){
+    let maisu = humans[cam][type].length;
+
+    card.num = maisu;
+    
     humans[cam][type].push(card);
 
     return card
@@ -528,7 +563,9 @@ function cardMake(card){
 function cardPlace(cam, cardDiv){
     document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
     
-    let fromRect = document.querySelector('#else .info .deck').getBoundingClientRect();
+    let fromRect = null;
+    if(cam == 'player') fromRect = document.querySelector('#else .info .deck').getBoundingClientRect();
+    if(cam == 'dealer') fromRect = document.querySelector('#else .info .spada').getBoundingClientRect();
     
     let toRect = cardDiv.getBoundingClientRect();
     
@@ -560,6 +597,10 @@ function cardPlace(cam, cardDiv){
 
 //Divになっているカードを置き場からメルトに置く動き
 async function cardMelt(cam, card){
+    if(cam == 'all'){
+        await allMelt();
+        return;
+    }
     //つまるところcardMelt使う前にcardsから消えてるんだから、cardをcardMeltにpushするだけの動き
     if(card.melted.length != 0){
         let results = [];
@@ -570,7 +611,44 @@ async function cardMelt(cam, card){
         })
     }
 
-    humans[cam].melt.push(card);
+    cardAdd(cam, 'melt', card)
+}
+async function cardMelting(cam, cardDiv){
+    let fromRect = cardDiv.getBoundingClientRect();
+    
+    // let toRect = document.querySelector('#else .info .deck').getBoundingClientRect();
+    
+    let toRect = null;
+    if(cam == 'player') toRect = document.querySelector('#else .info .melt').getBoundingClientRect();
+    if(cam == 'dealer') toRect = document.querySelector('#else .info .spada').getBoundingClientRect();
+
+    let rare = arrayGacha(['ま、嘘なんですけどね(3%)','ねずっちでもあります！！！！！(17%)',''],[3,17,80]);
+    
+    console.log(cam+'です！！！！' + rare)
+
+    let cloneKun = cardDiv.cloneNode(true);
+    cloneKun.classList.add('clone')
+    cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+    cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
+    cloneKun.style.width = `${fromRect.width}px`;
+    cloneKun.style.height = `${fromRect.height}px`;
+
+    document.body.appendChild(cloneKun);
+
+    cardDiv.classList.add('invisibility')
+    
+    // console.log(`${fromRect.left}, ${fromRect.top} => ${toRect.left}, ${toRect.top}`)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${toRect.left + window.scrollX}px`;
+        cloneKun.style.top = `${toRect.top + window.scrollY}px`;
+    });
+
+    await delay(500)
+    
+    cloneKun.remove();
+    cardDiv.remove();
+    
 }
 
 //カードを相手の場に送ったりする動き
@@ -746,7 +824,6 @@ function checkAttributo(card, type, name, num){
 
 async function hasAttend(card){
     let attributi = card.attend;
-
     
     if(attributi.length <= 0) return 0;
 
@@ -756,6 +833,38 @@ async function hasAttend(card){
     }
 
     return 1;
+}
+async function hasMelted(card){
+    let attributi = card.melted;
+    
+    if(attributi.length <= 0) return 0;
+
+    for (const a of attributi) {
+        await delay(1000);
+        await execute(a);
+    }
+
+    return 1;
+}
+async function hasElseed(card,event){
+    let attributi = card.melted;
+
+    //elseed:[[['endRound'],['buffAdd','me','power-up',1,1]]],
+
+    if(attributi.length <= 0) return 0;
+
+    for(let a of attributi){
+        if(a[0][0] == event){
+            await delay(1000);
+            await execute(a[1]);
+        }
+    }
+
+    return 1;
+}
+
+async function letsElseed(event){
+    
 }
 
 async function executeAttributo(card, type, name){
@@ -812,6 +921,8 @@ async function results(code = 'none'){
 
     tekiou();
     console.log(`dealer:${dealer.value} player:${player.value}`);
+
+    await letsElseed('endRound')
 
     let res = 1;
     if(code == 'none'){
@@ -896,8 +1007,8 @@ async function damage(cam, dmg){
                     defense += buff.value;
                     break;
             }
-        })
-    })
+        });
+    });
 
     //清算
     let deal = Math.max((dmg + attack) - defense, 0); //基礎控除
@@ -994,6 +1105,7 @@ function waitButton(){
 function resetButton(){
     hitButton.classList.remove("wait");
     standButton.classList.remove("wait");
+    tekiou();
 }
 async function reset() {
     let player = humans["player"];
@@ -1002,35 +1114,36 @@ async function reset() {
     player.standed = 0;
     dealer.standed = 0;
 
-    const playerDOM = document.querySelector("#cardPlaces .player");
-    const dealerDOM = document.querySelector("#cardPlaces .dealer");
-
-
-    while(player.cards.length > 0){
-        const card = player.cards.shift(); // 先頭から1枚ずつ
-        if(hasProp(card, 'vanish') == 0){//vanishがないならば
-            await cardMelt('player', card);
-        }
-        if(playerDOM.children.length > 0){
-            playerDOM.children[0].remove();
-        }
-    }
-
-    while(dealer.cards.length > 0){
-        const card = dealer.cards.shift();
-        if(hasProp(card, 'vanish') == 0){
-            await cardMelt('dealer', card);
-        }
-        if(dealerDOM.children.length > 0){
-            dealerDOM.children[0].remove();
-        }
-    }
+    await allMelt();
 
     tekiou();
-
     actable = 1;
     resetButton();
 }
+async function allMelt(){
+    for (let cam of ['player', 'dealer']) {
+        let DOM = document.querySelector(`#cardPlaces .${cam}`);
+        console.log(`${cam}、行きま～す`);
+    
+        let meltingTasks = [];
+    
+        let i = 0;
+        while (humans[cam].cards.length > 0) {
+            console.log(`ただ今のレングスは～～？ => ${humans[cam].cards.length}`);
+            const card = humans[cam].cards.shift(); // 先頭から1枚ずつ
+            if (hasProp(card, 'vanish') == 0) {
+                await cardMelt(cam, card);
+            }
+
+            meltingTasks.push(cardMelting(cam, DOM.children[i]));
+
+            i++;
+        }
+
+        await Promise.all([...meltingTasks]);
+    }
+}
+
 
 async function battleStart(){
     turn = 0;
