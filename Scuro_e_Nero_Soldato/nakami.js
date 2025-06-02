@@ -270,9 +270,24 @@ function tekiou(){
         for(let i = 0; i < human.deck.length; i++){human.deck[i].id = i;}
         for(let i = 0; i < human.melt.length; i++){human.melt[i].id = i;}
         for(let i = 0; i < human.cards.length; i++){human.cards[i].id = i;}
+
+        //DOMの方も
+        let placeDOM = document.querySelector(`#cardPlaces .${cam}`);
+        let children = Array.from(placeDOM.children);
+        children.forEach((c,i) => {
+            let ko = humans[cam].cards[i]
+            c.setAttribute('data-id', i)
+            c.querySelector('.front').setAttribute('data-description', `
+                "${ko.name}" (suit:${ko.suit}) (id:${ko.id})<br>
+                value:${ko.value} (prop:[${ko.prop}])<br>
+                attend:[${ko.attend}]<br>
+                melted:[${ko.melted}]<br>
+                elseed:[${ko.elseed}]
+            `)
+        });
     });
     
-    //playerのその他の要素のtekiou
+    //#region playerのその他の要素のtekiou
     let elseInfo = document.querySelector("#else .info");
     elseInfo.innerHTML = '';
     
@@ -333,6 +348,8 @@ function tekiou(){
     upperEngine.appendChild(roundDivpre);
     
     elseInfo.appendChild(upperEngine);
+
+    //#endregion
 }
 
 //#region deckかmeltの表示処理
@@ -446,10 +463,6 @@ async function cardBecome(cam, type, cardOrigin){
 
 //カードをdeck/melt/cardsに入れる(だけ～ 歩いて～走って～ 日の光浴びながぁら～〜～～)
 async function cardAdd(cam, type, card){
-    let maisu = humans[cam][type].length;
-
-    card.num = maisu;
-    
     humans[cam][type].push(card);
 
     return card
@@ -472,7 +485,7 @@ async function cardDraw(cam, name = null, suit = null, prop, attend, melted, els
     cardAdd(cam, 'cards', card)
 
     let cardDiv = cardMake(card);
-    cardPlace(cam, cardDiv)
+    cardAPlace(cam, cardDiv)
 
     tekiou();
 
@@ -559,8 +572,50 @@ function cardMake(card){
     return newCard;
 }
 
+
+
+//Divになっているカードを置き場からメルトに置く動き
+async function cardMelt(cam, card){
+    if(cam == 'all'){
+        await allMelt();
+        return;
+    }
+    console.log(card)
+    //つまるところcardMelt使う前にcardsから消えてるんだから、cardをcardMeltにpushするだけの動き
+    if(card.melted.length != 0){
+        let results = [];
+        card.melted.forEach(thing => async function(){
+            let [functionName, ...args] = thing;
+            let result = await executions[functionName](...args);
+            results.push(result);
+        })
+    }
+
+    cardAdd(cam, 'melt', card)
+}
+
+
+
+//カードを相手の場に送ったりする動き
+async function cardSend(cam, card){
+    
+}
+
+//カードを相手と交換する動き
+async function cardTrade(cam, card){
+    if(cam == 'all'){
+        await cardASwap();
+
+        let temp = humans.player.cards;
+        humans.player.cards = humans.dealer.cards;
+        humans.dealer.cards = temp;
+
+        return 1;
+    }
+}
+
 //Divになったカードをデッキから置き場に置く動き
-function cardPlace(cam, cardDiv){
+function cardAPlace(cam, cardDiv){
     document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
     
     let fromRect = null;
@@ -594,40 +649,20 @@ function cardPlace(cam, cardDiv){
 
     return 1;
 }
-
-//Divになっているカードを置き場からメルトに置く動き
-async function cardMelt(cam, card){
-    if(cam == 'all'){
-        await allMelt();
-        return;
-    }
-    //つまるところcardMelt使う前にcardsから消えてるんだから、cardをcardMeltにpushするだけの動き
-    if(card.melted.length != 0){
-        let results = [];
-        card.melted.forEach(thing => async function(){
-            let [functionName, ...args] = thing;
-            let result = await executions[functionName](...args);
-            results.push(result);
-        })
-    }
-
-    cardAdd(cam, 'melt', card)
-}
-async function cardMelting(cam, cardDiv){
+async function cardAMelting(cam, cardDiv){
     let fromRect = cardDiv.getBoundingClientRect();
-    
-    // let toRect = document.querySelector('#else .info .deck').getBoundingClientRect();
     
     let toRect = null;
     if(cam == 'player') toRect = document.querySelector('#else .info .melt').getBoundingClientRect();
     if(cam == 'dealer') toRect = document.querySelector('#else .info .spada').getBoundingClientRect();
 
-    let rare = arrayGacha(['ま、嘘なんですけどね(3%)','ねずっちでもあります！！！！！(17%)',''],[3,17,80]);
+    let rare = arrayGacha(['ま、嘘なんですけどね','ねずっちでもあります！！！！！',''],[3,17,80]);
     
-    console.log(cam+'です！！！！' + rare)
+    // console.log(cam+'です！！！！' + rare)
+    if(rare == 'ま、嘘なんですけどね') console.log('星3引いたで');
 
     let cloneKun = cardDiv.cloneNode(true);
-    cloneKun.classList.add('clone')
+    cloneKun.classList.add('clone');
     cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
     cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
     cloneKun.style.width = `${fromRect.width}px`;
@@ -648,29 +683,8 @@ async function cardMelting(cam, cardDiv){
     
     cloneKun.remove();
     cardDiv.remove();
-    
 }
-
-//カードを相手の場に送ったりする動き
-async function cardSend(cam, card){
-    
-}
-
-//カードを相手と交換する動き
-async function cardTrade(cam, card){
-    if(cam == 'all'){
-        // アニメーション
-        await animateSwapCards();
-
-        // カードデータ交換（humans内）
-        let temp = humans.player.cards;
-        humans.player.cards = humans.dealer.cards;
-        humans.dealer.cards = temp;
-
-        return 1;
-    }
-}
-async function animateSwapCards() {
+async function cardASwap() {
     const playerDOM = document.querySelector('#cardPlaces .player');
     const dealerDOM = document.querySelector('#cardPlaces .dealer');
 
@@ -736,6 +750,78 @@ async function animateSwapCards() {
     dealerDOM.classList.remove('invisibility');
 
     return 1;
+}
+async function cardAJump(cardDiv){
+    let fromRect = cardDiv.getBoundingClientRect();
+
+    let cloneKun = cardDiv.cloneNode(true);
+    cloneKun.classList.add('clone');
+    cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+    cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
+    cloneKun.style.width = `${fromRect.width - 8}px`;
+    cloneKun.style.height = `${fromRect.height - 8}px`;
+
+    document.body.appendChild(cloneKun);
+
+    cardDiv.classList.add('invisibility')
+    
+    // console.log(`${fromRect.left}, ${fromRect.top} => ${toRect.left}, ${toRect.top}`)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+        cloneKun.style.top = `${fromRect.top - 50 + window.scrollY}px`;
+    });
+    await delay(500)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+        cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
+    })
+    await delay(500)
+    
+    cloneKun.remove();
+    cardDiv.classList.remove('invisibility');
+}
+async function cardAQuake(cardDiv){
+    let fromRect = cardDiv.getBoundingClientRect();
+
+    let cloneKun = cardDiv.cloneNode(true);
+    cloneKun.classList.add('clone');
+    cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+    cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
+    cloneKun.style.width = `${fromRect.width - 8}px`;
+    cloneKun.style.height = `${fromRect.height - 8}px`;
+
+    document.body.appendChild(cloneKun);
+
+    cardDiv.classList.add('invisibility')
+    
+    // console.log(`${fromRect.left}, ${fromRect.top} => ${toRect.left}, ${toRect.top}`)
+
+    cloneKun.transition = 'all 0.2s ease';
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${fromRect.left - 20 + window.scrollX}px`;
+    });
+    await delay(200)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${fromRect.left + 20 + window.scrollX}px`;
+    })
+    await delay(200)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${fromRect.left -20 + window.scrollX}px`;
+    })
+    await delay(200)
+
+    requestAnimationFrame(() => {
+        cloneKun.style.left = `${fromRect.left + window.scrollX}px`;
+    })
+    await delay(200)
+    
+    cloneKun.remove();
+    cardDiv.classList.remove('invisibility');
 }
 
 
@@ -1078,15 +1164,18 @@ async function checkout(){
 }
 
 
+//#region debug
 let debugMenu = document.querySelector("#debug .menu");
-let debugData = document.querySelector("#debug .data");
+let debugDiv = document.querySelector('#debug .div');
+let debugging = 0;
 document.addEventListener("keydown", (e) =>{
-    if(e.key == 'y'){
-        if(debugData.style.display == 'block'){
-            debugData.style.display = 'none';
-            debugData.innerHTML = JSON.stringify(humans);
+    if(e.key == 'h'){
+        if(debugging){
+            debugging = 0;
+            NicoNicoText('debug off');
         }else{
-            debugData.style.display = 'block';
+            debugging = 1;
+            NicoNicoText('debug on');
         }
     }else if(e.key == "g"){
         if(debugMenu.style.display == 'block'){
@@ -1096,6 +1185,85 @@ document.addEventListener("keydown", (e) =>{
         }
     }
 });
+
+document.addEventListener('mousemove', (e) => {
+    debugDiv.style.left = `${e.clientX + 10}px`;
+    debugDiv.style.top = `${e.clientY + 10}px`;
+});
+document.addEventListener('mouseover', (e) => {
+    if(debugging && e.target.dataset.description != undefined){
+        const desc = e.target.dataset.description;
+        debugDiv.innerHTML = desc;
+        debugDiv.style.display = 'block';
+    }
+});
+document.addEventListener('mouseout', (e) => {
+    if(debugging && e.target.dataset.description != undefined){
+        debugDiv.innerHTML = '';
+        debugDiv.style.display = 'none';
+    }
+});
+
+
+debugMenu.addEventListener('mousedown', (e) => {
+    offsetX = e.clientX - debugMenu.getBoundingClientRect().left;
+    offsetY = e.clientY - debugMenu.getBoundingClientRect().top;
+    
+    function onMouseMove(e) {
+        debugMenu.style.left = `${e.clientX - offsetX}px`;
+        debugMenu.style.top = `${e.clientY - offsetY}px`;
+    }
+
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    // ドラッグ中のイベントリスナーを追加
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+});
+
+
+let DMcam = debugMenu.querySelector('.cam');
+let DMdrawCard = debugMenu.querySelector('.draw');
+let DMdrawCard_name = debugMenu.querySelector('.draw-name');
+let DMdrawCard_suit = debugMenu.querySelector('.draw-suit');
+let DMdrawCard_prop = debugMenu.querySelector('.draw-prop');
+let DMdrawCard_attend = debugMenu.querySelector('.draw-attend');
+let DMdrawCard_melted = debugMenu.querySelector('.draw-melted');
+let DMdrawCard_elseed = debugMenu.querySelector('.draw-elseed');
+let DMmeltCard = debugMenu.querySelector('.melt');
+let DMmeltCard_id = debugMenu.querySelector('.melt-id');
+
+Object.keys(Cards).forEach(name => {
+    DMdrawCard_name.options.add(new Option(name, name));
+})
+
+DMdrawCard.addEventListener('click', () => {
+    let Dcam = DMcam.value;
+    let Dname = DMdrawCard_name.value;
+    let Dsuit = DMdrawCard_suit.value;
+
+    if(!Dname || !Dsuit) return;
+
+    let Dprop = DMdrawCard_prop.value == '' ? undefined : DMdrawCard_prop.value;
+    let Dattend = DMdrawCard_attend.value == '' ? undefined : DMdrawCard_attend.value;
+    let Dmelted = DMdrawCard_melted.value == '' ? undefined : DMdrawCard_melted.value;
+    let Delseed = DMdrawCard_elseed.value == '' ? undefined : DMdrawCard_elseed.value;
+
+    cardDraw(Dcam, Dname, Dsuit, Dprop, Dattend, Dmelted, Delseed);
+})
+DMmeltCard.addEventListener('click', () => {
+    let Dcam = DMcam.value;
+    let Did = DMmeltCard_id.value;
+
+    placeDOM = document.querySelector(`#cardPlaces ${Dcam}`)
+    children = Array.from(placeDOM.children);
+    
+    cardMelt(Dcam, children[Did]);
+})
+//#endregion
 
 
 function waitButton(){
@@ -1123,19 +1291,17 @@ async function reset() {
 async function allMelt(){
     for (let cam of ['player', 'dealer']) {
         let DOM = document.querySelector(`#cardPlaces .${cam}`);
-        console.log(`${cam}、行きま～す`);
     
         let meltingTasks = [];
     
         let i = 0;
         while (humans[cam].cards.length > 0) {
-            console.log(`ただ今のレングスは～～？ => ${humans[cam].cards.length}`);
             const card = humans[cam].cards.shift(); // 先頭から1枚ずつ
             if (hasProp(card, 'vanish') == 0) {
                 await cardMelt(cam, card);
             }
 
-            meltingTasks.push(cardMelting(cam, DOM.children[i]));
+            meltingTasks.push(cardAMelting(cam, DOM.children[i]));
 
             i++;
         }

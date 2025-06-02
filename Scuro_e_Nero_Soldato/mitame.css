@@ -6,6 +6,30 @@
 html{
     margin: -8px;
 }
+
+#debug .menu{
+    display: none;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    background-color: #ddf9ffe2;
+    color: #242424;
+    text-align: left;
+    padding: 5px;
+    z-index: 255;
+}
+#debug .div{
+    display: none;
+    position: fixed;
+    pointer-events: none;
+    background-color: #363636e2;
+    color: #f0f8ff;
+    text-align: left;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 256;
+}
+
 #gameArea{
     display:flex;
     flex-direction: row;
