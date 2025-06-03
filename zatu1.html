@@ -1,51 +1,16 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
+    <title>なんかやる日曜日(大嘘)</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ドラッグ可能な固定要素</title>
-    <style>
-        #draggable {
-            position: fixed;
-            width: 100px;
-            height: 100px;
-            background-color: lightblue;
-            border: 1px solid #000;
-            cursor: move;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="https://pyscript.net/releases/2022.12.1/pyscript.css" />
+    <script defer src="https://pyscript.net/releases/2022.12.1/pyscript.js"></script>
 </head>
 <body>
-
-    <div id="draggable">ドラッグしてね</div>
-
-    <script>
-        const draggable = document.getElementById('draggable');
-
-        let offsetX, offsetY;
-
-          draggable.addEventListener('mousedown', (e) => {
-              // マウスの位置を取得
-              offsetX = e.clientX - draggable.getBoundingClientRect().left;
-              offsetY = e.clientY - draggable.getBoundingClientRect().top;
-
-              // ドラッグ中のイベントリスナーを追加
-              document.addEventListener('mousemove', onMouseMove);
-              document.addEventListener('mouseup', onMouseUp);
-          });
-
-          function onMouseMove(e) {
-              // 新しい位置を計算
-              draggable.style.left = `${e.clientX - offsetX}px`;
-              draggable.style.top = `${e.clientY - offsetY}px`;
-          }
-
-          function onMouseUp() {
-              // ドラッグを終了
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-          }
-    </script>
-
+    <h1>PyScript REPL</h1>
+    <py-repl auto-generate="true">
+    # press Shift+Enter to execute
+    </py-repl>
 </body>
 </html>

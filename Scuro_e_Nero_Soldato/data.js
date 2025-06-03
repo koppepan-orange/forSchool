@@ -140,6 +140,7 @@ let Cards = {
         id:'strength',
         val:0,
         kind:'tarot',
+        elseed:[[['bursted'],['cardMelt','me','last']],[['bursted'],['cardDraw','me','A','♡']],[['bursted'],['cardMelt','me','this']]],
         description:'このカードが自分の場にあるならば、<br>一回バーストしそうになっても<br>そのカードを♡のAに変えてくれる<br>力でねじ伏せる..ってイメージ<br>絵が酷いね',
         rare:'UR',
         buyable:1,
@@ -155,8 +156,8 @@ let Cards = {
         buyable:1
     },
     'death':{
-        name:'strength',
-        id:'strength',
+        name:'death',
+        id:'death',
         val:0,
         kind:'tarot',
         //attend:[['results','death']],
@@ -248,6 +249,142 @@ let Buffs = {
         description:'防御力の基礎量を下げる。'
     }
 }
+
+let Friends = {
+    '飛花レイル':{
+       ruby:'ひか れいる',
+       name:'飛花レイル',
+       belongto:'', //所属
+       rare:3,
+       description:``, 
+       comment:``,
+       N:0,
+       S:0,
+       E:0,
+       P:0,
+    },
+    '憚羅レイル':{
+       ruby:'はばから れいる',
+       name:'憚羅レイル',
+       rare:3
+    },
+    
+    '裏花夜淡':{
+        ruby:'うらばな よだん',
+        name:'裏花夜淡',
+        comment:'余談しか話さない。余談をするときに現れる。<br>珠算四段を保有しているため"四段の夜淡の余談"と呼ばれることも',
+        inviteCut:'もしや私の出番ですか！？',
+        inviteSer:'こ〜んちは〜！！裏花夜淡です！！！<br>"たん"じゃなくて"だん"ですからね！<br>ちなみに、作者は一番私が好きらしいですよ～！',
+        rare:3
+    },
+
+    '泡沫アリア':{
+       ruby:'うたかた ありあ',
+       name:'泡沫アリア',
+       belongto:'',
+       rare:2,
+       description:``, 
+       comment:``,
+       N:0,
+       S:0,
+       E:0,
+       P:0,
+    },
+    'メメント・ラメント':{
+       ruby:'めめんと らめんと',
+       name:'メメント・ラメント',
+       rare:3
+    },
+
+    '暮花ロマニア':{
+        ruby:'ぼか ろまにあ',
+        name:'暮花ロマニア',
+        rare:3
+    },
+    '道遊城京':{
+        ruby:'どうゆう じょうきょう',
+        name:'道遊城京',
+        belongto:'創生黎明の原野',
+        inviteCut:'えっと..つまりどゆこと....？',
+        inviteSer:'初めまして、城京と言います...<br>えと、私はこれから何をすれば良いのでしょう....?',
+        rare:3
+    },
+    '刻池千田':{
+        ruby:'こくち せんでん',
+        name:'刻池千田',
+        rare:2
+    },
+    'エクレア・アルニワール':{
+        ruby:'えくれあ あるにわーる',
+        name:'エクレア・アルニワール',
+        rare:1
+    },
+    '藍針 久雑斗':{
+        ruby:'あいしん くざっと',
+        name:'藍針 久雑斗',
+        rare:3
+    },
+    '丹路宰聖':{
+        ruby:'あかじ ざいせい',
+        name:'丹路宰聖',
+        rare:1
+    },
+
+    
+    '空寄葉豆':{
+        ruby:'からより はもか',
+        name:'空寄葉豆',
+        rare:2
+    },
+    '時馬立禾':{
+        ruby:'ときば たてのぎ',
+        name:'時馬立禾',
+        rare:3
+    },
+ 
+    '小安見ニーク':{
+       ruby:'おやすみ にーく',
+       name:'小安見ニーク',
+       rare:3,
+    },
+    '面戸ガリヤ':{
+       ruby:'めんど がりや',
+       name:'面戸ガリヤ',
+       rare: 2,
+    },
+    '伊辣キキ':{
+       ruby:'いらつ きき',
+       name:'伊辣キキ',
+       rare: 2,
+    },
+ 
+    '息留河鹿':{
+       ruby:'いきる かしか',
+       name:'息留 河鹿',
+       rare: 1
+    },
+    'ジャンネ マジデ':{
+       ruby:'じゃんね まじで',
+       name:'ジャンネ マジデ',
+       rare:1
+    },
+    '手斧バス':{
+       ruby:'ておの ばす',
+       name:'手斧バス',
+       rare:1
+    },
+ 
+    '久須田和伊男':{
+       ruby:'くすた わいお',
+       name:'久須田 和伊男',
+       rare:1,
+    },
+    'ゴードン・ソージィ':{
+       ruby:'ごーどん そーじぃ',
+       name:'ゴードン・ソージィ',
+       rare:3
+    }
+ }
 //#endregion
 //#region Dealerのやつとかレンタルデッキ構成とか
 let Dealers = {
