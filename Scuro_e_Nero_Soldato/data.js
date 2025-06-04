@@ -140,7 +140,7 @@ let Cards = {
         id:'strength',
         val:0,
         kind:'tarot',
-        elseed:[[['bursted'],['cardMelt','me','last']],[['bursted'],['cardDraw','me','A','♡']],[['bursted'],['cardMelt','me','this']]],
+        // elseed:[[['bursted'],['cardMelt','me','last']],[['bursted'],['cardDraw','me','A','♡']],[['bursted'],['cardMelt','me','this']]],
         description:'このカードが自分の場にあるならば、<br>一回バーストしそうになっても<br>そのカードを♡のAに変えてくれる<br>力でねじ伏せる..ってイメージ<br>絵が酷いね',
         rare:'UR',
         buyable:1,
@@ -170,7 +170,7 @@ let Cards = {
         id:'emperor',
         val:0,
         kind:'tarot',
-        // attend:[['results','emperor']],
+        attend:[['results','emperor']],
         description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が負けていたならば、<br>その勝利を奪い自分の攻撃力として攻撃する。<br>これが皇帝だよ',
         rare:'UR',
         buyable:1

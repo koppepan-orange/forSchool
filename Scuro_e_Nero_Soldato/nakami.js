@@ -225,7 +225,6 @@ let humans = {
     }
 }
 
-
 function cocGacha(fixRare = 0){
     let list = Object.keys(Friends).map(a => Friends[a]);
     
@@ -530,7 +529,8 @@ async function cardDraw(cam, name = null, suit = null, prop, attend, melted, els
     let isburst = await isBurst(cam);
     if(isburst) return 1;
 
-    await hasAttend(card);
+    let res = await hasAttend(card);
+    if(res) return 1;
 
     return 0
 }
@@ -627,7 +627,7 @@ async function cardMelt(cam, card, without){
         return;
     }else{
         cam = camS(card.cam, cam);
-        console.log(`${cocGacha()}「camは${cam}になったぜ～～」`)
+        // console.log(`${cocGacha()}「camは${cam}になったぜ～～」`)
     }
     
     let cardDiv = searchDomCard(cam, card.id);
@@ -638,7 +638,7 @@ async function cardMelt(cam, card, without){
             let [functionName, ...args] = thing;
             let result = await executions[functionName](...args);
         }
-    }
+    };
     
     if(!without) await cardAMelting(cam, cardDiv);
 
@@ -706,9 +706,8 @@ async function cardAMelting(cam, cardDiv){
     if(cam == 'dealer') toRect = document.querySelector('#else .info .spada').getBoundingClientRect();
 
     let rare = arrayGacha(['ま、嘘なんですけどね','ねずっちでもあります！！！！！',''],[3,17,80]);
-    
     // console.log(cam+'です！！！！' + rare)
-    if(rare == 'ま、嘘なんですけどね') console.log(`${cocGacha(1)}「酒飲みてぇ～」`);
+    if(rare == 'ま、嘘なんですけどね') console.log(`${cocGacha(3)}「酒飲みてぇ～」`);
 
     let cloneKun = cardDiv.cloneNode(true);
     cloneKun.classList.add('clone');
@@ -978,25 +977,35 @@ async function hasMelted(card){
 
     return 1;
 }
-async function hasElseed(card,event){
-    let attributi = card.melted;
+async function hasElseed(card, event){
+    let attributi = card.elseed;
 
     //elseed:[[['endRound'],['buffAdd','me','power-up',1,1]]],
 
     if(attributi.length <= 0) return 0;
 
     for(let a of attributi){
+        console.log(cocGacha());
         if(a[0][0] == event){
+            console.log('お前誰？')
             await delay(1000);
-            await execute(a[1]);
-        }
-    }
+            let res = await execute(a[1]);
+            if(res) return 1;
+        };
+    };
 
-    return 1;
+    return 0;
 }
 
 async function letsElseed(event){
+    let queue = ['player','dealer'];
     
+    for(let cam of queue){
+        for(let card of humans[cam].cards){
+            let res = await hasElseed(card, event);
+            if(res) return 1;
+        }
+    }
 }
 
 async function executeAttributo(card, type, name){
@@ -1073,7 +1082,7 @@ async function results(code = 'none'){
     //相手バーストの自分soldatoだったら42っていう激ヤバなダメージになるわけだし いややばくね？それ
 
     round += 1;
-    if(res) reset(); //もし死んでいないならば、続行(reset)
+    if(!res) reset(); //もし死んでいないならば、続行(reset)
 }
 
 //ステータスを増減させるやつ increase/decreaseのindec
@@ -1109,7 +1118,7 @@ async function buffAdd(cam, buff, val, time){
 }
 
 async function damage(cam, dmg){
-    if(!cam) return 1;
+    if(!cam) return 0;
     let attacker = humans[cam == 'player' ? 'dealer' : 'player'];
     let defender = humans[cam];
 
@@ -1175,15 +1184,15 @@ async function damage(cam, dmg){
 
     if(humans['player'].hp == 0){
         outcome('dealer');
-        return 0;
+        return 1;
     };
 
     if(humans['dealer'].hp == 0){
         outcome('player');
-        return 0;
+        return 1;
     };
     
-    return 1; //どちらかが死んだならば処理を停止するため0を、そうでなければ1をお返し申す
+    return 0; //どちらかが死んだならば処理を停止するため0を、そうでなければ1をお返し申す
 }
 
 //負け/勝ちのセリフの表示、次のバトルへ
@@ -1249,7 +1258,6 @@ document.addEventListener('mouseover', (e) => {
         debugDiv.style.display = 'block';
     }
 });
-
 document.addEventListener('mouseout', (e) => {
     if (!debugging) return;
 
@@ -1259,7 +1267,6 @@ document.addEventListener('mouseout', (e) => {
         debugDiv.style.display = 'none';
     }
 });
-
 
 
 debugMenu.addEventListener('mousedown', (e) => {
@@ -1292,6 +1299,10 @@ let DMdrawCard_melted = debugMenu.querySelector('.draw-melted');
 let DMdrawCard_elseed = debugMenu.querySelector('.draw-elseed');
 let DMmeltCard = debugMenu.querySelector('.melt');
 let DMmeltCard_id = debugMenu.querySelector('.melt-id');
+let DMaCard = debugMenu.querySelector('.a');
+let DMaCard_id = debugMenu.querySelector('.a-id');
+let DMaCard_name = debugMenu.querySelector('.a-name');
+
 
 Object.keys(Cards).forEach(name => {
     DMdrawCard_name.options.add(new Option(name, name));
@@ -1310,14 +1321,21 @@ DMdrawCard.addEventListener('click', () => {
     let Delseed = DMdrawCard_elseed.value == '' ? undefined : DMdrawCard_elseed.value;
 
     cardDraw(Dcam, Dname, Dsuit, Dprop, Dattend, Dmelted, Delseed);
+    tekiou();
 })
 DMmeltCard.addEventListener('click', () => {
     let Dcam = DMcam.value;
     let Did = DMmeltCard_id.value;
 
-    let child = searchDomCard(Dcam, Did);
+    cardMelt(Dcam, humans[Dcam].cards[Did]);
+    tekiou();
+})
+DMaCard.addEventListener('click', () => {
+    let Dcam = DMcam.value;
+    let Did = DMaCard_id.value;
     
-    cardMelt(Dcam, children[Did]);
+    let animations = {cardAJump,cardAQuake}
+    animations[DMaCard_name.value](searchDomCard(Dcam, Did));
 })
 //#endregion
 
@@ -1365,7 +1383,6 @@ async function allMelt(){
         await Promise.all([...meltingTasks]);
     }
 }
-
 
 async function battleStart(){
     turn = 0;
