@@ -54,6 +54,11 @@
 
     let direction = new THREE.Vector3(); //direction == 向いてる角度
 
+    // プレイヤーモデル（簡単な例としてボックス）
+    const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
+    const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+    const playerMesh = new THREE.Mesh(playerGeometry, playerMaterial);
+    scene.add(playerMesh);
 
     document.body.addEventListener("click", () => {
         document.body.requestPointerLock();
@@ -130,9 +135,11 @@
                 break;
             case 'n':
                 camera.fov -= 5;
+                camera.updateProjectionMatrix()
                 break;
             case 'm':
                 camera.fov += 5;
+                camera.updateProjectionMatrix()
                 break;
             // case 'q':
             //     camera.getWorldDirection(direction);  // カメラの向いている方向を取得
@@ -193,25 +200,12 @@
 
     const touchableObjects = [];
 
-    let rooken;
     const loader = new THREE.OBJLoader();
-    loader.load('model.obj', function (obj) {
-        obj.traverse((child) => {
-            if (child.isMesh) {
-                child.userData.touchable = true;
-                child.geometry.computeBoundingBox(); // boundingBox を計算
-                touchableObjects.push(child);
-            }
-        });
-        scene.add(obj);
-        rooken = obj
-    });
-
     
-    let backGrounds = [];
-    let BackGround = [
+    let Objects = [];
+    let ObjList = [
         {
-            name:'ru-kun',
+            name:'ru_kun',
             x:0,
             y:0,
             z:3,
@@ -235,14 +229,26 @@
             z:10,
         },
         {
+            name:'royalblend',
+            x:0,
+            y:3,
+            z:-7,
+        },
+        {
             name:'room',
             x:30,
             y:0,
             z:0,
+        },
+        {
+            name:'world',
+            x:0,
+            y:-50,
+            z:0,
         }
     ];
     const mtlLoader = new THREE.MTLLoader();
-    BackGround.forEach((back) => {
+    ObjList.forEach((back) => {
         mtlLoader.load(`${back.name}.mtl`, (materials) => {
             materials.preload();
 
@@ -258,6 +264,8 @@
                     }
                 });
                 obj.position.set(back.x, back.y, back.z);
+                Objects[back.name] = obj;
+                
                 scene.add(obj);
             });
         });
@@ -372,7 +380,13 @@
 
     function animate() {
         requestAnimationFrame(animate);
-        if(rooken)rooken.rotation.y += 0.01; // 右回転
+        if(Objects["ru_kun"]) Objects["ru_kun"].rotation.y += 0.01; // 右回転
+
+        // カメラの位置を取得
+        playerMesh.position.copy(camera.position);
+
+        // モデルの向きをカメラと同じにする（または調整する）
+        playerMesh.quaternion.copy(camera.quaternion);
         updateBullets();
         updateCameraMovement();
         renderer.render(scene, camera);

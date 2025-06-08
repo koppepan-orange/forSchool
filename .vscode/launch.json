@@ -23,6 +23,12 @@
             "file": "Scuro_e_Nero_Soldato/index.html"
         },
         {
+            "type": "chrome",
+            "request": "launch",
+            "name": "race_mac",
+            "file": "race/index.html"
+        },
+        {
             "type": "debugpy",
             "name": "from now on(python)",
             "request": "launch",

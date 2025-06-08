@@ -140,7 +140,7 @@ let Cards = {
         id:'strength',
         val:0,
         kind:'tarot',
-        // elseed:[[['bursted'],['cardMelt','me','last']],[['bursted'],['cardDraw','me','A','♡']],[['bursted'],['cardMelt','me','this']]],
+        elseed:[[['bursted','me'],['cardMelt','me','me_last']],[['bursted','me'],['cardMelt','me','this']],[['bursted','me'],['cardDraw','me','A','♡']]],
         description:'このカードが自分の場にあるならば、<br>一回バーストしそうになっても<br>そのカードを♡のAに変えてくれる<br>力でねじ伏せる..ってイメージ<br>絵が酷いね',
         rare:'UR',
         buyable:1,
@@ -160,7 +160,7 @@ let Cards = {
         id:'death',
         val:0,
         kind:'tarot',
-        //attend:[['results','death']],
+        attend:[['results','death','me']],
         description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が勝っていたならば、<br>その勝利を奪われ相手の攻撃力として攻撃される。',
         rare:'UR',
         buyable:1,
@@ -170,7 +170,7 @@ let Cards = {
         id:'emperor',
         val:0,
         kind:'tarot',
-        attend:[['results','emperor']],
+        attend:[['results','emperor','me']],
         description:'このカードが場に出たとき、戦が強制的に開始します<br>もし自分が負けていたならば、<br>その勝利を奪い自分の攻撃力として攻撃する。<br>これが皇帝だよ',
         rare:'UR',
         buyable:1
@@ -180,6 +180,7 @@ let Cards = {
         id:'empress',
         val:0,
         kind:'tarot',
+        elseed:[[['endRound'],['heal','me','me_val']]],
         description:'ラウンドが終了したときにこのカードが場にあるプレイヤーは、<br>バーストしていなければ自身の値分回復する。<br>女帝..4つくらいの国を統一したエリザベス女王とか？<br>懐かしいね～～テラリア',
         rare:'UR',
         buyable:1
@@ -384,7 +385,7 @@ let Friends = {
        name:'ゴードン・ソージィ',
        rare:3
     }
- }
+};
 //#endregion
 //#region Dealerのやつとかレンタルデッキ構成とか
 let Dealers = {

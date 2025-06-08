@@ -14,11 +14,11 @@ async function NicoNicoText(mes){
     document.querySelector('body').appendChild(newDiv);
     //let speed = (Math.random()*100+1)*0.1;
     //let speed = mes.toString().length*2 
-    speed = 4;
+    speed = 2;
     for(let i = 0; window.innerWidth > i*speed; i++){
         let val = i*speed;
         newDiv.style.right = `${val}px`
-        await delay(10);
+        await delay(5);
     }
     newDiv.remove();
 };
@@ -199,28 +199,35 @@ function addlog(text){
 //#endregion
 let humans = {
     player:{
-        name: "player",
+        cam: 'player',
+        id: 'player',
+        name: 'player',
+        value: 0,
+        cards: [],
         deck: [],
         melt: [],
-        cards: [],
-        value: 0,
         standed: 0,
+        atk: 0,
+        def: 0,
+        shl: 0,
         hp: 40,
         maxhp: 40,
-        shl: 0,
         buffs: [],
     },
     dealer:{
-        name: "コッペ",
-        coinRate: 1,
+        cam: 'dealer',
+        id: 'コッペ', //dealername
+        name: 'コッペ', //dealername
+        value: 0,
+        cards: [],
         deck: [],
         melt: [],
-        cards: [],
-        value: 0,
         standed: 0,
-        hp: 20,
-        maxhp: 20,
+        atk: 0,
+        def: 0,
         shl: 0,
+        hp: 1, //nameData.maxhp
+        maxhp: 1, //nameData.maxhp
         buffs: [],
     }
 }
@@ -230,13 +237,13 @@ function cocGacha(fixRare = 0){
     
     let p3 = 3, p2 = 17, p1 = 80;
     if(probability(7) && !fixRare){
-        console.log('確変！！！！！');
+        // console.log('確変！！！！！');
         p3 = 6, p2 = 24, p1 = 70;
     }
     
     let rare = arrayGacha([3,2,1],[p3,p2,p1]);
     if(fixRare){
-        console.log(`☆${fixRare}確定チケットを消費しました！`);
+        // console.log(`☆${fixRare}確定チケットを消費しました！`);
         rare = fixRare;
     };
 
@@ -250,7 +257,8 @@ function re(cam){
     let res = cam == 'player' ? 'dealer' : 'player';
     return res;
 }
-function camS(cam, code){
+function camS(card, code){
+    let cam = '';
     switch(code){
         case 'me': cam = card.cam; break;
         case 'yo': cam = re(card.cam); break;
@@ -260,16 +268,55 @@ function camS(cam, code){
     
     return cam;
 }
+function trans(card, arr){
+    for(let i = 0; i < arr.length; i++){
+        switch(arr[i]){
+            case 'me':
+            case 'yo':
+            case 'rn':{
+                arr[i] = camS(card, arr[i]);
+                break;
+            };
+            case 'this':{
+                arr[i] = card;
+                break;
+            };
+            case 'me_fast':
+            case 'yo_fast':
+            case 'rn_fast':{
+                let cam = camS(card, arr[i].substring(0, 2));
+                arr[i] = humans[cam].cards[0];
+                break;
+            }
+            case 'me_last':
+            case 'yo_last':
+            case 'rn_last':{
+                let cam = camS(card, arr[i].substring(0, 2));
+                arr[i] = humans[cam].cards[humans[cam].cards.length - 1];
+                break;
+            }
+            case 'me_val':
+            case 'yo_val':
+            case 'rn_val':{
+                let cam = camS(card, arr[i].substring(0, 2));
+                arr[i] = humans[cam].value;
+                break;
+            };
+        }
+        
+    }
+    return arr;
+}
 
 let coin = 0;
 
 let floor = 1;
 let stage = 1; //訳: 1-1
 let battle = 1; //if バトル中(バトル中かどうか)
-let round = 0;
-let turn = 0;
+let round = 1;
+let turn = 1;
 
-let piano = 0;
+let piano = 0;  
 
 let spada = 21;
 
@@ -312,6 +359,7 @@ function tekiou(){
         let children = Array.from(placeDOM.children);
         children.forEach((c,i) => {
             let ko = humans[cam].cards[i]
+            if(!ko)return;
             c.setAttribute('data-id', i)
             c.setAttribute('data-description', `
                 "${ko.name}" (suit:${ko.suit}) (id:${ko.id} cam:${ko.cam})<br>
@@ -520,11 +568,10 @@ async function cardDraw(cam, name = null, suit = null, prop, attend, melted, els
     cardAdd(cam, 'cards', card)
 
     let cardDiv = cardMake(card);
-    cardAPlace(cam, cardDiv)
+    await cardAPlace(cam, cardDiv)
 
     tekiou();
 
-    await delay(750)
 
     let isburst = await isBurst(cam);
     if(isburst) return 1;
@@ -621,33 +668,49 @@ function searchDomCard(cam, id){
 }
 
 //Divになっているカードを置き場からメルトに置く動き
-async function cardMelt(cam, card, without){
+async function cardMelt(cam, card, without, edOccur){
     if(cam == 'all'){
         await allMelt();
         return;
     }else{
-        cam = camS(card.cam, cam);
-        // console.log(`${cocGacha()}「camは${cam}になったぜ～～」`)
+        cam = camS(card, cam);
     }
+
+    let raison = humans[cam].cards.indexOf(card);
+    let ran1 = random(1, 10), ran2 = random(0, 9);
+    // console.log(raison < 0 ? `${cocGacha()}「${ran1}${raison}は${ran2}やで${ran2 + 1 == ran1 ? '(奇跡)' : ''}」` : `${cocGacha()}「${raison}..まあ1000の位で四捨五入したら0か」`);
+    if(raison >= 0){
+        // console.log('消し去って！青と白のセッション 太陽さんなら怖くな〜い');
+        humans[cam].cards.splice(humans[cam].cards.indexOf(card), 1);
+    }
+
+    cardAdd(cam, 'melt', card)
     
     let cardDiv = searchDomCard(cam, card.id);
     
-    if(card.melted.length != 0){
-        for(let thing of card.melted){
-            await cardAJump(cardDiv)
-            let [functionName, ...args] = thing;
-            let result = await executions[functionName](...args);
-        }
-    };
+    let res = edOccur ? await hasMelted(card) : 0;
+    if(res) return 1;
     
     if(!without) await cardAMelting(cam, cardDiv);
-
-    cardAdd(cam, 'melt', card)
 };
 
 //カードを相手の場に送ったりする動き
 async function cardSend(cam, card){
-    
+    if(cam == 'all'){
+        //await allSend();
+        console.error('まだないぜ〜〜')
+        return;
+    }else{
+        cam = camS(card, cam);
+    }
+
+    let cardDiv = searchDomCard(cam, card.id);
+    await cardASending(cam, cardDiv);
+
+    cardAdd(cam, 'cards', card)
+    cardMelt(cam, card, 1, 1);
+
+    return 0
 }
 
 //カードを相手と交換する動き
@@ -659,12 +722,12 @@ async function cardTrade(cam, card){
         humans.player.cards = humans.dealer.cards;
         humans.dealer.cards = temp;
 
-        return 1;
+        return 0;
     }
 }
 
 //#region Divになったカードを動かす"A"達
-function cardAPlace(cam, cardDiv){
+async function cardAPlace(cam, cardDiv){
     document.querySelector(`#cardPlaces .${cam}`).appendChild(cardDiv);
     
     let fromRect = null;
@@ -679,6 +742,7 @@ function cardAPlace(cam, cardDiv){
     cloneKun.style.top = `${fromRect.top + window.scrollY}px`;
     cloneKun.style.width = `${toRect.width}px`;
     cloneKun.style.height = `${toRect.height}px`;
+    cloneKun.style.transition = 'left 0.5s ease, top 0.5s ease';
 
     document.body.appendChild(cloneKun);
 
@@ -691,10 +755,10 @@ function cardAPlace(cam, cardDiv){
         cloneKun.style.top = `${toRect.top + window.scrollY}px`;
     });
     
-    cloneKun.addEventListener('transitionend', () => {
-        cloneKun.remove();
-        cardDiv.classList.remove('invisibility');
-    });
+    await delay(500)
+
+    cloneKun.remove();
+    cardDiv.classList.remove('invisibility');
 
     return 1;
 }
@@ -894,7 +958,9 @@ hitButton.addEventListener("click", async function (){
 
         if(!dealer.standed){
             res = await cardDraw('dealer');
-            if(dealer.value >= 17) dealer.standed = 1;
+            if(res) return 1;
+
+            if(dealer.value >= 17) res = await stand('dealer');
             if(res) return 1;
         }
     }
@@ -905,6 +971,7 @@ hitButton.addEventListener("click", async function (){
     resetButton();
 });
 
+
 standButton.addEventListener("click", async function (){
     if(!actable) return;
     actable = 0;
@@ -913,7 +980,10 @@ standButton.addEventListener("click", async function (){
     let player = humans['player'];
     let dealer = humans['dealer'];
 
-    player.standed = 1;
+    let res = await stand('player');
+    if(res)return;
+
+    await delay(1000);
 
     if(!dealer.standed){
         do{
@@ -924,7 +994,8 @@ standButton.addEventListener("click", async function (){
             if(res) return 1
         }while(humans["dealer"].value < 17);
 
-        dealer.standed = 1;
+        let res = await stand('dealer');
+        if(res)return;
     }
 
     await delay(1000);
@@ -955,27 +1026,33 @@ function checkAttributo(card, type, name, num){
 
 async function hasAttend(card){
     let attributi = card.attend;
-    
+
     if(attributi.length <= 0) return 0;
 
-    for (const a of attributi) {
+    for(let a of attributi){
+        console.log(`${cocGacha()}「あってんど..うアリスってね〜〜？？」`)
         await delay(1000);
-        await execute(a);
+        a = trans(card, a);
+        let res = await execute(a);
+        if(res) return 1;
     }
 
-    return 1;
+    return 0;
 }
 async function hasMelted(card){
     let attributi = card.melted;
     
+
     if(attributi.length <= 0) return 0;
 
     for (const a of attributi){
+        console.log(`${cocGacha()}「メ〜ルト 熔けてしまいそう〜〜〜」`);
         await delay(1000);
+        a = trans(card, a);
         await execute(a);
     }
 
-    return 1;
+    return 0;
 }
 async function hasElseed(card, event){
     let attributi = card.elseed;
@@ -985,17 +1062,43 @@ async function hasElseed(card, event){
     if(attributi.length <= 0) return 0;
 
     for(let a of attributi){
-        console.log(cocGacha());
-        if(a[0][0] == event){
-            console.log('お前誰？')
+        console.log(`「条件文:[${a[0]}] 実行文:[${a[1]}]」`)
+        a[0] = trans(card, a[0]);
+        if(checkElseed(a[0], event)){
+            console.log(`${cocGacha()}「お前誰？」`)
             await delay(1000);
+            a[1] = trans(card, a[1]);
+            console.log(a)
             let res = await execute(a[1]);
+            // tekiou();
+            console.log(res)
             if(res) return 1;
         };
     };
 
     return 0;
 }
+
+function checkElseed(arr, event){
+    if(arr[0] != event) return 0;
+
+    let checkList = {bursted, endRound};
+    function checkExecute(arr){
+        let [functionName, ...args] = arr;
+        if(!checkList[functionName]) console.error(`${event}はcheckListに存在しないぜ〜〜〜`);
+        return checkList[functionName](...args);
+    }
+    
+    function bursted(cam){
+        if(humans[cam].value > spada) return 1;
+        return 0;
+    }
+    function endRound(){
+        return 1;
+    }
+
+    return checkExecute(arr);
+};
 
 async function letsElseed(event){
     let queue = ['player','dealer'];
@@ -1017,46 +1120,66 @@ async function executeAttributo(card, type, name){
     return 1;
 }
 
-let executions = {cardDraw, cardMelt, cardTrade, cardSend}
+let executions = {cardDraw, cardMelt, cardTrade, cardSend, results, buffAdd, damage, heal}
 async function execute(arr){
     let [functionName, ...args] = arr;
-    await executions[functionName](...args);
+    if(!executions[functionName]) console.error(`${functionName}はcheckListに存在しないぜ〜〜〜`);
+    let res = await executions[functionName](...args);
+
+    return res;
 }
 //#endregion
 
+async function stand(cam){
+    humans[cam].standed = 1;
+
+    let code = cam == 'player' ? 'P' : 'D';
+    let standeden = document.createElement('div');
+    standeden.className = 'standeden';
+    let standedenImg = document.createElement('img');
+    standedenImg.src = `assets/systems/standed${code}.png`;
+    standedenImg.alt = 'standeden(すたんででん)';
+    standeden.appendChild(standedenImg);
+    document.querySelector(`#UIs .${cam} .health`).appendChild(standeden);
+
+    let res = await letsElseed('standed');
+    if(res) return 1;
+
+    return 0;
+}
 async function isBurst(cam){
     let human = humans[cam];
 
     tekiou();
 
+    // if(human.value > spada)console.log(`dealer:${humans.dealer.value} vs player:${humans.player.value}`);
     if(human.value > spada){
         console.log(`${cam}:「burstしたぜぇ」`)
         //when burst, suddenly lose
-        for(let card of human.cards){
-            if(card.name == 'strength'){
-                let disCard = human.cards.pop;
-                await cardMelt(cam, 'melt', disCard);
 
-                await cardDraw(cam, 'A', '♡', [['vanish']]); //vanish..つまりは消滅 そのラウンドの終了時meltに行かず消える
-
-                return 0
-                //もしcardsの中にstrength(tarot,UR)があるのならば、今引いたカードをA(normal,N)に変化させる～って動き
-                //スツ金みたいな感じにさせたい
-            }
+        let res = await letsElseed('bursted');
+        if(res) return 0;
+        if(human.value <= spada){
+            console.log('って、変わっとるやないか〜い！')
+            return 0;
         }
+        //console.log(`☆ dealer:${humans.dealer.value} vs player:${humans.player.value} ☆`);
+
+        tekiou();
+        
         console.log(`${cam}:「ワイルドだろぉ？」`)
         human.standed = 1;
 
-        results(cam);
+        //おそらくスレンダーマン的な、別の場所で同時に二つの動きが進行している感じになってる。どーにかしといて
+
+        results('burst', cam);
         return 1
     }else{
         return 0
     }
 }
 
-//勝敗、ドローか、バーストかどうか whetherですね
-async function results(code = 'none'){
-    //codeが${cam}ならば、${cam}がburstしたということ。!${cam}のvalueをそのままdamage
+async function results(code = 'none', o = 0){ //o = 目的語
     let player = humans["player"];
     let dealer = humans["dealer"];
     
@@ -1066,24 +1189,49 @@ async function results(code = 'none'){
     tekiou();
     console.log(`dealer:${dealer.value} player:${player.value}`);
 
-    await letsElseed('endRound')
+    await letsElseed('endRound');
 
     let res = 1;
-    if(code == 'none'){
-        let difference = player.value - dealer.value;
-        if(difference > 0) res = await damage('dealer', difference)
-        else if(difference < 0) res = await damage('player', -difference)
-        else res = await damage(0, 0);
-    }else{
-        let attackerCam = code == 'player' ? 'dealer' : 'player';
-        res = await damage(code, humans[attackerCam].value);
+    console.log(`${cocGacha()}「${code}だよ」`)
+    switch(code){       
+        case 'none':{
+            let difference = player.value - dealer.value;
+            if(difference > 0) res = await damage('dealer', difference)
+            else if(difference < 0) res = await damage('player', -difference)
+            else res = await damage(0, 0);
+            break;
+        };
+        case 'burst':{
+            let attackerCam = o == 'player' ? 'dealer' : 'player';
+            res = await damage(o, humans[attackerCam].value);
+            break;
+        };
+        case 'emperor': {
+            let diff = humans[o].value - humans[re(o)].value;
+            if (diff > 0) {
+                //負けててもその差で殴る。勝ってたらそのままダメ
+                res = await damage(re(o), diff);
+            } else {
+                res = await damage(re(o), -diff);
+            }
+            break;
+        }
+        case 'death': {
+            let diff = humans[o].value - humans[re(o)].value;
+            if(diff > 0){
+                //勝ってても、その差で自分が殴られる。負けてたら0ダメ。
+                res = await damage(o, diff);
+            }else{
+                res = await damage(o, -diff);
+            }
+            break;
+        }
     }
-    //soldatoならばダメージ二倍とかあってもいいかも
-    //相手バーストの自分soldatoだったら42っていう激ヤバなダメージになるわけだし いややばくね？それ
 
-    round += 1;
-    if(!res) reset(); //もし死んでいないならば、続行(reset)
+    
+    if(!res) reset(); //もし"死んでいない"ならば、続行(reset) ここだけ!resですまない
 }
+
 
 //ステータスを増減させるやつ increase/decreaseのindec
 async function buffAdd(cam, buff, val, time){
@@ -1121,18 +1269,20 @@ async function damage(cam, dmg){
     if(!cam) return 0;
     let attacker = humans[cam == 'player' ? 'dealer' : 'player'];
     let defender = humans[cam];
+    let motoHP = defender.hp;
 
     //加算(attacker)
     let power = 1; //倍率 *power みたいに使うから初期値は1
     let attack = 0; //加算分
     attacker.buffs.forEach(buff => {
-        buff.effects.forEach(effect => {
+        Object.keys(buff.effects).forEach(effect => {
             switch(effect){
                 case 'power':
-                    power += buff.value;
+                    // console.log(buff, effect, buff.effects[effect].value);
+                    power += buff.effects[effect];
                     break;
                 case 'attack':
-                    attack += buff.value;
+                    attack += buff.effects[effect];
                     break;
             }
         })
@@ -1142,13 +1292,13 @@ async function damage(cam, dmg){
     let suffer = 1; //被ダメ率、みたいなもん
     let defense = 0; //基礎控除みたいなもん
     defender.buffs.forEach(buff => {
-        buff.effects.forEach(effect => {
+        Object.keys(buff.effects).forEach(effect => {
             switch(effect){
                 case 'suffer':
-                    suffer += buff.value;
+                    suffer += buff.effects[effect];
                     break;
                 case 'defense':
-                    defense += buff.value;
+                    defense += buff.effects[effect];
                     break;
             }
         });
@@ -1178,6 +1328,8 @@ async function damage(cam, dmg){
     defender.hp -= deal;
     addlog(`${defender.name}に${deal}ダメージ`);
 
+    console.log(`${attacker.name} => ${defender.name} | ${motoHP} => ${defender.hp}`);
+
     if(defender.hp < 0) defender.hp = 0;
 
     tekiou();
@@ -1193,6 +1345,27 @@ async function damage(cam, dmg){
     };
     
     return 0; //どちらかが死んだならば処理を停止するため0を、そうでなければ1をお返し申す
+}
+
+async function heal(cam, dmg){
+    if(!cam) return 0;
+
+    let defender = humans[cam];
+    
+    defender.hp += dmg;
+
+    if(defender.hp > defender.maxhp) defender.hp = defender.maxhp;
+
+    if(defender.hp <= 0){
+        defender.hp = 1;
+        console.error(`${defender.name}「なんか知らんけど死にかけたぜ。バグの恐れがあるから要チェックだ！！」`)
+    };
+    
+    addlog(`${defender.name}を${dmg}回復した！！`);
+
+    tekiou();
+
+    return 0;
 }
 
 //負け/勝ちのセリフの表示、次のバトルへ
@@ -1290,6 +1463,7 @@ debugMenu.addEventListener('mousedown', (e) => {
 
 
 let DMcam = debugMenu.querySelector('.cam');
+let DMtekiou = debugMenu.querySelector('.tekiou');
 let DMdrawCard = debugMenu.querySelector('.draw');
 let DMdrawCard_name = debugMenu.querySelector('.draw-name');
 let DMdrawCard_suit = debugMenu.querySelector('.draw-suit');
@@ -1306,6 +1480,10 @@ let DMaCard_name = debugMenu.querySelector('.a-name');
 
 Object.keys(Cards).forEach(name => {
     DMdrawCard_name.options.add(new Option(name, name));
+})
+
+DMtekiou.addEventListener('click', () => {
+    tekiou();
 })
 
 DMdrawCard.addEventListener('click', () => {
@@ -1355,10 +1533,14 @@ async function reset() {
 
     player.standed = 0;
     dealer.standed = 0;
+    document.querySelectorAll('.standeden').forEach(a => a.remove());
 
     await allMelt();
 
     tekiou();
+    
+    turn = 1;
+    round += 1;
     actable = 1;
     resetButton();
 }
@@ -1385,16 +1567,21 @@ async function allMelt(){
 }
 
 async function battleStart(){
-    turn = 0;
-    round = 0;
-    
-    let dealer = decideDealerName();
-    humans['dealer'] = {};
-    Object.keys(dealer).forEach(key => {
-        humans['dealer'][key] = dealer[key]
-    })
+    turn = 1;
+    round = 1;
 
-    humans['player'].deck = arrayShuffle(humans['player'].deck);
+    kariNokills += 1;
+    
+    let player = humans['player'];
+    let dealer = decideDealerName();
+    // humans['dealer'] = {};
+    // Object.keys(dealer).forEach(key => {
+    //     humans['dealer'][key] = dealer[key]
+    // })
+
+    
+
+    player.deck = arrayShuffle(player.deck);
     dealer.deck = arrayShuffle(dealer.deck);
 
     addtext(`${dealer.name}「${Dealers[dealer.name].opening}」`);
@@ -1402,14 +1589,19 @@ async function battleStart(){
     reset();
 }
 
+let kariNokarine = [1,2,4,7,11,16,22,29]
+let kariNokills = 0;
 function decideDealerName(){
     //一応
     document.querySelector('#cardPlaces .dealer').innerHTML = '';
     let names = Object.keys(Dealers).filter(a => Dealers[a].stage == stage).map(a => Dealers[a].name);
     let dealername = arraySelect(names);
     let nameData = Dealers[dealername];
+
+    let kariMaxhp = kariNokarine[kariNokills-1];
+    if(kariNokills > 8) kariMaxhp = random(1, 30);
     
-    let dealer = {
+    humans['dealer'] = {
         cam: 'dealer',
         id: dealername,
         name: dealername,
@@ -1421,16 +1613,16 @@ function decideDealerName(){
         atk: 0,
         def: 0,
         shl: 0,
-        hp: nameData.maxhp,
-        maxhp: nameData.maxhp,
+        hp: kariMaxhp, //nameData.maxhp
+        maxhp: kariMaxhp, //nameData.maxhp
         buffs: [],
     };
 
-    humans['dealer'].deck = [];
     rentalDecks[nameData.deckKind].deck.forEach(card => {
         cardBecome('dealer', 'deck', card);
     })
-    dealer.deck = humans['dealer'].deck
+
+
 
     // ステータスの上下ありかどうかはファローズでよろっぷ
     // let statuses = ['attack','defense','mattack','mdefense','maxhealth','maxmp','critlate','critdmg','critresist','speed'];
@@ -1455,7 +1647,7 @@ function decideDealerName(){
     // };
     
 
-    return dealer;
+    return humans['dealer'];
 }
 
 //雑々デッキ作成
@@ -1468,6 +1660,9 @@ cardBecome('player', 'deck', ['emperor', '♢']);
 cardBecome('player', 'deck', ['empress', '♢']);
 cardBecome('player', 'deck', ['justice', '♤']);
 cardBecome('player', 'deck', ['hermit', '♡']);
+cardBecome('player', 'deck', ['fool', '♧']);
+cardBecome('player', 'deck', ['death', '♤']);
+
 
 
 //一旦のやつ

@@ -1,0 +1,55 @@
+
+body { margin: 0; }
+canvas {
+    display: block;
+    z-index: 1;
+}
+#debug-info {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 10px;
+    font-size: 12px;
+}
+#right{
+    display: none;
+    width: 25%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background: linear-gradient(to left, rgba(255, 130, 40, 0.75), rgba(255, 150, 75, 0.5));
+    z-index: 255;
+}
+#left{
+    display: none;
+    width: 25%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(to right, rgba(40, 237, 255, 0.75), rgba(77, 240, 255, 0.5));
+    z-index: 255;
+}
+#upper{
+    display: none;
+    width: 100vw;
+    height: 25%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 48, 0.75), rgba(255, 255, 89, 0.5));
+    z-index: 255;
+}
+#lower{
+    display: none;
+    width: 100%;
+    height: 25%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to top, rgba(255, 40, 216, 0.75), rgba(255, 79, 223, 0.5));
+    z-index: 255;
+}
