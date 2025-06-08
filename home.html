@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
+    <title>forSchool-site</title>
+    <link rel="icon" href="koppepan.ico">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>log-text_test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
         /*logとtext*/
         #log{
@@ -80,6 +81,19 @@
             color: #1919ff;
         }
 
+        /* description */
+        #movableDescription{
+            display: none;
+            position: fixed;
+            pointer-events: none;
+            background-color: #363636e2;
+            color: #f0f8ff;
+            text-align: left;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 256;
+        }
+
     </style>
 </head>
 <body>
@@ -88,12 +102,82 @@
        <div class="opener">‹</div>
        <div class="log"></div>
     </div>
-    
-    <!-- こっから試験的用 -->
-    <input type="text" id="addtext" contenteditable aria-placeholder="hello">
-    <div id="addtextGo">push here</div>
+    <div id="movableDescription"></div>
 
+    <div id="links">
+        雑々リンク貼り々々ゾーン
+        <ul class="look"></ul>
+    </div>
     <script>
+        //#region komagome
+        function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+        async function NicoNicoText(mes){
+            const newDiv = document.createElement('div');
+            newDiv.textContent = mes;
+            newDiv.style = `
+            position: absolute;
+            top: ${Math.random()*100}vh;
+            right: 0;
+            background-color: rgba(228, 249, 255, 0.563);
+            color: #000000;
+            font-size: 50px;
+            `
+            document.querySelector('body').appendChild(newDiv);
+            //let speed = (Math.random()*100+1)*0.1;
+            //let speed = mes.toString().length*2 
+            speed = 2;
+            for(let i = 0; window.innerWidth > i*speed; i++){
+                let val = i*speed;
+                newDiv.style.right = `${val}px`
+                await delay(5);
+            }
+            newDiv.remove();
+        };
+        function arraySelect(array){
+            let select = Math.floor(Math.random()*array.length);
+            return array[select];
+        };
+        function arrayShuffle(array) {
+            for(let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+        function arrayGacha(array,probability){
+            if(array.length !== probability.length){throw new Error("長さがあってないっす！先輩、ちゃんとチェックした方がいいっすよ〜？");}
+            const total = probability.reduce((sum, p) => sum + p, 0);
+            let random = Math.random() * total;
+            for (let i = 0; i < array.length; i++) {
+                if(random < probability[i]){
+                return array[i];
+                }
+                random -= probability[i];
+            }
+        };
+        function copy(obj){
+            if (obj === null || typeof obj !== 'object') {
+                return obj; // 基本型はそのまま返す
+            }
+            if (Array.isArray(obj)) {
+                return obj.map(copy); // 配列の各要素を再帰コピー
+            }
+            const result = {};
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    result[key] = copy(obj[key]); // オブジェクトのプロパティを再帰コピー
+                }
+            }
+            return result;
+        };
+        function probability(num){
+            return Math.random()*100 <= num;
+            //例:num == 20 → randomが20以内ならtrue,elseならfalseを返す
+        };
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+        //#endregion
         //#region log&text
         let textDiv = document.querySelector('#text');
         let autoDelay = 1;
@@ -224,11 +308,79 @@
             log.scrollTop = log.scrollHeight;
         }
         //#endregion
-        
-        document.getElementById('addtextGo').addEventListener('click', async function(){
-            let text = document.getElementById('addtext').value
-            console.log(text)
-            addtext(text)
+        //#region description
+        let movableDescription = document.getElementById('movableDescription');
+        document.addEventListener('mousemove', (e) => {
+            movableDescription.style.left = `${e.clientX + 10}px`;
+            movableDescription.style.top = `${e.clientY + 10}px`;
+        });
+        document.addEventListener('mouseover', (e) => {
+            const descTarget = e.target.closest('[data-description]');
+            if (descTarget) {
+                const desc = descTarget.dataset.description;
+                movableDescription.innerHTML = desc;
+                movableDescription.style.display = 'block';
+            }
+        });
+        document.addEventListener('mouseout', (e) => {
+            const descTarget = e.target.closest('[data-description]');
+            if (descTarget) {
+                movableDescription.innerHTML = '';
+                movableDescription.style.display = 'none';
+            }
+        });
+        //#endregion
+
+        let Links = [
+            {
+                name:'Scuro-e-Nero-Soldato',
+                url:'https://koppepan-orange.github.io/forSchool/Scuro_e_Nero_Soldato/index.html',
+                description:'ブラックジャックxローグライクxデッキ構築なゲーム<br>エフェクトもモーションも結構こだわったのでぜひどぞ'
+            },
+            {
+                name:'platFormer',
+                url:'https://koppepan-orange.github.io/forSchool/platFormer/index.html',
+                description:'友達がプラットフォーマーを作っているのを見て感化され作ったやつ<br>9割AIさん<br>spaceで足場設置はまじ天才だと思う<br>足場設置だけ作者が作りましたもん'
+            },
+            {
+                name:'3D_test',
+                url:'https://koppepan-orange.github.io/forSchool/three/index.html',
+                description:'3Dがやってみたい！！でやってみたthree.js。<br>まじで没というか作者の砂場的存在<br>うちのmacくんでもちゃんとできます'
+            },
+            {
+                name:'race',
+                url:'https://koppepan-orange.github.io/forSchool/race/index.html',
+                description:'3Dで加速度を用いたい！！でやってみた試作品<br>うちのmacくんでは荷が重かったようです'
+            },
+            {
+                name:'集計できるやつ',
+                url:'https://koppepan-orange.github.io/forSchool/集計できるやつ.html',
+                description:'とあるゲームのCV/絵師さん発表前の、<br>民が意見を出し合っているのを見て集計したくなって作ったやつ<br>短時間作成にしてはUIが綺麗で好き'
+            },
+            {
+                name:'なんかダウンロードさせられるやつ',
+                url:'https://koppepan-orange.github.io/forSchool/機器破壊デストロイヤー.html',
+                description:'名の通り。<br>鏖 が10²³回繰り返されてるファイルが欲しい人はぜひ'
+            },
+            {
+                name:'pythonに触れよう！',
+                url:'https://koppepan-orange.github.io/forSchool/pythonと話そう.html',
+                description:'htmlでpythonを触れると聞いて作った謎物<br>スマホでも試せるので興味ある方はぜひ'
+            },
+            {
+                name:'test-site',
+                url:'https://koppepan-orange.github.io/test-site/home.html',
+                description:'大元のホームページ<br>色々あるけどほとんどバグ&未完成<br>着手するにも..その....面倒でね......'
+            }
+        ]
+
+        document.addEventListener('DOMContentLoaded', () => {
+            Links.forEach(link => {
+                let li = document.createElement('li')
+                li.innerHTML = `<a href="${link.url}">${link.name}</a>`
+                li.setAttribute('data-description', link.description)
+                document.querySelector('.look').appendChild(li)
+            })
         })
     </script>
 </body>
