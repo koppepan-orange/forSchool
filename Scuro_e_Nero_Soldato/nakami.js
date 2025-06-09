@@ -370,6 +370,32 @@ function tekiou(){
             `)
         });
     });
+
+    //#region hitにカーソル合わせたときに何%でバースト/即死するかの確率を出すやつ
+    let player = humans['player']
+    let now = player.value;
+    let rest = spada - now;
+    let hiitaraShi = 0;
+    player.deck.forEach(card => {
+        if(card.value > rest) hiitaraShi += 1;
+    });
+    let hiitaraShi_rate = hiitaraShi / player.deck.length;
+    hiitaraShi_rate = Math.ceil(hiitaraShi_rate * 10000);
+    hiitaraShi_rate *= 0.01;
+
+    let deathes = 0;
+    player.deck.forEach(card => {
+        if(card.name == 'death') deathes += 1;
+    });
+    let deathes_rate = deathes / player.deck.length;
+    deathes_rate = Math.ceil(deathes_rate * 10000);
+    deathes_rate *= 0.01;
+
+    let description = `<br>バーストする確率: ${hiitaraShi_rate}%`;
+    if(deathes) description += `<br>しにがみを引く確率: ${deathes_rate}%`
+
+    hitButton.setAttribute('data-description', description);
+    //#endregion
     
     //#region playerのその他の要素のtekiou
     let elseInfo = document.querySelector("#else .info");
@@ -1062,16 +1088,14 @@ async function hasElseed(card, event){
     if(attributi.length <= 0) return 0;
 
     for(let a of attributi){
-        console.log(`「条件文:[${a[0]}] 実行文:[${a[1]}]」`)
+        console.log(`条件文:[${a[0]}] 実行文:[${a[1]}]`)
         a[0] = trans(card, a[0]);
         if(checkElseed(a[0], event)){
             console.log(`${cocGacha()}「お前誰？」`)
             await delay(1000);
             a[1] = trans(card, a[1]);
-            console.log(a)
             let res = await execute(a[1]);
-            // tekiou();
-            console.log(res)
+            tekiou();
             if(res) return 1;
         };
     };
@@ -1125,8 +1149,9 @@ async function execute(arr){
     let [functionName, ...args] = arr;
     if(!executions[functionName]) console.error(`${functionName}はcheckListに存在しないぜ〜〜〜`);
     let res = await executions[functionName](...args);
+    if(res)return 1;
 
-    return res;
+    return 0;
 }
 //#endregion
 
@@ -1328,9 +1353,9 @@ async function damage(cam, dmg){
     defender.hp -= deal;
     addlog(`${defender.name}に${deal}ダメージ`);
 
-    console.log(`${attacker.name} => ${defender.name} | ${motoHP} => ${defender.hp}`);
-
     if(defender.hp < 0) defender.hp = 0;
+
+    console.log(`${attacker.name} => ${defender.name} | HP: ${motoHP} => ${defender.hp}`);
 
     tekiou();
 

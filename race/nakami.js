@@ -1,5 +1,6 @@
 const scene = new THREE.Scene(); //scene、まあ受け皿みたいなもんを生成
 const renderer = new THREE.WebGLRenderer(); //レンダラーを生成
+renderer.setClearColor('#f0f8ff');
 renderer.setSize(window.innerWidth, window.innerHeight); //レンダラーのサイズを
 document.body.appendChild(renderer.domElement); //レンダラーをcanvasの代わり
 
@@ -91,6 +92,15 @@ document.addEventListener("keyup", e => {
 //#region debug
 let info = document.querySelector('#debug-info');
 let isCreative = false
+let tpSelect = document.querySelector('#tpSelect');
+let tpSelectXD = 1;
+let tpSelectable = 0;
+document.addEventListener('keydown', event => {
+    if(event.key == "r" && !tpSelectable){
+        tpSelect.style.display = "flex";
+        tpSelectable = 1;
+    }
+});
 document.addEventListener('keyup', (event) => {
     switch(event.key){
         case 'g':
@@ -99,11 +109,6 @@ document.addEventListener('keyup', (event) => {
             }else{
                 info.style.display = 'none';
             }
-            break;
-        case 'r':
-            camera.position.set(5, 15, 5);
-            velocity.set(0, 0, 0); //速度リセット
-            acceleration.set(0, 0, 0); //加速度も
             break;
         case 'i':
             speed += 0.5;
@@ -134,50 +139,36 @@ document.addEventListener('keyup', (event) => {
         case 'm':
             camera.fov += 5;
             break;
+    };
+    
+    if(tpSelectable){
+        switch(event.key){
+            case 'ArrowRight':
+                tpSelectXD += 1;
+                if(4 < tpSelectXD) tpSelectXD = 4;
+                break;
+            case 'ArrowLeft':
+                tpSelectXD -= 1;
+                if(tpSelectXD < 1) tpSelectXD = 1;
+                break;
+            case 'r':
+                tpSelectable = 0;
+                let posiD = tpPositions[tpSelectXD];
+                camera.position.set(posiD.x, posiD.y, posiD.z);
+                velocity.set(0, 0, 0); //速度リセット
+                acceleration.set(0, 0, 0); //加速度も
+        };
+        
+        // [1,2,3,4]
+
+        //えーーーと～～～～～～～～～～＾＾＾
+        //クラス selectedをつけてね～～～～～～～～～～～～
     }
 })
+
+
 //#endregion
 
-//#region bullet
-const bullets = [];
-const bulletSpeed = 0.5;
-document.addEventListener("click", () => {
-    if (document.pointerLockElement !== document.body) return;
-    
-    // 弾を作成
-    const bulletGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-    const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-    const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
-
-    // カメラの位置を初期位置として設定
-    bullet.position.copy(camera.position);
-
-    // カメラの向いている方向を取得
-    const direction = new THREE.Vector3();
-    camera.getWorldDirection(direction);
-    
-    // 速度を設定
-    bullet.userData.velocity = direction.clone().multiplyScalar(bulletSpeed);
-
-    // シーンに追加
-    scene.add(bullet);
-    bullets.push(bullet);
-});
-
-// 弾の移動処理
-function updateBullets() {
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        const bullet = bullets[i];
-        bullet.position.add(bullet.userData.velocity);
-
-        // 一定距離飛んだら削除
-        if (bullet.position.length() > 10) {
-            scene.remove(bullet);
-            bullets.splice(i, 1);
-        }
-    }
-}
-//#endregion
 
 const raycaster = new THREE.Raycaster();
 const downVector = new THREE.Vector3(0, -1, 0); // 真下を向いたベクトル
@@ -225,7 +216,7 @@ presetObjects.forEach((back) => {
 let floorAtumii = 2; //あつみぃ じゃねえんだよまじww
 let floorWandH = 100;
 const floorGeometry = new THREE.BoxGeometry(floorWandH, floorAtumii, floorWandH);
-const floorMaterial = new THREE.MeshBasicMaterial({color: 0xf0f8ff});
+const floorMaterial = new THREE.MeshBasicMaterial({color: 0xabced8});
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 
 // グリッドの作成
@@ -404,7 +395,6 @@ function updateCameraMovement() {
 
 function animate() {
     requestAnimationFrame(animate);
-    updateBullets();
     updateCameraMovement();
     renderer.render(scene, camera);
 }

@@ -8,3 +8,18 @@ let presetObjects = [
         touchable: 1,
     }
 ];
+
+let tpPositions = {
+    '1':{
+        name:'center',
+        x:5,
+        y:15,
+        z:5,    
+    },
+    '2':{
+        name:'course1',
+        x:-343,
+        y:-232,
+        z:-873,    
+    },
+}
