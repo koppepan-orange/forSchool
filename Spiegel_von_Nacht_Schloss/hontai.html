@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="mitame.css">
+    <title>rogue-game</title>
+</head>
+<body>
+    <div id="menuToggle">☰</div>
+    <nav id="sideMenu">
+        <ul class="forgame">
+            <li>設定</li>
+            <li>ウィンガディア</li> <!--ウィキペディア。tipsとか用-->
+            <li class="notice">お知らせ</li>
+        </ul>
+    </nav>
+
+    <div id="notice">
+        <div class="back"><img src="assets/icons/back.png"></div>
+        <div class="x"><img src="assets/icons/x.png"></div>
+        <div class="list"></div>
+        <div class="show">
+            <div class="title"></div>
+            <div class="date"></div>
+            <div class="body"></div>
+        </div>
+    </div>
+
+    <div id="movabledescription"></div>
+    <div id="ShowCardInfo" class="hidden">開けたら閉めろぉぅ</div>
+    <div id="text"></div><div id="log-opener"><</div><div id="log"></div>
+    <div id="GameArea">
+        <canvas id="ZentaiMiruo"></canvas>
+        <div id="PhaseBar"></div>
+
+        <div id="PhaseUI">
+            <span id="ShowPhase">1</span>
+        </div>
+
+        <div id="PandEsUI">
+            <div id="p" class="human">
+                <div class="name"></div>
+                <div>
+                    <span class="shield">0</span>
+                    <span class="health">40</span>
+                    <span class="maxhealth">/40</span>
+                </div>
+                <div class="healthBar">
+                    <div class="innerBar" width="100%"></div>
+                </div>
+                <div class="effect">
+                    <div class="buff">
+                        ▲
+                        <div class="appear">
+                            <img class="img" src="assets/buffs/none.png">
+                            <span class="time">0</span>
+                        </div>
+                    </div>
+                    <div class="debuff">
+                        ▼
+                        <div class="appear">
+                            <img class="img" src="assets/buffs/none.png">
+                            <span class="time">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="e" class="human">
+                <div class="name"></div>
+                <div>
+                    <span class="shield">0</span>
+                    <span class="health">40</span>
+                    <span class="maxhealth">/40</span>
+                </div>
+                <div class="healthBar">
+                    <div class="innerBar" width="100%"></div>
+                </div>
+                <div class="effect">
+                    <div class="buff">
+                        ▲
+                        <div class="appear">
+                            <img class="img" src="assets/buffs/none.png">
+                            <span class="time">0</span>
+                        </div>
+                    </div>
+                    <div class="debuff">
+                        ▼
+                        <div class="appear">
+                            <img class="img" src="assets/buffs/none.png">
+                            <span class="time">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><br>  
+        <div id="NoteCardArea">
+            <div id="NoteCardA"></div>  
+            <div id="NoteCardM"></div>
+        </div>
+        <div id="PhaseStart"></div> 
+    </div>
+    <div id="FieldArea">
+        <div id="StageButton"></div>
+    </div>
+    <script src="data.js" defer></script>
+    <script src="nakami.js" defer></script>
+</body>
+</html>
