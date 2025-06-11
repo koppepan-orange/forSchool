@@ -1,3 +1,72 @@
+//#region komagome
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+async function NicoNicoText(mes){
+    const newDiv = document.createElement('div');
+    newDiv.textContent = mes;
+    newDiv.style = `
+    position: absolute;
+    top: ${Math.random()*100}vh;
+    right: 0;
+    background-color: rgba(228, 249, 255, 0.563);
+    color: #000000;
+    font-size: 50px;
+    `
+    document.querySelector('body').appendChild(newDiv);
+    //let speed = (Math.random()*100+1)*0.1;
+    //let speed = mes.toString().length*2 
+    speed = 2;
+    for(let i = 0; window.innerWidth > i*speed; i++){
+        let val = i*speed;
+        newDiv.style.right = `${val}px`
+        await delay(5);
+    }
+    newDiv.remove();
+};
+function arraySelect(array){
+    let select = Math.floor(Math.random()*array.length);
+    return array[select];
+};
+function arrayShuffle(array) {
+    for(let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+};
+function arrayGacha(array,probability){
+    if(array.length !== probability.length){throw new Error("長さがあってないっす！先輩、ちゃんとチェックした方がいいっすよ〜？");}
+    const total = probability.reduce((sum, p) => sum + p, 0);
+    let random = Math.random() * total;
+    for (let i = 0; i < array.length; i++) {
+        if(random < probability[i]){
+        return array[i];
+        }
+        random -= probability[i];
+    }
+};
+function copy(obj){
+    if (obj === null || typeof obj !== 'object') {
+        return obj; // 基本型はそのまま返す
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(copy); // 配列の各要素を再帰コピー
+    }
+    const result = {};
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            result[key] = copy(obj[key]); // オブジェクトのプロパティを再帰コピー
+        }
+    }
+    return result;
+};
+function probability(num){
+    return Math.random()*100 <= num;
+    //例:num == 20 → randomが20以内ならtrue,elseならfalseを返す
+};
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+//#endregion
 const scene = new THREE.Scene(); //scene、まあ受け皿みたいなもんを生成
 const renderer = new THREE.WebGLRenderer(); //レンダラーを生成
 renderer.setClearColor('#f0f8ff');
@@ -77,7 +146,7 @@ let velocity = new THREE.Vector3();
 let acceleration = new THREE.Vector3();
 let speed = 1;
 let jumpPower = 2; // ジャンプの強さ
-const keys = {w:false, s:false, a:false, d:false, space:false, q:false};
+const keys = {w:false, s:false, a:false, d:false, space:false, q:false, e:false};
 
 //キー入力を保存するやつ
 document.addEventListener("keydown", e => {
@@ -133,11 +202,15 @@ document.addEventListener('keyup', (event) => {
         case 'l':
             jumpPower -= 0.2;
             break;
-        case 'n':
-            camera.fov -= 5;
-            break;
-        case 'm':
-            camera.fov += 5;
+        case 'b':
+            placeObject({
+                name: 'deer',
+                x: camera.position.x,
+                y: camera.position.y-7,
+                z: camera.position.z,
+                scale: 3,
+                touchable: 0
+            })
             break;
     };
     
@@ -146,10 +219,12 @@ document.addEventListener('keyup', (event) => {
             case 'ArrowRight':
                 tpSelectXD += 1;
                 if(4 < tpSelectXD) tpSelectXD = 4;
+                tpSeltekiou()
                 break;
             case 'ArrowLeft':
                 tpSelectXD -= 1;
                 if(tpSelectXD < 1) tpSelectXD = 1;
+                tpSeltekiou()
                 break;
             case 'r':
                 tpSelectable = 0;
@@ -157,7 +232,17 @@ document.addEventListener('keyup', (event) => {
                 camera.position.set(posiD.x, posiD.y, posiD.z);
                 velocity.set(0, 0, 0); //速度リセット
                 acceleration.set(0, 0, 0); //加速度も
+                tpSelect.style.display = 'none'
         };
+
+        function tpSeltekiou(){
+            let items = document.querySelectorAll('#tpSelect .item');
+            console.log(items, tpSelectXD)
+            items.forEach(a => {
+                if(a.classList.contains('selected')) a.classList.remove('selected')
+            })
+            items[tpSelectXD-1].classList.add('selected')
+        }
         
         // [1,2,3,4]
 
@@ -183,33 +268,41 @@ const mtlLoader = new THREE.MTLLoader();
 let backGrounds = [];
 
 presetObjects.forEach((back) => {
-    mtlLoader.load(`assets/objects/${back.name}.mtl`, (materials) => {
+    placeObject(back)
+});
+
+
+let existOb = 0;
+function placeObject(object){
+    mtlLoader.load(`assets/objects/${object.name}.mtl`, (materials) => {
         materials.preload();
         loader.setMaterials(materials);
 
-        loader.load(`assets/objects/${back.name}.obj`, (obj) => {
+        loader.load(`assets/objects/${object.name}.obj`, (obj) => {
             obj.traverse((child) => {
                 if (child.isMesh) {
                     // userDataにbackのプロパティを全部突っ込む
                     child.userData = {
-                        ...back,
-                        touchable: back.touchable ? 1 : 0,
-                        dethable: back.dethable ? 1 : 0,
-                        accelable: back.accelable ? 1 : 0
+                        id: existOb,
+                        name: object.name,
+                        touchable: object.touchable ? 1 : 0,
+                        dethable: object.dethable ? 1 : 0,
+                        accelable: object.accelable ? 1 : 0
                     };
 
                     child.geometry.computeBoundingBox();
                     objects.push(child);
+                    existOb += 1;
                 }
             });
 
-            obj.position.set(back.x, back.y, back.z);
-            obj.scale.set(back.scale, back.scale, back.scale);
+            obj.position.set(object.x, object.y, object.z);
+            obj.scale.set(object.scale, object.scale, object.scale);
             scene.add(obj);
+            return obj;
         });
     });
-});
-
+}
 
 
 // 床の作成
@@ -269,19 +362,20 @@ let gravity = -0.1; // 重力加速度
 let isGrounded = false; // 地面についているか
 let isOnAccelPad = false;
 function checkGround() {
+    let rayLength = Math.abs(velocity.y) + 1;
     raycaster.set(camera.position, new THREE.Vector3(0, -1, 0));
     const intersects = raycaster.intersectObjects(objects, false);
 
     // 距離2に近くて、touchable === true のオブジェクトがあるかどうか
     const groundedHit = intersects.find(ob =>
         ob.object.userData.touchable &&
-        Math.abs(ob.distance - 7) < 1
+        ob.distance == rayLength
     );
 
     let accelPadHit = intersects.find(ob =>
         ob.object.userData.touchable &&
         ob.object.userData.accelPad &&
-        Math.abs(ob.distance - 7) < 1
+        ob.distance == rayLength
     );
 
     if(accelPadHit){
@@ -328,7 +422,9 @@ function updateCameraMovement() {
     direction.y = 0;
     direction.normalize();
     
-    if (keys.w && !checkWallCollision()) {
+    if (keys.q && keys.e){
+        acceleration.z = accelRate*10;
+    }else if (keys.w && !checkWallCollision()) {
         if (!isCreative) {
             // camera.position.addScaledVector(direction, speed);
             acceleration.z = accelRate;
@@ -369,12 +465,12 @@ function updateCameraMovement() {
     } else if (!keys.space && !isGrounded && isCreative) {
         velocity.y = 0;
     }
-
-
+    
+    
     if (!isGrounded) velocity.y += gravity;
     camera.position.y += velocity.y;
 
-    checkGround();
+    checkGround('player');
 
     if (keys.w || keys.s || keys.a || keys.d) {
         yawBase += moveX;
