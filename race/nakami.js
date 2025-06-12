@@ -362,20 +362,20 @@ let gravity = -0.1; // 重力加速度
 let isGrounded = false; // 地面についているか
 let isOnAccelPad = false;
 function checkGround() {
-    let rayLength = Math.abs(velocity.y) + 1;
+    let rayLength = Math.abs(velocity.y) + 10;
     raycaster.set(camera.position, new THREE.Vector3(0, -1, 0));
     const intersects = raycaster.intersectObjects(objects, false);
 
     // 距離2に近くて、touchable === true のオブジェクトがあるかどうか
     const groundedHit = intersects.find(ob =>
         ob.object.userData.touchable &&
-        ob.distance == rayLength
+        ob.distance <= rayLength
     );
 
     let accelPadHit = intersects.find(ob =>
         ob.object.userData.touchable &&
         ob.object.userData.accelPad &&
-        ob.distance == rayLength
+        ob.distance <= rayLength
     );
 
     if(accelPadHit){
