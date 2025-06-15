@@ -11,6 +11,13 @@
             "file": "${file}",
         },
         {
+            "type": "debugpy",
+            "name": "from now on(python)",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "scuro e nero soldato_win",
@@ -29,11 +36,10 @@
             "file": "race/index.html"
         },
         {
-            "type": "debugpy",
-            "name": "from now on(python)",
+            "type": "chrome",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "name": "stone-trader_mac",
+            "file": "stone_trader/index.html"
         },
     ]
 }

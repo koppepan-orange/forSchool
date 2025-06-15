@@ -1,0 +1,143 @@
+/*nicotext*/
+.nicotext{
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: rgba(228, 249, 255, 0.563);
+    color: #000000;
+    font-size: 50px;
+}
+
+/* description */
+#movableDescription{
+    display: none;
+    position: fixed;
+    pointer-events: none;
+    background-color: #363636e2;
+    color: #f0f8ff;
+    text-align: left;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 256;
+}
+
+html{
+    margin: -8px;
+}
+::-webkit-scrollbar{
+    display: none;
+}
+.row{
+    display: flex;
+    flex-direction: row;
+}
+
+#gameZone{
+    display: block;
+    width: 40%;
+    height: 100vh;
+    margin: 0 auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    user-select: none;
+    box-sizing: border-box;
+}
+@media(max-width: 768px){ /*相手のデバイスのwidthが768px以下になったら〜ってやつ*/
+    #gameZone{
+        width: 100%;
+    }
+}
+
+#select{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 45px;
+    padding-top: 25%;
+}
+#select .row{
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 45px;
+}
+#select .selection{
+    width: 150px;
+    height: 150px;
+    background-color: #8d8d8d;
+}
+#select .selection img{
+    width: 100%;
+    aspect-ratio: 1;
+    /* object-fit: contain; */ /*これはなんかimgの比率を全体から調節してくれるらしい*/ 
+}
+
+#buyer{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: #4d2500;
+    position: relative;
+}
+#buyer .owner{
+    /*感情の表現が顕著で、あーこれはｽﾊﾞﾗｼｲﾃﾞｽﾈ~~ ぜ〜ひとも私に売っていただきたいですね〜〜 ....いやこれはだめだな、なんか....宝の質屋だな*/
+    /*...セイムマートを少年にして、こっちはシーナ風、つまり おや？こんな時間に客とは珍しいねぇ.. やあお兄さん、私に何を売ってくれるんだい？ ....いいね*/
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    height: 15%;
+    padding: 5px;
+    background-color: #5e2d00;
+    border-bottom: 3px dotted #3f1f009d;
+    position: relative;
+}
+#buyer .owner .chara{
+    height: 100%;
+    aspect-ratio: 1;
+    position: absolute;
+    top: 0px;
+    left: -5%;
+}
+#buyer .owner .chara img{
+    width: 100%;
+    aspect-ratio: 1;
+}
+#buyer .owner .text{
+    width: calc(80% - 24px);
+    height: 80%;
+    margin-left: 20%;
+    color: #f0f8ff;
+    background-color: #00000082;
+    border: 2px solid;
+    font-size: 16px;
+    text-align: left;
+    position: absolute;
+    bottom: 0px;
+}
+#buyer .place{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    width: calc(100% - 20px);
+    height: 85%;
+    padding: 10px;
+}
+#buyer .place .row{
+    width: 90%;
+    justify-content: center;
+    gap: 10%;
+    padding: 0 5%;
+}
+#buyer .place .row .item{
+    width: 50%;
+    aspect-ratio: 1;
+}
+#buyer .place .row .item img{
+    width: 100%;
+    aspect-ratio: 1;
+}
