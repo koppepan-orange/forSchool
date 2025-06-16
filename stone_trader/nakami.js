@@ -109,8 +109,56 @@ document.addEventListener('mouseout', (e) => {
 });
 //#endregion
 
+//#region 画像とかをロードする機構
+let imagesLoaded = 0;
+let images = {};
+let imageNames = {
+    'stones':['coal','iron','ruby','gold','larimar'/*,'stone_stone','coal_stone','iron_stone','ruby_stone','gold_stone','larimar_stone'*/],
+}
+let totalImages = Object.keys(imageNames).map(a => imageNames[a].length).reduce((a, b) => a + b);
+Object.keys(imageNames).forEach(belong => {
+    imageNames[belong].forEach(num => {
+        let img = new Image();
+        img.src = `assets/${belong}/${num}.png`;
+        img.onload = () => {
+            imagesLoaded++;
+            if(imagesLoaded === totalImages){
+                gameloop()
+            }
+        };
+        img.onerror = () => {
+            console.error(`Image ${num} failed to load.`);
+        };
+        if(!images[belong]){
+            images[belong] = {}
+        }
+        images[belong][num] = img;
+    });
+});
+//#endregion
 //#region zentai-toshite-noyatsu
 let gameZone = document.getElementById('gameZone');
+let debugData = document.querySelector('#debug .data');
+let debugMenu = document.querySelector('#debug .menu');
+document.querySelectorAll('.draggable').forEach(a => {
+    a.addEventListener('mousedown', e => {
+        offsetX = e.clientX - a.getBoundingClientRect().left;
+        offsetY = e.clientY - a.getBoundingClientRect().top;
+        
+        function onMouseMove(e){
+            a.style.left = `${e.clientX - offsetX}px`;
+            a.style.top = `${e.clientY - offsetY}px`;
+        }
+    
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }); 
+});
 
 let ores =  {
     coal:{
@@ -154,14 +202,15 @@ let ores =  {
         value:[5,15]
     }
 }
+
 function tekiou(){
-    buyerOwnertextD.textContent = `
-    石炭:${ores.coal.price},
-    鉄:${ores.iron.price},
-    ルビー:${ores.ruby.price},
-    金:${ores.gold.price},
-    ラリマール:${ores.larimar.price}
-    `
+    debugData.innerHTML = `
+    <span class="ore"><img src="${images.stones['coal'].src}"/>:${ores.coal.price}</span>
+    <span class="ore"><img src="${images.stones['iron'].src}"/>:${ores.iron.price}</span>
+    <span class="ore"><img src="${images.stones['ruby'].src}"/>:${ores.ruby.price}</span>
+    <span class="ore"><img src="${images.stones['gold'].src}"/>:${ores.gold.price}</span>
+    <span class="ore"><img src="${images.stones['larimar'].src}"/>:${ores.larimar.price}</span>
+    `;
 }
 function change(){
     Object.values(ores).forEach(a => {
@@ -177,7 +226,11 @@ function change(){
     })
     tekiou();
 }
-setInterval(change, 2000);
+function gameloop(){
+    change();
+    setTimeout(gameloop, 4000)
+}
+
 //#endregion
 
 //#region select

@@ -48,6 +48,28 @@ html{
     }
 }
 
+/*debugのやつ*/
+#debug .data{
+    display: block;
+    width: auto;
+    height: auto;
+    background-color: #cfe9ff;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    font-size: 20px;
+    text-align: left;
+}
+#debug .data .ore{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+#debug .data .ore img{
+    width: 20px;
+    aspect-ratio: 1;
+}
+
 #select{
     display: flex;
     flex-direction: column;

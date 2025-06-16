@@ -41,5 +41,11 @@
             "name": "stone-trader_mac",
             "file": "stone_trader/index.html"
         },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "stone-trader_win",
+            "file": "n:\\koppepan_orange\\forSchool\\stone_trader\\index.html"
+        },
     ]
 }
