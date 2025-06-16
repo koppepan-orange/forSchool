@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Danmaku Game</title>
+<style>
+    ::-webkit-scrollbar{
+        display: none;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        user-select: none;
+    }
+    canvas {
+        display: block;
+        background-color: #cecece;
+    }
+    #score{
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: 200px;
+        height: 100px;
+        padding: 5px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #00000055;
+        color: #ffffffaa;
+    }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="score">
+    <div class="hited"></div>
+</div>
+<script>
+    //#region komagome
+    function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+    async function NicoNicoText(mes){
+        const newDiv = document.createElement('div');
+        newDiv.textContent = mes;
+        newDiv.style = `
+        position: absolute;
+        top: ${Math.random()*100}vh;
+        right: 0;
+        background-color: rgba(228, 249, 255, 0.563);
+        color: #000000;
+        font-size: 20px;
+        `
+        document.querySelector('body').appendChild(newDiv);
+        //let speed = (Math.random()*100+1)*0.1;
+        //let speed = mes.toString().length*2 
+        speed = 2;
+        for(let i = 0; window.innerWidth > i*speed; i++){
+            let val = i*speed;
+            newDiv.style.right = `${val}px`
+            await delay(5);
+        }
+        newDiv.remove();
+    };
+    function arraySelect(array){
+        let select = Math.floor(Math.random()*array.length);
+        return array[select];
+    };
+    function arrayShuffle(array) {
+        for(let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
+    function arrayGacha(array,probability){
+        if(array.length !== probability.length){throw new Error("長さがあってないっす！先輩、ちゃんとチェックした方がいいっすよ〜？");}
+        const total = probability.reduce((sum, p) => sum + p, 0);
+        let random = Math.random() * total;
+        for (let i = 0; i < array.length; i++) {
+            if(random < probability[i]){
+            return array[i];
+            }
+            random -= probability[i];
+        }
+    };
+    function copy(obj){
+        if (obj === null || typeof obj !== 'object') {
+            return obj; // 基本型はそのまま返す
+        }
+        if (Array.isArray(obj)) {
+            return obj.map(copy); // 配列の各要素を再帰コピー
+        }
+        const result = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                result[key] = copy(obj[key]); // オブジェクトのプロパティを再帰コピー
+            }
+        }
+        return result;
+    };
+    function probability(num){
+        return Math.random()*100 <= num;
+        //例:num == 20 → randomが20以内ならtrue,elseならfalseを返す
+    };
+    function random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+    //#endregion
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let hited = 0;
+    // Player object
+    const player = {
+        x: canvas.width / 2,
+        y: canvas.height - 50,
+        width: 5,
+        height: 5,
+        color: 'black'
+    };
+
+    let scoreDiv = document.querySelector('#score')
+    function tekiou(){
+        scoreDiv.querySelector('.hited').textContent = `hited: ${hited}`;
+    }
+
+
+    // Bullets array
+    const bullets = [];
+
+    // Update bullet positions
+    function updateBullets() {
+        bullets.forEach((bullet, index) => {
+            if(bullet.prop == 'up') bullet.y -= bullet.speed;
+            if(bullet.prop == 'down') bullet.y += bullet.speed;
+            if(bullet.prop == 'left') bullet.x -= bullet.speed;
+            if(bullet.prop == 'right') bullet.x += bullet.speed;
+            if(bullet.prop === 'aim'){bullet.x += bullet.vx; bullet.y += bullet.vy;}
+
+            function destroy(){bullets.splice(index, 1);}
+            
+            if (bullet.y - bullet.radius > canvas.height || 
+                bullet.y + bullet.radius < 0 ||
+                bullet.x + bullet.radius < 0 ||
+                bullet.x - bullet.radius > canvas.width &&
+                bullet.name != 'meteo') {
+                destroy();
+            }
+
+            if(bullet.color == '#880015' && bullet.y <= canvas.height*0.75 && bullet.name != 'meteo'){
+                destroy()
+            }
+            if(bullet.name == 'meteo' && bullet.y - bullet.radius > canvas.height){
+                destroy();
+            }
+            
+            if (bullet.color != '#880015') {
+                let nearLava = bullets.some(other => {
+                    // 自分自身は除外
+                    if (other === bullet) return false;
+
+                    // 溶岩かどうか whetherやね
+                    if (other.color != '#880015') return false;
+
+                    const distance = distanceBetween(bullet, other);
+                    const combinedRadius = bullet.radius + other.radius;
+
+                    return distance < combinedRadius + 5;
+                });
+
+                if(nearLava){
+                    bullet.hp -= 1;
+                    if(bullet.hp <= 0){
+                        destroy()
+                    }
+                }
+            }
+
+
+            if (checkCollision(bullet, player) && bullet.name != 'meteo') {
+                if(bullet.color == '#880015'){
+                    NicoNicoText('溶岩来てますよ～')
+                }else{
+                    NicoNicoText('痛って〜〜〜〜');
+                }
+                hited += 1;
+                destroy();
+            }
+        });
+    }
+    function distanceBetween(a, b) {
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    function checkCollision(from, to) {
+        const dx = Math.abs(from.x - to.x);
+        const dy = Math.abs(from.y - to.y);
+        const combinedHalfWidths = to.width / 2 + from.radius;
+        const combinedHalfHeights = to.height / 2 + from.radius;
+
+        return dx < combinedHalfWidths && dy < combinedHalfHeights;
+    }
+
+    // Draw function
+    function draw() {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw player
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+
+        // Draw bullets
+        bullets.forEach(bullet => {
+            ctx.beginPath();
+            ctx.fillStyle = bullet.color;
+            ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.closePath();
+        });
+    }
+
+    // Game loop
+    function gameLoop() {
+        updateBullets();
+        draw();
+        tekiou();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Function to create new bullet
+    function createBullet() {
+        bulletMake('down', 1, 8, 5, '#fff0f0', random(0, canvas.width), 0, 'snow');
+        bulletMake('down', 1, 4, 5, '#fffafa', random(0, canvas.width), 0, 'snow');
+        bulletMake('right', 1, 5, 5, '#fafffa', 0, random(0, canvas.height), 'snow');
+        bulletMake('left', 1, 5, 5, '#fafffa', canvas.width, random(0, canvas.height), 'snow');
+        bulletMake('up', 1, 0.2, 5, '#880015', random(0, canvas.width), canvas.height, 'lava');
+        bulletMake('up', 1, 0.6,  5, '#880015', random(0, canvas.width), canvas.height, 'lava');
+        bulletMake('up', 1, 1,  5, '#880015', random(0, canvas.width), canvas.height, 'lava');
+        if(probability(5))bulletMake('aim', 4, 25, 20, '#cfe9ff', random(0, canvas.width), 0, 'ice')
+        if(probability(0.5))bulletMake('aim', 255, 1, 100, '#880015', (random(0, canvas.width/2)+canvas.width/2), 0, 'meteo')
+    }
+    function bulletMake(target, hp, speed, radius, color, x = 0, y = 0, name = 'none'){
+        let bullet = {
+            x: x,
+            y: y,
+            radius: radius,
+            hp: hp,
+            speed: speed,
+            color: color,
+            prop: target,
+            name: name
+        }
+
+        if(target == 'aim'){
+            let dx = player.x - x;
+            let dy = player.y
+            let angle = Math.atan2(dy, dx);
+
+            bullet.vx = Math.cos(angle) * speed;
+            bullet.vy = Math.sin(angle) * speed;
+        };
+
+        bullets.push(bullet);
+
+        return bullet
+    }
+    // Create new bullets at regular intervals
+    setInterval(createBullet, 100);
+
+    // Event listener for mouse movement
+    window.addEventListener('mousemove', updatePlayerPosition);
+    function updatePlayerPosition(event) {
+        player.x = event.clientX;
+        player.y = event.clientY;
+    }
+
+    // Start the game loop
+    gameLoop();
+</script>
+</body>
+</html>
