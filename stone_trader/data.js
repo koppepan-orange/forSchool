@@ -1,7 +1,14 @@
 let Selections = {
+    select:{
+        id:'select',
+        name:'全体',
+        display:'flex',
+        process:function(){}
+    },
     buyer:{
         id:'buyer',
         name:'売り屋',
+        display:'block',
         serifs:{
             normal:[
                 'おや、お客さんとは珍しいね<br>まあゆっくりしていきなよ',
@@ -12,5 +19,13 @@ let Selections = {
             buyerOwnertext = arraySelect(Selections.buyer.serifs.normal);
             buyerOwnertextD.innerHTML = buyerOwnertext;
         }
-    }
+    },
+    mine:{
+        id:'mine',
+        name:'鉱山',
+        display:'block',
+        process:function(){
+
+        }
+    },
 }

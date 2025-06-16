@@ -34,7 +34,7 @@ html{
 
 #gameZone{
     display: block;
-    width: 40%;
+    width: 768px;
     height: 100vh;
     margin: 0 auto;
     overflow-x: hidden;
@@ -42,17 +42,13 @@ html{
     user-select: none;
     box-sizing: border-box;
 }
-@media(max-width: 768px){ /*相手のデバイスのwidthが768px以下になったら〜ってやつ*/
-    #gameZone{
-        width: 100%;
-    }
-}
 
 /*debugのやつ*/
 #debug .data{
     display: block;
     width: auto;
     height: auto;
+    padding: 10px;
     background-color: #cfe9ff;
     position: fixed;
     top: 0px;
@@ -93,7 +89,13 @@ html{
     aspect-ratio: 1;
     /* object-fit: contain; */ /*これはなんかimgの比率を全体から調節してくれるらしい*/ 
 }
+.back{
+    width: 100%;
+    height: 25px;
+    background-color: #ddefff;
+}
 
+/* buyer */
 #buyer{
     display: none;
     width: 100%;
@@ -121,7 +123,7 @@ html{
     aspect-ratio: 1;
     position: absolute;
     top: 0px;
-    left: -5%;
+    /* left: -5%; */
 }
 #buyer .owner .chara img{
     width: 100%;
@@ -129,8 +131,8 @@ html{
 }
 #buyer .owner .text{
     width: calc(80% - 24px);
-    height: 80%;
-    margin-left: 20%;
+    height: 82%;
+    margin-left: 18%;
     color: #f0f8ff;
     background-color: #00000082;
     border: 2px solid;
@@ -160,6 +162,35 @@ html{
     aspect-ratio: 1;
 }
 #buyer .place .row .item img{
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+/* mine */
+#mine{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: #3d3d3d;
+    position: relative;
+}
+#mine .vein{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+#mine .vein .row{
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+#mine .vein .row .stone{
+    width: 200px;
+    aspect-ratio: 1;
+}
+#mine .vein .row .stone img{
     width: 100%;
     aspect-ratio: 1;
 }

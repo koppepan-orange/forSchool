@@ -235,17 +235,30 @@ function gameloop(){
 
 //#region select
 let selectArea = document.getElementById('select');
+let nowplace = 'select';
 document.querySelectorAll('.selection').forEach(a => 
     a.addEventListener('click', () => {
         let goto = a.classList[1];
-        console.log(`フォリア「${goto}に行きますよ〜〜！！」`);
-        
-        selectArea.style.display = 'none';
-        document.getElementById(goto).style.display = 'block';
-
-        Selections[goto].process();
-    })
+        cd(goto);
+    }),
 );
+document.querySelectorAll('.back').forEach(a =>
+    a.addEventListener('click', () => {
+        let goto = 'select';
+        cd(goto);
+    }),
+)
+function cd(goto){
+    console.log(`フォリア「${goto}に行きますよ〜〜！！」`);
+    
+    document.getElementById(nowplace).style.display = 'none';
+    document.getElementById(goto).style.display = Selections[goto].display;
+
+    nowplace = goto;
+
+    Selections[goto].process();
+}
+
 //#endregion
 //#region buyer
 let buyerArea = document.getElementById('buyer');
@@ -267,7 +280,25 @@ buyerArea.querySelectorAll('.item').forEach(a => {
     });
 })
 //#endregion
-
+//#region mine
 let mineArea = document.getElementById('mine');
+let kakuritsu = [['coal','iron','ruby','gold','larimar'],[30,25,23,17,5]];
+mineArea.querySelectorAll('.vein .stone').forEach(a => {
+    a.addEventListener('click', () => {
+        console.log('clicken')
+        let now = a.dataset.ore ?? 'stone';
+
+        if(now != 'stone'){
+            ores[now].num += 1;
+        }
+
+        let next = arrayGacha(...kakuritsu);
+        a.dataset.ore = next;
+        a.innerHTML = `<img src="${images.stones[next].src}"/>`;
+
+        tekiou();
+    })
+})
+//#endregion
 let shopArea = document.getElementById('shop');
 let stillArea = document.getElementById('still');
