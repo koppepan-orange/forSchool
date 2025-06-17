@@ -102,12 +102,17 @@
             font-size: 50px;
         }
 
+        body{
+            user-select: none;
+        }
+
         /*window*/
         .window{
             width: 300px;
             height: 200px;
             padding: 2px;
             background-color: #cecece;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
         }
         .window .upper{
             width: calc(100% - 4px);
@@ -373,22 +378,25 @@
             let offsetX = 0, offsetY = 0;
 
             let doc = a;
-            if(a.classList.contains('window')) doc = a.querySelector('upper')
+            if(a.classList.contains('upper')){
+                doc = a.parentElement;
+                console.log('お前windowsの一員なのか？', doc)
+            }
+            doc.addEventListener('mousedown', e => {
+                console.log('お前windowsの一員なのか？')
+                // if(a.classList.contains('window')){
+                //     if(e.target.closest('.body') || e.target.classList.contains('-') || e.target.classList.contains('o') || e.target.classList.contains('x')){
+                //         return;
+                //     }
+                // }
 
-            a.addEventListener('mousedown', e => {
-                if(a.classList.contains('window')){
-                    if(e.target.closest('.body') || e.target.classList.contains('-') || e.target.classList.contains('o') || e.target.classList.contains('x')){
-                        return;
-                    }
-                }
-
-                offsetX = e.clientX - a.getBoundingClientRect().left;
-                offsetY = e.clientY - a.getBoundingClientRect().top;
+                offsetX = e.clientX - doc.getBoundingClientRect().left;
+                offsetY = e.clientY - doc.getBoundingClientRect().top;
             
                 function onMouseMove(e){
-                    a.style.position = 'absolute';
-                    a.style.left = `${e.clientX - offsetX}px`;
-                    a.style.top = `${e.clientY - offsetY}px`;
+                    doc.style.position = 'absolute';
+                    doc.style.left = `${e.clientX - offsetX}px`;
+                    doc.style.top = `${e.clientY - offsetY}px`;
                 }
             
                 function onMouseUp() {
@@ -400,6 +408,39 @@
                 document.addEventListener('mouseup', onMouseUp);
             }); 
         });
+
+        function addDraggable(div){
+            div.classList.add('draggable');
+
+            let offsetX = 0, offsetY = 0;
+
+            let doc = div;
+            if(div.classList.contains('upper')){
+                doc = div.parentElement;
+            }
+
+            div.addEventListener('mousedown', e => {
+                if(div.classList.contains('upper')){
+                    if(doc.dataset.mini == 1) return;
+                }
+                offsetX = e.clientX - doc.getBoundingClientRect().left;
+                offsetY = e.clientY - doc.getBoundingClientRect().top;
+            
+                function onMouseMove(e){
+                    doc.style.position = 'absolute';
+                    doc.style.left = `${e.clientX - offsetX}px`;
+                    doc.style.top = `${e.clientY - offsetY}px`;
+                }
+            
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+            
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }); 
+        }
         //#endregion
         
         //#region window
@@ -409,7 +450,8 @@
         let windowCase = document.getElementById("windowcase");
         function windowMake(text = 'null'){
             let win = document.createElement('div')
-            win.className = 'window draggable';
+            win.className = 'window';
+            win.style.position = 'absolute';
 
             let upper = document.createElement('div');
             upper.className = 'upper';
@@ -428,6 +470,7 @@
                     win.style.opacity = "1";
                     win.style.width = "100px";
                     win.style.height = "40px";
+                    win.style.position = '';
                     win.dataset.mini = 1;
                 }, 300);
             });
@@ -448,24 +491,25 @@
 
             let o = document.createElement('div');
             o.className = 'o';
+            let oI = document.createElement('img');
+            oI.src = 'o.png';
+            o.appendChild(oI)
+
             o.addEventListener("click", () => {
-                if(o.textContent == "o"){
+                if(!win.dataset.full){
                     win.dataset.width = win.style.width || getComputedStyle(win).width;
                     win.dataset.height = win.style.height || getComputedStyle(win).height;
                     win.style.width = "100vw";
                     win.style.height = "100vh";
-                    o.textContent = "8";
+                    oI.src = '8.png';
                     win.dataset.full = 1;
                 }else{
                     win.style.width = win.dataset.width || "300px";
                     win.style.height = win.dataset.height || "200px";
-                    o.textContent = "o";
+                    oI.src = 'o.png';
                     win.dataset.full = 0;
                 }
             });
-            let oI = document.createElement('img');
-            oI.src = 'o.png';
-            o.appendChild(oI)
             cover.appendChild(o);
 
             let x = document.createElement('div');
@@ -483,6 +527,8 @@
             let body = document.createElement('div');
             body.innerHTML = text;
             win.appendChild(body)
+            
+            addDraggable(upper)
             
             document.querySelector('body').appendChild(win)
         }

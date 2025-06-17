@@ -285,7 +285,6 @@ let mineArea = document.getElementById('mine');
 let kakuritsu = [['coal','iron','ruby','gold','larimar'],[30,25,23,17,5]];
 mineArea.querySelectorAll('.vein .stone').forEach(a => {
     a.addEventListener('click', () => {
-        console.log('clicken')
         let now = a.dataset.ore ?? 'stone';
 
         if(now != 'stone'){
