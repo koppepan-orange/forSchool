@@ -67,6 +67,7 @@ function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 //#endregion
+
 const scene = new THREE.Scene(); //scene、まあ受け皿みたいなもんを生成
 const renderer = new THREE.WebGLRenderer(); //レンダラーを生成
 renderer.setClearColor('#f0f8ff');
@@ -243,11 +244,6 @@ document.addEventListener('keyup', (event) => {
             })
             items[tpSelectXD-1].classList.add('selected')
         }
-        
-        // [1,2,3,4]
-
-        //えーーーと～～～～～～～～～～＾＾＾
-        //クラス selectedをつけてね～～～～～～～～～～～～
     }
 })
 

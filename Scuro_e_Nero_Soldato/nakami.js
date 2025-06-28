@@ -256,7 +256,7 @@ function cocGacha(fixRare = 0){
 function re(cam){
     let res = cam == 'player' ? 'dealer' : 'player';
     return res;
-}
+};
 function camS(card, code){
     let cam = '';
     switch(code){

@@ -46,6 +46,13 @@
             "request": "launch",
             "name": "stone-trader_win",
             "file": "n:\\koppepan_orange\\forSchool\\stone_trader\\index.html"
+            // stone_trader\\index.html だけでもいいかも
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "stroll-game_mac",
+            "file": "stroll_game/index.html"
         },
     ]
 }

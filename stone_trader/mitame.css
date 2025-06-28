@@ -144,7 +144,7 @@ html{
 #buyer .place{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 25px;
     width: calc(100% - 20px);
@@ -158,7 +158,7 @@ html{
     padding: 0 5%;
 }
 #buyer .place .row .item{
-    width: 50%;
+    width: 30%;
     aspect-ratio: 1;
 }
 #buyer .place .row .item img{
@@ -177,7 +177,7 @@ html{
 #mine .vein{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 10px;
 }
@@ -193,4 +193,22 @@ html{
 #mine .vein .row .stone img{
     width: 100%;
     aspect-ratio: 1;
+}
+
+/*shop*/
+#shop{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f8ff;
+    position: relative;
+}
+
+/*still*/
+#still{
+    display: none;
+    width: 100%;
+    height: 100%;
+    background-color: #dedede;
+    position: relative;
 }

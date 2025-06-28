@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>stroll_game</title>
+  <link rel="stylesheet" href="mitame.css">
+  <style id="ButtonStyle">
+    .button{
+      border: 2px solid #ff3e3e;
+      padding: 2px 3px;
+      background: #fdff89;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="exploreArea">
+    <canvas class="map"></canvas>
+  </div>
+  <!-- <span id="UI" style="border: dashed rgb(73, 73, 73);"><span id="UI1"></span><br><span id="UI2"></span><br><span id="UI3"></span></span> -->
+    <span id="Time">00:00</span><br><br>
+  <p id="scene">
+    <button class="button" onclick="LetsStroll()">Go to stroll</button><br><br>
+    <button class="button" onclick="GoShop()">Shop</button>
+  </p>
+  <br><span id="log"></span>
+  <div id="UI">
+    <div class="nameSend draggable">
+      <input type="text" class="input" placeholder="write your name">
+      <button class="button">send</button>
+    </div>
+  </div>
+  <script src="nakami.js" defer></script>
+</body>
+</html>

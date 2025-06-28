@@ -24,8 +24,18 @@ let Selections = {
         id:'mine',
         name:'鉱山',
         display:'block',
-        process:function(){
-
-        }
+        process:function(){}
+    },
+    shop:{
+        id:'shop',
+        name:'セイムマート',
+        display:'block',
+        process:function(){}
+    },
+    still:{
+        id:'still',
+        name:'まだ',
+        display:'block',
+        process:function(){}
     },
 }

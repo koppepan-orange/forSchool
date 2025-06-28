@@ -113,7 +113,7 @@ document.addEventListener('mouseout', (e) => {
 let imagesLoaded = 0;
 let images = {};
 let imageNames = {
-    'stones':['coal','iron','ruby','gold','larimar'/*,'stone_stone','coal_stone','iron_stone','ruby_stone','gold_stone','larimar_stone'*/],
+    'stones':['none','coal','iron','ruby','gold','larimar','stone_stone','stone_coal','stone_iron','stone_ruby','stone_gold','stone_larimar'],
 }
 let totalImages = Object.keys(imageNames).map(a => imageNames[a].length).reduce((a, b) => a + b);
 Object.keys(imageNames).forEach(belong => {
@@ -260,6 +260,7 @@ function cd(goto){
 }
 
 //#endregion
+
 //#region buyer
 let buyerArea = document.getElementById('buyer');
 let buyerOwnertextD = buyerArea.querySelector('.owner .text');
@@ -280,6 +281,7 @@ buyerArea.querySelectorAll('.item').forEach(a => {
     });
 })
 //#endregion
+
 //#region mine
 let mineArea = document.getElementById('mine');
 let kakuritsu = [['coal','iron','ruby','gold','larimar'],[30,25,23,17,5]];
@@ -293,11 +295,18 @@ mineArea.querySelectorAll('.vein .stone').forEach(a => {
 
         let next = arrayGacha(...kakuritsu);
         a.dataset.ore = next;
-        a.innerHTML = `<img src="${images.stones[next].src}"/>`;
+        a.innerHTML = images['stones'][`stone_${next}`].outerHTML;
 
         tekiou();
     })
 })
 //#endregion
+
+//#region shop
 let shopArea = document.getElementById('shop');
+//#endregion
+
+//#region still
 let stillArea = document.getElementById('still');
+//#endregion
+
