@@ -144,6 +144,7 @@ let Objects = {
          moving: 0,
          ables: ['move', 'attack', 'beattack'],
          beacten: 'none',
+         group: 1,
          bt: {
             hp: 10,
             maxhp: 10,
@@ -206,6 +207,7 @@ function mapMake(code){
          moving: 0,
          ables: ['pass'],
          beacten: 'none',
+         group: 0,
          bt: {
             hp: 10,
             maxhp: 10,
@@ -247,6 +249,7 @@ function mapMake(code){
          moving: 0,
          ables: ['pass'],
          beacten: 'none',
+         group: 0,
          bt: {
             hp: 10,
             maxhp: 10,
@@ -275,7 +278,7 @@ function mapMake(code){
          };
       }
    }
-   let maxEnemy = random(5, 12);
+   let maxEnemy = random(3, 6);
    while(maxEnemy > 0){
       let y = random(0, 11);
       let x = random(0, 11);
@@ -284,7 +287,7 @@ function mapMake(code){
       let def = 0;
       let newEne = {
          id: 'enemy',
-         name: arraySelect(Object.keys(images.enemies).filter(a => a != 'box')),
+         name: arraySelect(Object.keys(images.enemies)),
          kind: 'enemies', //画像指定用
          cam: 'enemies', //識別用
          me: Objects['enemies'].length, //仮。tekiou毎に変えてもいいかも
@@ -296,6 +299,7 @@ function mapMake(code){
          spd: 20,
          moving: 0,
          ables: ['move', 'attack', 'beattack'],
+         group: 2,
          bt: {
             hp: hp,
             maxhp: hp,
@@ -323,15 +327,20 @@ function draw(){
    }
 
    Object.values(Objects).flat().forEach(ob => {
+      let src;
+
+      if(images[ob.kind]?.[ob.name]) src = images[ob.kind][ob.name];
+      else if(images[ob.kind]?.[ob.id]) src = images[ob.kind][ob.id];
+      else src = images['systems']['error'], console.error(`画像が見つからない: kind=${ob.kind}, name=${ob.name}, id=${ob.id}`);
+      
+
       let youso = {
-         src: images[ob.kind][ob.name],
+         src: src,
          x: ob.x*mass,
          y: ob.y*mass,
          w: mass,
          h: mass
       }
-      if(youso.src == undefined) youso.src = images[ob.kind][ob.id];
-      if(youso.src == undefined) youso.src = images['systems'][probability(2) ? 'error_nico' : 'error'];
       
       if(youso.id == 'kira'){
          let harf = mass/2;
@@ -412,7 +421,7 @@ async function update(en = 0){
          case 2: kariy += 1; break;
          case 3: karix -= 1; break;
       }
-      get('enemies').filter(e => e.x == p.x + karix && e.y == p.y + kariy).forEach(e => {
+      Object.values(Objects).flat().filter(e => e.x == p.x + karix && e.y == p.y + kariy).forEach(e => {
          // nicoText('うわーー！！')
          if(able(e, 'beattack')) attack(p.cam, p.me, e.cam, e.me, 1);
          if(able(e, 'bepush')) move(e.cam, e.me, karix, kariy, 1);
@@ -493,8 +502,10 @@ async function attack(...arr){
    let tag = get(tcam, tme);
    let hasp = (name) => {return prop.some(p => p == name)};
 
-   if(!able(who, 'attack') && !hasp('force')) return console.log(`${who.name}「攻撃できないっっ...!!」`);
-   if(!able(tag, 'beattack') && !hasp('force')) return console.log(`${tag.name}「攻撃が効かない..だと....!?」`);
+   //console.log(`自分:${who.group}  相手:${tag.group}`);
+   if(who.group == tag.group) return// console.log(`さすがに同種喰らいは..無理っすよ`);
+   if(!able(who, 'attack') && !hasp('force')) return// console.log(`${who.name}「攻撃できないっっ...!!」`);
+   if(!able(tag, 'beattack') && !hasp('force')) return// console.log(`${tag.name}「攻撃が効かない..だと....!?」`);
 
    let dmg = (who.bt.atk * rate);
    if(!hasp('penetrate')) dmg -= (tag.bt.def);
@@ -552,7 +563,9 @@ let images = {};
 let imageNames = {
    'systems':['select', 'error', 'error_nico'],
    'maps':['0', 'a', 'b', 'kira', 'machine'],
-   'enemies':['ghost_b', 'ghost_r', 'skeleton', '蒼白の粘液', 'box']
+   'players':[],
+   'enemies':['ghost_b', 'ghost_r', 'skeleton', '蒼白の粘液'],
+   'objects':['box']
 }
 let totalImages = Object.keys(imageNames).map(a => imageNames[a].length).reduce((a, b) => a + b);
 Object.keys(imageNames).forEach(belong => {
@@ -564,7 +577,7 @@ Object.keys(imageNames).forEach(belong => {
          if(imagesLoaded == totalImages) start();
       };
       img.onerror = () => {
-         console.error(`Image ${num} failed to load.`);
+         console.error(`Image (${belong}/${num}) failed to load.`);
       };
       if(!images[belong]) images[belong] = {};
       images[belong][num] = img;
@@ -578,14 +591,27 @@ let UI_name = UI.querySelector('.nameSend');
 document.addEventListener('keydown', e => {
    if(e.key == 'n' && get().name == 'player') UI_name.style.display = 'flex';
    if(e.key == 'b' && !get().moving){
-      let y = get().y;
-      let x = get().x;
-      let newEne = {
-         id: 'enemy',
+      let p = get();
+      let x = p.x;
+      if(p.dir == 1 && x == 11) return;
+      else if(p.dir == 1) x += 1;
+      if(p.dir == 3 && x == 0) return;
+      else if(p.dir == 3) x -= 1;
+      
+      let y = p.y;
+      if(p.dir == 0 && y == 0) return;
+      else if(p.dir == 0) y -= 1;
+      if(p.dir == 2 && y == 11) return;
+      else if(p.dir == 2) y += 1;
+
+      if(Object.values(Objects).flat().some(o => o.x == x && o.y == y)) return;
+
+      let newOb = {
+         id: 'objects',
          name: 'box',
-         kind: 'enemies', //画像指定用
-         cam: 'enemies', //識別用
-         me: Objects['enemies'].length, //仮。tekiou毎に変えてもいいかも
+         kind: 'objects', //画像指定用
+         cam: 'objects', //識別用
+         me: Objects['objects'].length,
          x: x,
          y: y,
          dir: 0,
@@ -593,7 +619,8 @@ document.addEventListener('keydown', e => {
          sy: y,
          spd: 20,
          moving: 0,
-         ables: ['bepush', 'beattack'], 
+         ables: ['bepush', 'beattack'],
+         group: 1,
          //これ、playerの味方と敵で分け..いや、攻撃可能whetherをグループで分けるようにしようか、fortniteのクリエイティブのように
          bt: {
             hp: 10,
@@ -605,7 +632,7 @@ document.addEventListener('keydown', e => {
             oridef: 0,
          }
       };
-      Objects['enemies'].push(newEne);
+      Objects['objects'].push(newOb);
    }
 });
 
