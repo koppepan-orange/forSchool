@@ -16,12 +16,15 @@ canvas {
 
 /*nicotext*/
 .nicotext{
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
-    background-color: rgba(228, 249, 255, 0.563);
+    background-color: #f0f8ff80;
     color: #000000;
     font-size: 20px;
+    transition: right 2.0s linear;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .draggable{
