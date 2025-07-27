@@ -1,0 +1,307 @@
+html{
+    margin: -8px;
+}
+body{
+    user-select: none;
+    scrollbar-width: none;
+    background: #fffaf3;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+:focus{
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: transparent;
+}
+
+.row{
+    display: flex;
+    flex-direction: row;
+}
+
+/*nicotext*/
+.nicotext{
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: #f0f8ff80;
+    color: #000000;
+    font-size: 20px;
+    transition: right 2.0s linear;
+    white-space: nowrap;
+    pointer-events: none;
+}
+/*logとtext*/
+#log{
+    display: none;
+    /* display: flex; */
+    flex-direction: row;
+    justify-content: space-between;
+    width: 320px;
+    height: 200px;
+    border: 1px solid #ffffff;
+    background-color: rgba(0,0,0,0);
+    position: fixed;
+    bottom: 150px;
+    right: -300px;
+    color: #fefefe;
+    overflow-y: hidden;
+    transition: right 0.3s;
+    z-index: 254;
+}
+#log .opener{
+    width: 20px;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    color: #fefefe;
+    text-align: center;
+    cursor: pointer;
+    z-index: 254;
+}
+#log .log{
+    width: 300px;
+    height: 100%;
+    max-height: 200px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    background-color: rgba(0,0,0,0.8);
+    color: #fefefe;
+    text-align: left;
+    font-size: 14px;
+    transition: right 0.3s;
+    z-index: 253;
+}
+#text{
+    display: none;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1.2em;
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+
+    white-space: nowrap;
+    overflow: hidden;
+    width: fit-content; /* 文字の長さに応じた幅 */
+    animation: fadeIn 0.5s ease forwards;
+}
+@keyframes fadeIn {
+    0%{
+        opacity: 0;
+    }
+    100%{
+        opacity: 1;
+    }
+}
+.color-red{
+    color: #ff1919;
+}
+.color-pink{
+    color: #ff56e9;
+}
+.color-blue{
+    color: #1919ff;
+}
+
+/* description */
+#movableDescription{
+    display: none;
+    position: fixed;
+    pointer-events: none;
+    background-color: #363636e2;
+    color: #f0f8ff;
+    text-align: left;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 256;
+}
+
+水色 #f0f8ff, #eaf5ff, #def0ff, #cfe9ff, #b5dcff
+紫色 #f8f6ff, #f5f2ff, #f1edff, #ece8ff, #e9e4ff
+橙色 #fffaf3, #fff7eb, #fff3e2, #fff0d9, #ffeccf
+緑色 #f6fff2, #eeffe7, #e6ffdc, #ddffd0, #d4ffc3
+
+#dummy{
+    color: #cfe9ff;
+    /* 上の謎の4つの文章によって、なんか最初のやつ無効化されるっぽい */
+    /* 謎に */
+}
+
+#saxn{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    background: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    transition: width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease;
+    cursor: pointer;
+}
+#saxn:hover{
+    width: 40px;
+    height: 40px;
+    top: 5px;
+    left: 5px;
+}
+
+#side{
+    position: fixed;
+    top: 0;
+    left: -220px;
+    width: 200px;
+    height: 100vh;
+    background-color: #fff7eb;
+    padding: 10px;
+}
+
+#main{
+    margin-left: 0px;
+    padding: 20px;
+    background-color: #fffaf3;
+}
+
+#add{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    scale: 1;
+    padding: 0;
+    background: #ffeccf;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    transition: width 0.2s ease, height 0.2s ease, right 0.2s ease, bottom 0.2s ease, background 0.2s ease, opacity 1.0s ease;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 1;
+    pointer-events: all;
+}
+#add:hover{
+    width: 60px;
+    height: 60px;
+    right: 5px;
+    bottom: 5px;
+    background: #fff3e2;
+}
+#add.tap{
+    animation: addBtap 1s ease-in-out forwards;
+    box-shadow: none;
+    pointer-events: none;
+}
+@keyframes addBtap{
+    /* 70%までで一回転して、残り30%でopacityを0に */
+    0% {
+        opacity: 1;
+        transform: rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: rotate(720deg);
+    }
+}
+
+#addpop{
+    width: 500px;
+    height: 350px;
+    background-color: #fff7eb;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 22px 20px 20px 20px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 1.0s ease;
+    opacity: 0;
+    z-index: 200;
+    pointer-events: none;
+}
+#addpop.tap{
+    opacity: 1;
+    pointer-events: all;
+}
+#addpop .x{
+    position: absolute;
+    top: -5px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+#addpop .daxn{
+    margin-top: -2px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 35px;
+}
+#addpop .l{
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+}
+#addpop .r{
+    width: calc(100% - 35px);
+    height: 35px;
+}
+#addpop .imp{
+    height: 35px;
+    padding: 5px;
+    border: 2px solid #ffeccf;
+    font-size: 18px;
+    box-sizing: border-box;
+}
+#addpop .twonoba .row{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+#addpop .twonoba .imp{
+    width: 48%;
+}
+#addpop .nobasi{
+    width: 4%;
+}
+#addpop .explain{
+    height: 95px;
+}
+#addpop .explain .r{
+    height: 95px;
+}
+#addpop .send{
+    width: calc(100% - 40px);
+    height: 45px;
+    background-color: #fff3e2;
+    border: 2px solid #ffeccf;
+    color: #222222;
+    font-size: 16px;
+    position: absolute;
+    bottom: 20px;
+    cursor: pointer;
+}
+#addpop .send:hover{
+    background: #fff0d9;
+}

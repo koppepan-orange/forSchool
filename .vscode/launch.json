@@ -15,7 +15,7 @@
             "name": "from now on(python)",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "internalConsole"
         },
         {
             "type": "chrome",
@@ -53,6 +53,12 @@
             "request": "launch",
             "name": "stroll-game_mac",
             "file": "stroll_game/index.html"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "nendai-matome_mac",
+            "file": "nendai/index.html"
         },
     ]
 }
