@@ -368,9 +368,10 @@ let addpop = {
     tags: addpopD.querySelector('.tags .imp'),
     explain: addpopD.querySelector('.explain .imp'),
     sendB: addpopD.querySelector('.send'),
-    addToggle: () => {
+    toggle: () => {
         addpopB.classList.toggle('tap');
         addpopD.classList.toggle('tap');
+        
         addpop.name.innerText = '';
         addpop.year.before.innerText = '';
         addpop.year.after.innerText = '';
@@ -384,21 +385,8 @@ let addpop = {
     }
 };
 
-addpopB.addEventListener('click', addpop.addToggle);
-addpop.x.addEventListener('click',addpop.addToggle);
-
-const underIn = new KeyboardEvent("keydown", {
-  key: "ArrowDown",
-  code: "ArrowDown",
-  keyCode: 40, // 古いやつ用
-  which: 40,   // 古いやつ用
-  bubbles: true,
-  cancelable: true
-});
-
-document.addEventListener('keydown' , e => {
-    if(e.key == 'p')document.dispatchEvent(underIn);
-})
+addpopB.addEventListener('click', addpop.toggle);
+addpop.x.addEventListener('click',addpop.toggle);
 
 addpop.tags.addEventListener('keydown', e => {
     if(e.key == 'Enter'){
@@ -440,11 +428,169 @@ addpop.sendB.addEventListener('click', () => {
     if(month.some(a => Number.isNaN(a))) return addtext('月..書いてあるけど文字だよね？これ');
     if(  day.some(a => Number.isNaN(a))) return addtext('日..書いてあるけど文字だよね？これ');
 
-    if(year[1] == 0) year[1] = 'now'
+    if(year[1] == 0) year[1] = '解なし';
     if(year[1] < year[0] && year[1] != 0) return addtext(`残念ながら${year[0]}年より${year[1]}年のほうが昔なんですよ..知ってました？`);
+
+    if(month[0] == '' || month[0] == 0) month[0] = '未記入';
+    if(month[1] == '' || month[1] == 0) month[1] = '未記入';
+    if(day[0] == '' || day[0] == 0) day[0] = '未記入';
+    if(day[1] == '' || day[1] == 0) day[1] = '未記入';
     
     console.log(`名前:${name} 年:${year[0]} ~ ${year[1]} 月:${month[0]} ~ ${month[1]} 日:${day[0]} ~ ${day[1]} 所属:${belong} タグ:${tags} コメント:${explain}`);
 
-    addpop.addToggle();
+    mainMake(name, year, month, day, belong, tags, explain);
+
+    addpop.toggle();
 });
-//#endregion
+//#endregion addpop
+
+//#region side
+let sideD = document.getElementById('side');
+let side = {
+    B: sideD.querySelector('.tog'),
+    toggle: () => {
+        side.B.classList.toggle('tap');
+        sideD.classList.toggle('tap');
+    }
+    //以下D内の諸々要素
+};
+side.B.addEventListener('click', side.toggle);
+
+//まあ直に追加しますよ、諸々
+
+//#endregion side
+
+//#region main
+let mainD = document.getElementById('main');
+let main = {
+    bodyD: mainD.querySelector('.body'),
+    sideD: mainD.querySelector('.side'),
+    /* all: [], //objたち */
+    list: {},
+    'kari':{ //listにはいるであろうもの
+        div: document.getElementById('div'),
+        items: [], //objたち new
+    }
+}
+
+function mainMake(...arr){
+    let [name, year, month, day, belong, tags, explain] = arr;
+
+    let obj = {
+        name,
+        year,
+        month,
+        day,
+        belong,
+        tags,
+        explain
+    }
+    
+    let div = document.createElement('div');
+    div.className = 'item';
+
+    let nameD = document.createElement('div');
+    nameD.className = 'name';
+    nameD.innerText = name;
+    div.appendChild(nameD);
+
+    let monthes = {
+        b: month[0] == '未記入' ? '' : `${month[0]}月`,
+        a: month[1] == '未記入' ? '' : `${month[1]}月`,
+    };
+    let dayes = {
+        b: day[0] == '未記入' ? '' : `${day[0]}日`,
+        a: day[1] == '未記入' ? '' : `${day[1]}日`,
+    };
+
+    let mdb = '', mba = '';
+    if(monthes.b != '' || dayes.b != '') mdb = `<div class="detail">(${monthes.b}${dayes.b})</div>`;
+    
+    if((monthes.a != '' || dayes.a != '')&& year[1] != '解なし') mba = `<div class="detail">(${monthes.a}${dayes.a})</div>`;
+
+    let whenD = document.createElement('div');
+    whenD.className = 'when';
+
+        let befD = document.createElement('div');
+        befD.className = 'before';
+        let befeed = `<div class="year">${year[0]}年</div>`;
+        befD.innerHTML = `${befeed}${mdb}`;
+        whenD.appendChild(befD);
+
+        let kanD = document.createElement('div');
+        kanD.className = 'nobashi';
+        kanD.innerText = '〜';
+        whenD.appendChild(kanD);
+
+        let aftD = document.createElement('div');
+        aftD.className = 'after';
+        let afteed = `<div class="year">${year[1]}年</div>`;
+        if(year[1] != '解なし') aftD.innerHTML = `${afteed}${mba}`;
+        else aftD.innerHTML = '<div class="year">解なし(今に至る)</div>';
+        whenD.appendChild(aftD);
+    
+    div.appendChild(whenD);
+
+    //belongは所属、つまりappendChildの時に使います
+
+    let tagD = document.createElement('div');
+    tagD.className = 'tags';
+    tags.forEach(a => {
+        let aD = document.createElement('div');
+        aD.className = 'tag';
+        aD.innerText = a;
+        //addEventListenerで押したらそのtagがあるやつだけ表示、(そのtagを再度押す || 右上に出る"検索解除"を押す)で全て表示、やってもいいかも
+        tagD.appendChild(aD);
+    })
+    div.appendChild(tagD);
+
+    let explainD = document.createElement('div');
+    explainD.className = 'explain';
+    explainD.innerText = explain;
+    div.appendChild(explainD);
+
+    if(belong == '未記入') belong = 'その他';
+    let oya = main.list[belong];
+    if(!oya){
+        let oyaLD = document.createElement('div');
+        oyaLD.className = `item ${belong}`;
+        oyaLD.innerText = belong;
+        main.sideD.appendChild(oyaLD);
+
+        let oyaBD = document.createElement('div');
+        oyaBD.className = `kind ${belong}`;
+        //配牌カラーでランダムセレクト、一巡するまで被りなし〜をやりたい、ね
+        main.bodyD.appendChild(oyaBD);
+        
+        main.list[belong] = {
+            li: oyaLD,
+            items: oyaBD,
+            all: []
+        };
+
+    }
+    
+    main.list[belong].all.push(obj);
+    main.list[belong].items.appendChild(div);
+}
+
+
+//#endregion main
+
+
+let migiueD = document.getElementById('migiue');
+migiueD.addEventListener('click', () => {
+    addpop.name.innerText = 'アメリカ独立戦争';
+    addpop.year.before.innerText = '1775';
+    addpop.year.after.innerText = '1783';
+    addpop.month.before.innerText = '4';
+    addpop.month.after.innerText = '9';
+    addpop.day.before.innerText = '19';
+    addpop.day.after.innerText = '3';
+    addpop.belong.innerText = 'アメリカ';
+    addpop.tags.innerText = '戦争,独立,米';
+    addpop.explain.innerText = 'アメリカのイギリスからの独立のための戦争。\nアメリカ合衆国内ではアメリカ革命と呼ばれているらしい';
+
+    addpop.sendB.click();
+    addpop.toggle();
+})

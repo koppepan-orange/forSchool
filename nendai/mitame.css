@@ -4,7 +4,9 @@ html{
 body{
     user-select: none;
     scrollbar-width: none;
-    background: #fffaf3;
+    background: #000;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 ::-webkit-scrollbar {
     display: none;
@@ -18,6 +20,17 @@ body{
 .row{
     display: flex;
     flex-direction: row;
+}
+
+#migiue{
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    background: #e9e4ff;
+    position: fixed;
+    top: 10px;
+    right: 10px;
 }
 
 /*nicotext*/
@@ -132,43 +145,100 @@ body{
     /* 謎に */
 }
 
-#saxn{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 30px;
-    height: 30px;
-    padding: 5px;
-    background: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    font-size: 20px;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    transition: width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease;
-    cursor: pointer;
-}
-#saxn:hover{
-    width: 40px;
-    height: 40px;
-    top: 5px;
-    left: 5px;
-}
-
-#side{
-    position: fixed;
-    top: 0;
-    left: -220px;
-    width: 200px;
-    height: 100vh;
-    background-color: #fff7eb;
-    padding: 10px;
-}
-
 #main{
     margin-left: 0px;
-    padding: 20px;
-    background-color: #fffaf3;
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh;
+    background: #fffaf3;
+    box-sizing: border-box;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+#main .side{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 240px;
+    height: 100%;
+    padding: 6px;
+    border-right: 5px dotted #fff0d9;
+    background: #fff9ef;
+    box-sizing: border-box;
+}
+#main .body{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: calc(100% - 120px);
+    height: 100%;
+    padding: 0;
+    background: #fffaf3;
+    box-sizing: border-box;
+}
+#main .body .item{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    border-radius: 3px;
+    padding: 5px;
+    background: #fff3e2;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+#main .body .item .when{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: fit-content;
+    font-size: 16px;
+}
+#main .body .item .when .before, #main .body .item .when .after{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 48%;
+    height: fit-content;
+}
+#main .body .item .when .detail{
+    font-size: 14px;
+}
+#main .body .item .when .nobashi{
+    display: block;
+    width: 4%;
+    height: fit-content;
+}
+#main .body .item .tags{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    height: fit-content;
+    font-size: 16px;
+}
+#main .body .item .tags .tag{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: 50%;
+    background: #ffeccf;
+}
+#main .body .item .explain{
+    font-size: 11px;
 }
 
 #add{
@@ -304,4 +374,43 @@ body{
 }
 #addpop .send:hover{
     background: #fff0d9;
+}
+
+
+#side{
+    width: 300px;
+    height: 100vh;
+    padding: 20px;
+    background-color: #fff7eb;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: -300px;
+    transition: left 0.2s ease;
+}
+#side.tap{
+    left: 0px;
+}
+#side .tog{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+    background: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    position: absolute;
+    top: 10px;
+    left: 310px;
+    transition: width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+#side .tog:hover{
+    width: 40px;
+    height: 40px;
+    top: 5px;
+    left: 305px;
 }
