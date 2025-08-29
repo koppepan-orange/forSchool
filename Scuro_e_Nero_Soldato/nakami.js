@@ -338,7 +338,7 @@ function tekiou(){
                 human.value += c.value;
             }
         });
-        while(aces > 0 && human.value + 10 <= 21) {
+        while(aces > 0 && human.value + 10 <= spada) {
             human.value += 10;
             aces--;
         };
@@ -371,7 +371,7 @@ function tekiou(){
         });
     });
 
-    //#region hitにカーソル合わせたときに何%でバースト/即死するかの確率を出すやつ
+    //#region hitにカーソル合わせたときに何%でバーストするかの確率を出すやつ
     let player = humans['player']
     let now = player.value;
     let rest = spada - now;

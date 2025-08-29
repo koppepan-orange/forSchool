@@ -463,8 +463,9 @@ side.B.addEventListener('click', side.toggle);
 //#region main
 let mainD = document.getElementById('main');
 let main = {
-    bodyD: mainD.querySelector('.body'),
     sideD: mainD.querySelector('.side'),
+    bodyD: mainD.querySelector('.body'),
+    desc: mainD.querySelector('.desc'),
     /* all: [], //objたち */
     list: {},
     'kari':{ //listにはいるであろうもの
@@ -563,8 +564,8 @@ function mainMake(...arr){
         main.bodyD.appendChild(oyaBD);
         
         main.list[belong] = {
-            li: oyaLD,
-            items: oyaBD,
+            li: main.sideD.querySelector(`.item.${belong}`),
+            items: main.bodyD.querySelector(`.kind.${belong}`),
             all: []
         };
 
@@ -573,6 +574,7 @@ function mainMake(...arr){
     main.list[belong].all.push(obj);
     main.list[belong].items.appendChild(div);
 }
+
 
 
 //#endregion main
