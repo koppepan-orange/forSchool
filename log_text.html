@@ -80,6 +80,63 @@
             color: #1919ff;
         }
 
+        #addtext-temp{
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 15px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #addtext-temp .com{
+            display: flex;
+            flex-direction: column;
+        }
+        #addtext-temp .expl{
+            border-left: 2px solid #ddffd0;
+            border-right: 2px solid #ddffd0;
+        }
+        #addtext-temp .button{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100px;
+            aspect-ratio: 1;
+            border: #ddffd0;
+            background: #eeffe7;
+        }
+        #addtext-desc{
+            display: none;
+            min-width: 100px;
+            width: fit-content;
+            height: 200px;
+            padding: 5px;
+            background: #eeffe7;
+            position: fixed;
+            box-sizing: border-box;
+        }
+        #addtext-desc .list{
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 5px;
+            width: 100%;
+            height: 100%;
+        }
+        #addtext-desc .under{
+            display: block;
+            width: 100%;
+            height: 40px;
+            background: #eeffe7;
+            position: absolute;
+            left: 0;
+            bottom: -40px;
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+        }
     </style>
 </head>
 <body>
@@ -90,8 +147,19 @@
     </div>
     
     <!-- こっから試験的用 -->
-    <input type="text" id="addtext" contenteditable aria-placeholder="hello">
-    <div id="addtextGo">push here</div>
+    <div id="addtext">
+        <input type="text" class="form" placeholder="hello">
+        <div class="send">push here</div>
+    </div>
+    <div id="addtext-desc">
+        <div class="list"></div>
+        <div class="under"></div>
+    </div>
+    <div id="addtext-temp">
+        <div class="button first">1</div>
+        <div class="button second">2</div>
+        <div class="button third">3</div>
+    </div>
 
     <script>
         //#region log&text
@@ -108,25 +176,67 @@
             let isBlue = false; // ^^ で囲まれた部分かどうか
 
             for(let i = 0; i < rawtext.length; i++){
-                if(rawtext[i] === "*" && rawtext[i + 1] === "*"){
+                if(rawtext[i] == "*" && rawtext[i + 1] == "*"){
                     isRed = !isRed; // 状態を切り替える
                     i++; // 次の * をスキップ
-                }else if(rawtext[i] === "&" && rawtext[i + 1] === "&"){
+                }else if(rawtext[i] == "&" && rawtext[i + 1] == "&"){
                     isPink = !isPink;
                     i++; // 次の & をスキップ
-                }else if(rawtext[i] === "^" && rawtext[i + 1] === "^"){
+                }else if(rawtext[i] == "^" && rawtext[i + 1] == "^"){
                     isBlue = !isBlue;
                     i++;
                 }else{
-                    text.push({ char: rawtext[i], color: isRed ? "red" : isPink ? "pink" : isBlue ? "blue" : null });
+                    let color = null;
+                    if(isRed) color = 'red';
+                    if(isPink) color = 'pink';
+                    if(isBlue) color = 'blue';
+                    text.push({
+                        char: rawtext[i],
+                        color: color
+                    });
                 }
             }
             return text;
         }
 
-        async function addtext(text){
+        // ↓一瞬これにしようとしてた
+        // if(textShowing){
+        //     queueAddtext.push(text);
+        //     while(textShowing){
+        //         await delay(10);
+        //     }
+        // };
+
+        let queueAddtext = [];
+        let loopAddtext = 0;
+        async function waitforAddtext(){
+            let len = queueAddtext.length;
+
+            if(len == 0) loopAddtext = 0;
+            else loopAddtext = 1;
+
+            if(!loopAddtext) return console.log('loopがないんでしゅーりょー');
+            requestAnimationFrame(waitforAddtext);
+            
+            if(textShowing) return console.log('文字表示されたんでスキップ');
+            
+            let raw = queueAddtext.shift();
+            console.log(`${raw}を送信します`);
+            console.log(`残り: (${len - 1})[${queueAddtext}]`);
+            await addtext(raw);
+        }
+        async function addtext(raw){
+            if(!raw) return console.log('「内容が？内容が〜〜？ないよ〜〜〜つってwwww直せ」');
+
+            if(textShowing){
+                queueAddtext.push(raw);
+
+                if(!loopAddtext) waitforAddtext();
+                return;
+            }
+            
             textShowing = 1;
-            text = colorcheck(text);
+            text = colorcheck(raw);
             textDiv.innerHTML = ""; // 中身をリセット
             textDiv.style.display = "block"; // 表示
             let index = 0;
@@ -224,12 +334,60 @@
             log.scrollTop = log.scrollHeight;
         }
         //#endregion
-        
-        document.getElementById('addtextGo').addEventListener('click', async function(){
-            let text = document.getElementById('addtext').value
-            console.log(text)
-            addtext(text)
+
+        let addtextD = document.getElementById('addtext');
+        let addtextTD = document.getElementById('addtext-temp');
+        let addtextDesc = document.querySelector('#addtext-desc');
+        let addtex = {
+            form: addtextD.querySelector('.form'),
+            send: addtextD.querySelector('.send'),
+            desc: addtextDesc.querySelector('.list'),
+            template: [
+                {
+                    D: addtextTD.querySelector('.first'),
+                    I: ['hello1', 'hello2', 'hello3', 'hello4']
+                },
+                {
+                    D: addtextTD.querySelector('.second'),
+                    I: ['[不明なエラー]']
+                },
+                {
+                    D: addtextTD.querySelector('.third'),
+                    I: ['[不明なエラー]']
+                }
+            ]
+        }
+        addtex.form.addEventListener('keydown', e => {
+            if(e.key == 'Enter') addtex.send.click();
         })
+        addtex.send.addEventListener('click', async function(){
+            let text = addtex.form.value;
+            await addtext(text)
+            console.log('送信完了')
+        })
+        addtex.template.forEach(t => {
+            t.D.addEventListener('click', async function(){
+                for(let b of t.I) addtext(b);
+            })
+
+            let arr = t.I.map(a => `<div class="item">${a}</div>`);
+            t.D.addEventListener('mouseover', async function(){
+                addtextDesc.style.display = 'block';
+                addtex.desc.innerHTML = arr.join('');
+
+                let top = t.D.getBoundingClientRect().top;
+                 top -= 250;
+                let left = t.D.getBoundingClientRect().left;
+                 left -= (addtextDesc.offsetWidth - t.D.offsetWidth) / 2;
+                
+                addtextDesc.style.top = `${top}px`;
+                addtextDesc.style.left = `${left}px`;
+            })
+            t.D.addEventListener('mouseout', async function(){
+                addtextDesc.style.display = 'none';
+                addtex.desc.innerHTML = '';
+            });
+        });
     </script>
 </body>
 </html>

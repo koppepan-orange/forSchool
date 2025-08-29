@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nendai-matome-yatsu</title>
+    <link rel="stylesheet" href="mitame.css">
+</head>
+<body>
+    <div id="movableDescription"></div>
+    <div id="log">
+        <div class="opener">‹</div>
+        <div class="log"></div>
+    </div>
+    <div id="text"></div>
+    <div id="migiue"></div>
+
+    <div id="side">
+        <!-- ファイルの読み込みとか選択とか。上部width100%ボタンで閉、左上の三で開 -->
+        <div class="tog">三</div>
+    </div>
+    <div id="main">
+        <!-- 出すところ。classで基本はelseでまとめ、idがつけられたらそれを上部に、class名をそのidに。 -->
+        <div class="side"></div>
+        <div class="body"></div>
+    </div>
+
+    <div id="add">+</div>
+    <div id="addpop">
+        <div class="x">×</div>
+
+        <div class="names daxn">
+            <div class="l">名前</div>
+            <div class="r imp" contenteditable></div>
+        </div>
+
+        <div class="years twonoba daxn">
+            <div class="l">年</div>
+            <div class="r row">
+                <div class="b imp" contenteditable></div>
+                <span class="nobasi">〜</span>
+                <div class="a imp" contenteditable></div>
+            </div>
+        </div>
+        <div class="months twonoba daxn">
+            <div class="l">月</div>
+            <div class="r row">
+                <div class="b imp" contenteditable></div>
+                <span class="nobasi">〜</span>
+                <div class="a imp" contenteditable></div>
+            </div>
+        </div>
+        <div class="days twonoba daxn">
+            <div class="l">日</div>
+            <div class="r row">
+                <div class="b imp" contenteditable></div>
+                <span class="nobasi">〜</span>
+                <div class="a imp" contenteditable></div>
+            </div>
+        </div>
+
+        <div class="belongs daxn">
+            <div class="l">所属</div>
+            <div class="r imp" contenteditable></div>
+        </div>
+
+        <div class="tags daxn">
+            <div class="l">タグ</div>
+            <div class="r imp" contenteditable></div>
+        </div>
+
+        <div class="explain daxn">
+            <div class="l">説明</div>
+            <div class="r imp" contenteditable></div>
+        </div>
+
+        <button class="send">確定</bsutton>
+    </div>
+
+    <script src="nakami.js" defer></script>
+</body>
+</html>

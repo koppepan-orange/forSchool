@@ -500,7 +500,6 @@ async function move(who, code, x, y, force = 0){
    who.moving = 0;
 }
 const EPSILON = 0.01;
-
 function over(a, b) {
    if (a.cam == b.cam && a.me == b.me) return false;
 

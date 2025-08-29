@@ -84,14 +84,16 @@
     let gravity = -0.01; // 重力加速度
     let jumpPower = 0.2; // ジャンプの強さ
     let isGrounded = false; // 地面についているか
-    const keys = { w: false, s: false, a: false, d: false, space: false, q: false };
 
-    document.addEventListener("keydown", (event) => {
-        const key = event.key === " " ? "space" : event.key.toLowerCase();
+    const keys = {};
+    document.addEventListener("keydown", e => {
+        let key = e.key.toLowerCase();
+        if(key == ' ') key = 'space';
         keys[key] = true;
     });
     document.addEventListener("keyup", (event) => {
-        const key = event.key === " " ? "space" : event.key.toLowerCase();
+        let key = event.key.toLowerCase();
+        if(key == ' ') key = 'space';
         keys[key] = false;
     });
 
@@ -247,15 +249,16 @@
             z:0,
         }
     ];
+    
+    const objLoader = new THREE.OBJLoader();
     const mtlLoader = new THREE.MTLLoader();
     ObjList.forEach((back) => {
         mtlLoader.load(`${back.name}.mtl`, (materials) => {
             materials.preload();
 
-            const backLoader = new THREE.OBJLoader();
-            backLoader.setMaterials(materials);
+            objLoader.setMaterials(materials);
             
-            backLoader.load(`${back.name}.obj`, function (obj) {
+            objLoader.load(`${back.name}.obj`, function (obj) {
                 obj.traverse((child) => {
                     if (child.isMesh) {
                         child.userData.touchable = true;
@@ -270,6 +273,7 @@
             });
         });
     });
+    
     
 
     //床
