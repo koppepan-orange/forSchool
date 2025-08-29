@@ -79,16 +79,17 @@ const zentaiLight = new THREE.AmbientLight(0xffffff, 0.25);
 scene.add(zentaiLight);
 
 //平行光 new THREE.DirectionalLight(色, 光の強さ)
-const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+const sunLight = new THREE.DirectionalLight(0xff0000, 1);
 sunLight.position.set(5, 5, 5);
 scene.add(sunLight);
 
 //点光源 new THREE.PointLight(色, 光の強さ, 距離, 光の減衰率)
-const pointLight = new THREE.PointLight(0xFFFFFF, 2, 50, 1.0);
+const pointLight = new THREE.PointLight(0x0000ff, 2, 50, 1.0);
 scene.add(pointLight);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 100, 0);
+camera.fov = 60;
 
 let direction = new THREE.Vector3(); //direction == 向いてる角度
 
@@ -161,6 +162,7 @@ document.addEventListener("keyup", e => {
 
 //#region debug
 let info = document.querySelector('#debug-info');
+let fov = 60;
 let isCreative = false
 let tpSelect = document.querySelector('#tpSelect');
 let tpSelectXD = 1;
@@ -187,7 +189,7 @@ document.addEventListener('keyup', (event) => {
             speed -= 0.5;
             break;
         case 'j':
-            jumpPower += 0.5;
+            jumpPower += 0.2;
             break;
         case 'k':
             if(gravity == -0.1){
@@ -212,6 +214,15 @@ document.addEventListener('keyup', (event) => {
                 scale: 3,
                 touchable: 0
             })
+            break;
+        case 'f':
+            if(fov < 170){
+                fov += 10;
+            }else{
+                fov = 10;
+            }
+            camera.fov = fov;
+            camera.updateProjectionMatrix();
             break;
     };
     
@@ -417,9 +428,25 @@ function updateCameraMovement() {
     camera.getWorldDirection(direction);
     direction.y = 0;
     direction.normalize();
+
+    let right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+    if (keys.a) {
+        camera.position.addScaledVector(right, speed);
+    }
+    if (keys.d) {
+        camera.position.addScaledVector(right.clone(), -speed);
+    }
     
-    if (keys.q && keys.e){
-        acceleration.z = accelRate*10;
+    if(keys.shift){
+        acceleration.z = accelRate*30;
+    }else if(keys.q && keys.e){
+        acceleration.z = accelRate*15;
+    }else if (keys.q){
+        acceleration.z = accelRate*7;
+        camera.position.addScaledVector(right, speed*2);
+    }else if (keys.e){
+        acceleration.z = accelRate*7;
+        camera.position.addScaledVector(right.clone(), -speed*2);
     }else if (keys.w && !checkWallCollision()) {
         if (!isCreative) {
             // camera.position.addScaledVector(direction, speed);
@@ -444,14 +471,6 @@ function updateCameraMovement() {
 
     velocity.z += acceleration.z;
     camera.position.addScaledVector(direction, velocity.z);
-
-    let right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
-    if (keys.a) {
-        camera.position.addScaledVector(right, speed);
-    }
-    if (keys.d) {
-        camera.position.addScaledVector(right.clone(), -speed);
-    }
 
     if (keys.space && isGrounded) {
         velocity.y = jumpPower;
@@ -481,6 +500,7 @@ function updateCameraMovement() {
     //direction
     info.querySelector('.speed').textContent = `speed:${speed}`;
     info.querySelector('.jumpPower').textContent = `jumpPower:${jumpPower}`;
+    info.querySelector('.fov').textContent = `fov:${fov}`;
     info.querySelector('.isGrounded').textContent = `isGrounded:${isGrounded}`;
     info.querySelector('.isOnAccelPad').textContent = `isOnAccelPad:${isOnAccelPad}`;
 }
