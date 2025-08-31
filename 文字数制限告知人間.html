@@ -18,14 +18,25 @@
             display: flex;
             flex-direction: column;
         }
+        :focus{
+            outline: none;
+        }
+        body{
+            user-select: none;
+            margin: 10px;
+        }
+        ::-webkit-scrollbar{
+            display: none;
+        }
 
         #mimax{
             justify-content: flex-start;
             align-items: center;
             gap: 7.5px;
-            width: 20%;
+            width: calc(20% + 20px);
             padding: 10px;
             background: #eaf5ff;
+            box-sizing: border-box;
         }
         #mimax .row{
             justify-content: center;
@@ -73,6 +84,33 @@
             box-sizing: border-box;
         }
 
+        #text{
+            display: block;
+            width: calc(20% + 20px);
+            height: 80%;
+            position: relative;
+            box-sizing: border-box;
+        }
+        #text .text{
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 5px;
+        }
+        #text .num{
+            position: absolute;
+            bottom: -40px;
+            right: 0;
+            width: 40px;
+            aspect-ratio: 1/1;
+            padding: 5px;
+            border: 1px solid #b5dcff;
+            border-radius: 50%;
+            font-size: 20px;
+            font-family: hangyaku;
+            text-align: center;
+            box-sizing: border-box;
+        }
 
     </style>
 </head>
@@ -92,16 +130,23 @@
         </div>
     </div>
 
-    <textarea id="text" placeholder="0から9999文字です"></textarea>
+    <div id="text">
+        <textarea class="text" placeholder="0から9999文字です"></textarea>
+        <div class="num">0</div>
+    </div>
 
     <script defer>
-        let minI = document.querySelector("#mimax .mix");
-        let maxI = document.querySelector("#mimax .max");
-        let pressD = document.querySelector("#mimax .button");
-        let textI = document.querySelector("#text");
+        let mimaxD = document.querySelector("#mimax");
+        let minI = mimaxD.querySelector(".mix");
+        let maxI = mimaxD.querySelector(".max");
+        let pressD = mimaxD.querySelector(".button");
+        let textD = document.querySelector("#text");
+        let textI = textD.querySelector(".text");
+        let numD = textD.querySelector(".num");
 
         let min = 0;
         let max = 9999;
+        let num = 0;
 
         pressD.addEventListener("click", function(){
             min = +minI.value;
@@ -112,12 +157,26 @@
 
         textI.addEventListener("input", tekiou);
         function tekiou(){
-            if(textI.value.length > max) return textI.style.backgroundColor = "#ff8080", 1;
-            if(textI.value.length < min) return textI.style.backgroundColor = "#8080ff", -1;
+            num = textI.value.length;
+            numD.textContent = num;
+            
+            let maxCo = '#ff8080';
+            let minCo = '#8080ff';
+            if(num > max) return textI.style.backgroundColor = maxCo, numD.style.color = maxCo,  1;
+            if(num < min) return textI.style.backgroundColor = minCo, numD.style.color = minCo, -1;
             
             textI.style.backgroundColor = "";
             return 0;
         }
+
+        new ResizeObserver(resized).observe(textI);
+        function resized(){
+            console.log(textI.offsetWidth);
+            textD.style.width = `${textI.offsetWidth}px`;
+            mimaxD.style.width = `${textI.offsetWidth}px`;
+            numD.style.left = `${textI.offsetWidth - numD.offsetWidth}px`;
+        }
+
     </script>
 </body>
 </html>
