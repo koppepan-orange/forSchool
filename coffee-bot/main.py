@@ -1,16 +1,17 @@
-
 import discord
 from discord import app_commands
 from discord.ext import commands
 import json
 import os
 import typing
+from dotenv import load_dotenv
+from pathlib import Path
+load_dotenv(Path(__file__).parent / ".env")
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 # TOKENは好きに使うがいい〜
-
 # TOKENを.envから読み込む
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -172,4 +173,5 @@ async def echo(ctx, *, message: str):
 
 
 bot.add_cog(MyBot(bot))
+# ↑ここでawaitにしたらfunctionの外でやっちゃだめっすよって言われた
 bot.run(TOKEN)
