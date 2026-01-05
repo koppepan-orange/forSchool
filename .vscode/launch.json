@@ -20,45 +20,14 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "scuro e nero soldato_win",
-            "file": "n:\\koppepan_orange\\forSchool\\Scuro_e_Nero_Soldato\\index.html"
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "scuro e nero soldato_mac",
-            "file": "Scuro_e_Nero_Soldato/index.html"
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
             "name": "race_mac",
             "file": "race/index.html"
         },
         {
             "type": "chrome",
             "request": "launch",
-            "name": "stone-trader_mac",
-            "file": "stone_trader/index.html"
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "stone-trader_win",
-            "file": "n:\\koppepan_orange\\forSchool\\stone_trader\\index.html"
-            // stone_trader\\index.html だけでもいいかも
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "stroll-game_mac",
-            "file": "stroll_game/index.html"
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "nendai-matome_mac",
-            "file": "nendai/index.html"
+            "name": "hiroviro",
+            "file": "hiroviro/index.html"
         },
     ]
 }
