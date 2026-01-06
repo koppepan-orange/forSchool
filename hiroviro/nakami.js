@@ -537,63 +537,211 @@ window.addEventListener('blur', () => { clicking = cricking = false; });
 // #region canvas
 let canvas = document.getElementById('c');
 let ctx = canvas.getContext('2d');
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+
+function resizeCanvas(){
+    let dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-ctx.beginPath();
-ctx.moveTo(150, 20);
-ctx.lineTo(280, 100);
-ctx.lineTo(230, 250);
-ctx.lineTo(70, 250);
-ctx.lineTo(20, 100);
-ctx.closePath();
 
-ctx.fillStyle = '#ff7b7b';
-ctx.fill();
 
-ctx.strokeStyle = '#222';
-ctx.lineWidth = 3;
-ctx.stroke();
+
+// #endregion
+
+// #region sound
+let souC = {
+    volume: 0.5
+}
+
+function soundPlay(name){
+    let sound = sounds[name];
+    if(!sound) return soundPlay("error");
+
+    sound.currentTime = 0;
+    sound.volume = souC.volume;
+    sound.play();
+}
+
+function soundStop(){
+    document.querySelectorAll('audio,video').forEach(el => {
+        el.pause();
+        el.currentTime = 0;
+    });
+}
+
+function soundVolume(val){
+    const v = Math.max(0, Math.min(1, val/100));
+    console.log(`[soundVolume] ${souC.volume??null} => ${v}`);
+    souC.volume = v;
+    document.querySelectorAll('audio,video').forEach(el => {
+        el.volume = v
+    });
+}
+soundVolume(50);
 // #endregion
 
 let p = {
-    x: 0,
-    y: 0,
+    x: 200,
+    y: 200,
     dx: 0,
     dy: 0,
     d:1
 }
 
+// #region Shape
+let shaD = document.getElementById('shape_slsl');
+let shaC = {
+    tog:1
+}
+shaC.list = [
+    {
+        name:'three',
+        color:'#ff6060',
+        points:[
+            {x:0, y:0},
+            {x:20, y:10},
+            {x:0, y:20},
+        ]
+    },
+    {
+        name:'four',
+        color:'#8fe9ff',
+        points:[
+            {x:0, y:0},
+            {x:20, y:0},
+            {x:20, y:20},
+            {x:0, y:20},
+        ]
+    }
+]
+let shaF = {};
+
+shaF.tog = (c = NaN) => {
+    shaD.classList.toggle('tog');
+    if(c == 1) shaD.classList.add('tog');
+    if(c == 0) shaD.classList.remove('tog');
+
+    if(shaD.classList.contains('tog')) shaC.tog = 1;
+    else shaC.tog = 0;
+}
+shaF.select = (name) => {
+    let shape = shaC.list.find(a => a.name == name);
+    let center = ((points) => {
+        let sx = 0, sy = 0;
+        for(let p of points){
+            sx += p.x;
+            sy += p.y;
+        }
+
+        return{
+            x: sx / points.length,
+            y: sy / points.length
+        };
+    })(shape.points);
+    p.center = center;
+    p.shape = shape;
+}
+shaF.select('three')
+// #endregion
+
 // #region move
-document.addEventListener('keydown', (e) => {
-    let key = e.key.toLowerCase();
-    if(e.key == ' ') key = 'space';
-    
-    if(key == 'w') p.dy = -p.d;
-    if(key == 'a') p.dx = -p.d;
-    if(key == 's') p.dy = p.d;
-    if(key == 'd') p.dx = p.d;
-})
 // #endregion
 
 // #region loooooop
 function tekiou(){
-    
+    // 描画
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+
+
+    ctx.translate(p.x+p.center.x, p.y+p.center.y);
+    ctx.scale(1, 1);
+
+    ctx.beginPath();
+    for(let i = 0; i < p.shape.points.length; i++){
+        let pt = p.shape.points[i];
+        let sx = pt.x - p.center.x;
+        let sy = pt.y - p.center.y;
+        if(i == 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+    }
+    ctx.closePath();
+
+    ctx.fillStyle = p.shape.color;
+    ctx.fill();
+
+    ctx.restore();
+
+    // 動こうとすると左上に固定。おそらくtekiouの処理が問題..?頑張れ
 }
 function update(){
-    this.x += this.dx;
-    this.y += this.dy;
+    // let masa2 = 0.02
+    // p.dx -= p.dx * masa2;
+    // p.dy -= p.dy * masa2;
+    
+    if(keys['w'] || keys['arrowup'])    p.dy = -p.speed;
+    if(keys['s'] || keys['arrowdown'])  p.dy =  p.speed;
+    if(keys['a'] || keys['arrowleft'])  p.dx = -p.speed;
+    if(keys['d'] || keys['arrowright']) p.dx =  p.speed;
+
+    p.x += p.dx;
+    p.y += p.dy;
 }
 
 let loop = 0;
 function gameloop(){
     update();
+    tekiou();
 
     if(!loop) return;
     requestAnimationFrame(gameloop);
 }
 // #endregion
+
+// #region load
+let sounds = {}
+let loaC = {
+    souT:0,
+    souD:0,
+    erd:0
+}
+loaC.souL = ["doom","damage"]
+let loaF = {};
+loaF.loadSon = async() => {
+    loaC.souT = loaC.souL.length;
+
+    for(let sou of loaC.souL){
+        let sound = new Audio();
+        sound.preload = 'auto';
+        sound.src = `assets/sounds/${sou}.mp3`;
+        sound.addEventListener('canplaythrough', () => {
+            // console.log(`Sound ${sou} loaded.`);
+            loaC.souD += 1;
+            if(loaC.souD == loaC.souT) start();
+        }, {once: 1});
+        sound.onerror = () => {
+            console.error(`Sound assets/sounds/${sou} failed to load.`);
+            loaC.erd += 1;
+            if(loaC.erd > 20) return console.error('さすがにやりすぎbonus'), 1;
+            sound.src = `assets/error.mp3`;
+            loaC.souD += 1;
+            if(loaC.souD == loaC.souT) start();
+        };
+        sounds[sou] = sound;
+    };
+}
+// #endregion
+
+async function start(){
+    await loaF.loadSon();
+
+    loop = 1;
+    gameloop();
+}
+document.addEventListener('DOMContentLoaded', start);

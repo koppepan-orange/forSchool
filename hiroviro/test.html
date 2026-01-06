@@ -1,0 +1,124 @@
+<canvas id="c"></canvas>
+<script>
+// 元のポリゴン（質問の座標をそのまま使う）
+const originalPoints = [
+  {x:0, y:0},
+  {x:20, y:10},
+  {x:0, y:20},
+];
+
+let canvas = document.getElementById('c');
+let ctx = canvas.getContext('2d');
+
+function resizeCanvas(){
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// 描画原点（ポリゴンの重心）を計算しておくと扱いやすい
+const center = (function(points){
+    let sx = 0, sy = 0;
+    for(const p of points){ sx += p.x; sy += p.y; }
+    return { x: sx / points.length, y: sy / points.length };
+})(originalPoints);
+
+// プレイヤー（またはポリゴン）の状態
+let p = {
+  x: 0,    // 描画位置オフセット（ピクセル）
+  y: 0,
+  dx: 0,   // 現在の速度（ピクセル/frame）
+  dy: 0,
+  d: 1     // スケール
+};
+
+// キー保持管理（押してる間だけ動くようにする）
+const keys = {};
+
+// キーイベント（押すと方向が入り、離すと消える）
+document.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+  keys[key] = true;
+
+  // スペースを 'space' で扱うのが元コードにあったから対応
+  if (e.key === ' ') keys['space'] = true;
+});
+document.addEventListener('keyup', (e) => {
+  const key = e.key.toLowerCase();
+  keys[key] = false;
+  if (e.key === ' ') keys['space'] = false;
+});
+
+// update: 速度計算・位置更新
+function update(){
+  // 移動速度（好きに変えて）
+  const speed = 10 * p.d; // スケールに合わせて速度を変えると自然
+  p.dx = 0; p.dy = 0;
+  if (keys['w'] || keys['arrowup'])    p.dy = -speed;
+  if (keys['s'] || keys['arrowdown'])  p.dy =  speed;
+  if (keys['a'] || keys['arrowleft'])  p.dx = -speed;
+  if (keys['d'] || keys['arrowright']) p.dx =  speed;
+
+  // 例: スペースで縮小・拡大のトグル（いらなければ消す）
+  if (keys[' ' ] || keys['space']) {
+    p.d = Math.max(0.1, p.d - 0.02); // 長押しで小さくなる
+  } else {
+    // 自動で元のサイズに戻したければコメントを外す
+    // p.d += (1 - p.d) * 0.05;
+  }
+
+  // 位置更新
+  p.x += p.dx;
+  p.y += p.dy;
+}
+
+// tekiou: 描画処理（毎フレーム呼ぶ）
+function tekiou(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+
+  // 移動：p.x/p.y はポリゴンの中心が置かれる位置（CSSピクセル）
+  // ここでは画面中央に初期表示したいなら初期値を設定するか、
+  // 描画時に canvas.width/2 などを足す。
+  // 今回は canvas の左上を基準に p.x/p.y を使う。
+  ctx.translate(p.x + center.x, p.y + center.y);
+  ctx.scale(p.d, p.d);
+
+  // パスを描く（中心を (0,0) にして描画）
+  ctx.beginPath();
+  for (let i = 0; i < originalPoints.length; i++){
+    const pt = originalPoints[i];
+    const sx = pt.x - center.x;
+    const sy = pt.y - center.y;
+    if (i === 0) ctx.moveTo(sx, sy);
+    else ctx.lineTo(sx, sy);
+  }
+  ctx.closePath();
+
+  ctx.fillStyle = '#ff7b7b';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// ゲームループ
+let running = true; // これを false にすれば止められる
+function gameloop(){
+  update();
+  tekiou();
+  if (!running) return;
+  requestAnimationFrame(gameloop);
+}
+
+// 初期位置を見やすいとこに移動して開始
+p.x = 50; // 好きに変えて
+p.y = 50;
+p.d = 0.8; // 初期スケール
+
+gameloop(); // スタート
+</script>
