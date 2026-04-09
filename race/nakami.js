@@ -313,7 +313,7 @@ function placeObject(object){
 
 
 // 床の作成
-let floorAtumii = 2; //あつみぃ じゃねえんだよまじww
+let floorAtumii = 2; //あつみぃ
 let floorWandH = 100;
 const floorGeometry = new THREE.BoxGeometry(floorWandH, floorAtumii, floorWandH);
 const floorMaterial = new THREE.MeshBasicMaterial({color: 0xabced8});
