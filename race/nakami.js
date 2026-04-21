@@ -79,12 +79,12 @@ const zentaiLight = new THREE.AmbientLight(0xffffff, 0.25);
 scene.add(zentaiLight);
 
 //平行光 new THREE.DirectionalLight(色, 光の強さ)
-const sunLight = new THREE.DirectionalLight(0xff0000, 1);
+const sunLight = new THREE.DirectionalLight(0xffffff, 1);
 sunLight.position.set(5, 5, 5);
 scene.add(sunLight);
 
 //点光源 new THREE.PointLight(色, 光の強さ, 距離, 光の減衰率)
-const pointLight = new THREE.PointLight(0x0000ff, 2, 50, 1.0);
+const pointLight = new THREE.PointLight(0xffffff, 2, 50, 1.0);
 scene.add(pointLight);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);

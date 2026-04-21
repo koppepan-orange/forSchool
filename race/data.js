@@ -23,6 +23,14 @@ let presetObjects = [
         scale: 100,
         touchable: 1,
     },
+    {
+        name: 'kyonshi_model',
+        x: -100,
+        y: 40,
+        z: -50,
+        scale: 100,
+        touchable: 1,
+    }
 ];
 
 let tpPositions = {
@@ -37,5 +45,11 @@ let tpPositions = {
         x:-343,
         y:-232,
         z:-873,    
+    },
+    '3':{
+        name:'course2',
+        x:-83.18,
+        y:-230,
+        z:325,    
     },
 }
