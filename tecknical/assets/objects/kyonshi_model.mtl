@@ -1,0 +1,34 @@
+newmtl skin
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+d 1.000
+map_Kd kyonshi_texture.png
+
+newmtl navy
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+d 1.000
+map_Kd kyonshi_texture.png
+
+newmtl red
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+d 1.000
+map_Kd kyonshi_texture.png
+
+newmtl black
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+d 1.000
+map_Kd kyonshi_texture.png
+
+newmtl yellow
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+d 1.000
+map_Kd kyonshi_texture.png
