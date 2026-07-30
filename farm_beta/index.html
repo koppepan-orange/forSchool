@@ -1,0 +1,96 @@
+ <!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="mitame.css">
+    <title>Agree! Carboner!!</title>
+</head>
+<body>
+    <div id="mobileDesc"></div>
+    <div id="log" class="hid">
+        <div class="opener"><</div>
+        <div class="main"></div>
+        <div class="text"></div>
+    </div>
+    <div id="tenshee">
+        <div class="disp"></div>
+        <div class="bts">
+            <div class="bt num" data-num="1">1</div>  <div class="bt num" data-num="2">2</div> <div class="bt num" data-num="3">3</div>
+            <div class="bt num" data-num="4">4</div>  <div class="bt num" data-num="5">5</div> <div class="bt num" data-num="6">6</div>
+            <div class="bt num" data-num="7">7</div>  <div class="bt num" data-num="8">8</div> <div class="bt num" data-num="9">9</div>
+            <div class="bt del">←</div> <div class="bt num" data-num="0">0</div> <div class="bt ok">OK</div>
+        </div>
+    </div>
+    <div id="movlis">
+        <div class="title">Move List</div>
+        <div class="list"></div>
+    </div>
+    
+
+    <div id="main">
+        <!-- アージャ・アステリオン -->
+
+        <div id="home" class="space">
+            <!-- 自室 -->
+            <div class="unit uni1">
+                <!-- 家近辺 -->
+                <div class="bt farm">畑の様子を見に行く</div>
+            </div>
+            
+            <div class="unit uni2">
+                <!-- 出かける -->
+                <div class="bt shop">売店に行く</div>
+                <div class="bt door">あのドアを探す</div>
+            </div>
+        </div>
+
+        <div id="farm" class="space">
+            <!-- 畑 -->
+
+        </div>
+
+        <div id="door" class="space">
+            <!-- 謎のドア。これを通って階段を降りると謎カジノへ -->
+
+            <div class="area loby">
+                <!--ろびーです-->
+
+            </div>
+
+            <div class="area nero">
+                <!--Scuro e Nero Soldatoの縮小版です-->
+
+            </div>
+
+            <div class="area cave">
+                <!--競馬です 馬じゃないけど-->
+
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- <script src="data.js" defer></script> -->
+    <!-- <script src="nakami.js" defer></script> -->
+
+    <script>
+        (async() => {
+            let ts = new Date().getTime(); 
+
+            let ZettaiTukawarenaiKannsuu = async (f) => {
+                return new Promise(res => {
+                    let script = document.createElement('script');
+                    script.src = `${f}.js?v=${ts}`;
+                    script.defer = true;
+                    script.onload = res;
+                    document.head.appendChild(script);
+                });        
+            }
+            await ZettaiTukawarenaiKannsuu(`data`);
+            await ZettaiTukawarenaiKannsuu(`nakami`);
+        })();
+    </script>
+</body>
+</html>
