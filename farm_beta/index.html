@@ -67,13 +67,14 @@
             <div class="area cave">
                 <!--競馬です 馬じゃないけど-->
 
+                <div class="bts">
+                    <div class="bt start">staRt</div>
+                </div>
             </div>
         </div>
 
     </div>
     
-    <!-- <script src="data.js" defer></script> -->
-    <!-- <script src="nakami.js" defer></script> -->
 
     <script>
         (async() => {
@@ -88,8 +89,9 @@
                     document.head.appendChild(script);
                 });        
             }
-            await ZettaiTukawarenaiKannsuu(`data`);
-            await ZettaiTukawarenaiKannsuu(`nakami`);
+            await ZettaiTukawarenaiKannsuu("data");
+            await ZettaiTukawarenaiKannsuu("komagome");
+            await ZettaiTukawarenaiKannsuu("nakami");
         })();
     </script>
 </body>
