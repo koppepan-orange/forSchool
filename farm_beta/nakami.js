@@ -57,9 +57,10 @@ dooC.cavC = {
     ing:0,
     waiting:0,
 
-    racers:[],
+    aflike: 2000, //後隙:規定値2000ms
     num: 4,
     longleg: 15,
+    racers:[],
 }
 dooC.cavF = {};
 
@@ -95,15 +96,19 @@ dooC.cavF.racerMake = (name = 0) => {
 
 
 dooC.cavF.act = async(who) => {
-    let act = arraySelect(who.acts);
-
     let hase = (arr, name) => {return arr.includes(name)};
+
+    let actor = {...who};
+    let act = arraySelect(who.acts);
+     let actL = act.split(",");
+    let aflike = dooC.cavC.aflike;
+     if(actL[0].startsWith("%")) aflike = +actL[0].slice(1);
 
     // becauseof: act_pre
     for(let buff of who.buffs){
         let data = findBuff(buff.name);
         if(hase(data.effects, "行動不可")) return 0;
-
+        
     }
 }
 
