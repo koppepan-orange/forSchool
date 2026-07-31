@@ -1420,6 +1420,41 @@ tensheeD.querySelectorAll('.bt').forEach(bt => {
 })
 
 //#endregion
+// #region provide
+class fuyoNagaOSU{
+    constructor(div, func, nagasa = 1000){
+        if(!div || !nagasa) return console.error(`せんぱ〜い？ ${div} ${func} ${nagasa} なんていうよくわからないものは使わないでくださ〜い笑`);
+        this.div = div;
+        this.func = func;
+        this.nagasa = nagasa;
+        this.timer = null;
+
+        this.make();
+    }
+
+    make(){
+        // 押し始めたとき
+        this.div.addEventListener('pointerdown', (e) => {
+            this.destroy();
+            this.timer = setTimeout(() => {
+                if(typeof this.func == 'function') this.func(e);
+            }, this.nagasa);
+        });
+
+        // 離したときやキャンセルされたとき(アロー関数でthisを守るらしい...)
+        this.div.addEventListener('pointerup', () => this.destroy());
+        this.div.addEventListener('pointercancel', () => this.destroy());
+        this.div.addEventListener('mouseleave', () => this.destroy());
+    }
+
+    destroy(){
+        if(this.timer != null){
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+    }
+}
+// #endregion
 //#region OBS
 let OBS = {
     keys: {},
@@ -1872,60 +1907,3 @@ document.addEventListener('keydown', async function(e){
 })
 //#endregion
 
-
-// #region main
-let mainD = document.getElementById('main');
-let mainC = {
-    spa: null,
-    
-    mvlsD: document.getElementById('movlis'),
-     mvlsLD: document.querySelector('#movlis .list'),
-    mvlsi: 0
-}
-let mainF = {};
-mainF.move = (to) => {
-    if(mainC.spa == to) return console.log('どういうわけか もう そこにいる');
-	if(!to) return console.error(`せんぱ〜い？${to}ってどこですか〜？笑`);
-	
-	for(let a of Spaces) document.getElementById(a.name).classList.remove('show');
-    document.getElementById(to).classList.add('show');
-    mainC.spa = to;
-
-    history.replaceState(null, "", `?${to}`);
-}
-
-mainF.load = () => {
-    for(let spa of Spaces){
-        let div = document.getElementById(spa.name);
-        if(!div) continue;
-
-        div.style.zIndex = spa.rank;
-        div.style.background = spa.back;
-    }
-}
-
-//#region movlis
-for(let n of Spaces){
-    let li = document.createElement('div');
-    li.textContent = n.name;
-    li.className = 'item';
-
-    li.addEventListener('click', () => mainF.move(n.name));
-
-    mainC.mvlsLD.appendChild(li);
-}
-document.addEventListener('keydown', (e) => {
-    if(e.key != 'm' || mainC.mvlsi) return;
-    mainC.mvlsD.style.left = `${OBS.mx - mainC.mvlsD.offsetWidth/2}px`;
-    mainC.mvlsD.style.top = `${OBS.my}px`;
-    mainC.mvlsD.classList.add('tog');
-    mainC.mvlsi = 1;
-})
-document.addEventListener('keyup',e => {
-    if(e.key != 'm') return;
-    mainC.mvlsD.classList.remove('tog');
-    mainC.mvlsi = 0;
-})
-//#endregion
-
-//#endregion main

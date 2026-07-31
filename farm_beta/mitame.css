@@ -709,8 +709,10 @@ input[type="range"].slider::-webkit-slider-thumb:hover{
 .space{
     display: none;
     flex-direction: column;
+    align-items: center;
     width: 100%;
     height: 100%;
+    padding: 40px 0;
     position: absolute;
     top: 0;
     left: 50%;
@@ -721,3 +723,131 @@ input[type="range"].slider::-webkit-slider-thumb:hover{
 .space.show{
     display: flex;
 }
+
+.space .return{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 40px;
+    aspect-ratio: 1/1;
+    object-fit: contain;
+    background-image: url(assets/images/systems/home.png);
+    background-size: contain;
+    background-position: center;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    transition: scale 0.05s;
+    transform-origin: top left;
+    cursor: pointer;
+    z-index: 255;
+    box-sizing: border-box;
+
+    &:active{
+        scale: 3.00;
+        transition: scale 0.85s linear;
+    }
+}
+
+
+#home.space{
+    content:"home";
+    gap: 30px;
+}
+#home .unit{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    width: 92%;
+    height: fit-content;
+    padding: 25px;
+    border: 4px solid #000000;
+    box-sizing: border-box;
+}
+#home .unit .bt{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 5px 10px;
+    border: 3.5px solid #000000;
+    transition: scale 0.05s;
+    font-size: 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+
+    &:active{
+        background: #000000;
+        scale: 0.90;
+        color: #ffffff;
+    }
+}
+
+
+
+/* #region door */
+#door.space{
+    content: "door 賭けエリア";
+}
+#door .area{
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+
+    &.show{
+        display: flex;
+    }
+}
+
+#door .area.cave{
+    gap: 40px;
+}
+#door .area.cave .racers{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 3px;
+    width: 100%;
+    height: fit-content;
+    padding: 0;
+    box-sizing: border-box;
+}
+#door .area.cave .racers .racer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: fit-content;;
+}
+#door .area.cave .racers .racer .road{
+    display: block;
+    width: 100%;
+    aspect-ratio: 1/1;
+    background-image: url("assets/images/systems/road.png");
+    background-size: contain;
+    background-position: center;
+    box-sizing: border-box;
+
+    & .at{
+        content: "@";
+        display: block;
+        width: 100%;
+        height: fit-content;
+        object-fit: contain;
+        font-size: 20px;
+        line-height: 100%;
+        font-family: genjuu;
+        box-sizing: border-box;
+    }
+}
+
+/* #endregion */

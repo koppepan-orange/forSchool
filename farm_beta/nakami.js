@@ -1,3 +1,101 @@
+// #region main
+let mainD = document.getElementById('main');
+let mainC = {
+    spa: null,
+    
+    mvlsD: document.getElementById('movlis'),
+     mvlsLD: document.querySelector('#movlis .list'),
+    mvlsi: 0,
+
+    returnDs: mainD.querySelectorAll('.return'),
+}
+let mainF = {};
+mainF.move = (to) => {
+    console.log(`[move] ${to}`);
+    if(mainC.spa == to) return console.log('どういうわけか もう そこにいる');
+	if(!to) return console.error(`せんぱ〜い？${to}ってどこですか〜？笑`);
+	
+	for(let a of Spaces) document.getElementById(a.name).classList.remove('show');
+    document.getElementById(to).classList.add('show');
+    mainC.spa = to;
+
+    switch(to){
+        case "home":{
+            homF.came();
+            break;
+        }
+    }
+
+    history.replaceState(null, "", `?${to}`);
+}
+
+mainF.load = () => {
+    for(let spa of Spaces){
+        let div = document.getElementById(spa.name);
+        if(!div) continue;
+
+        div.style.zIndex = spa.rank;
+        div.style.background = spa.back;
+    }
+
+    for(let a of mainC.returnDs){
+        let from = a.dataset.belong; //これが所属spaceのはず
+        
+        new fuyoNagaOSU(a, () => {
+            mainF.move("home");
+        }, 1000);
+    }
+}
+
+//#region movlis
+for(let n of Spaces){
+    let li = document.createElement('div');
+    li.textContent = n.name;
+    li.className = 'item';
+
+    li.addEventListener('click', () => mainF.move(n.name));
+
+    mainC.mvlsLD.appendChild(li);
+}
+document.addEventListener('keydown', (e) => {
+    if(e.key != 'm' || mainC.mvlsi) return;
+    mainC.mvlsD.style.left = `${OBS.mx - mainC.mvlsD.offsetWidth/2}px`;
+    mainC.mvlsD.style.top = `${OBS.my}px`;
+    mainC.mvlsD.classList.add('tog');
+    mainC.mvlsi = 1;
+})
+document.addEventListener('keyup',e => {
+    if(e.key != 'm') return;
+    mainC.mvlsD.classList.remove('tog');
+    mainC.mvlsi = 0;
+})
+//#endregion
+
+//#endregion main
+
+
+// #region home
+let homD = document.getElementById("home");
+let homC = {
+    goDs:{
+        farm: homD.querySelector(".uni1 .farm"),
+        cook: homD.querySelector(".uni1 .cook"),
+        shop: homD.querySelector(".uni2 .shop"),
+        door: homD.querySelector(".uni2 .door")
+    }
+}
+let homF = {};
+
+homF.load = () => {
+    for(let k of Object.keys(homC.goDs)) homC.goDs[k].addEventListener('click', () => mainF.move(k));
+}
+homF.came = () => {
+    if(hit(6)) homC.goDs["cook"].textContent = "キッキンチキンに向かう";
+}
+
+// #endregion
+
+
 function findGeneric(list, type, name, extraCheck = null) {
     let data;
     if(extraCheck) data = extraCheck(list, name);
@@ -9,6 +107,8 @@ function findGeneric(list, type, name, extraCheck = null) {
 }
 const findBuff = (name) => findGeneric(Buffs, "Buffs", name);
 const findRacer = (name) => findGeneric(Racers, "Racers", name);
+
+
 
 // #region door
 let dooD = document.getElementById("door");
@@ -23,12 +123,12 @@ let dooC = {
 let dooF = {};
 
 dooF.move = (to) => {
-    if(dooC.lis == to) return console.log('どういうわけか もう そこにいる');
+    if(dooC.now == to) return console.log('どういうわけか もう そこにいる');
 	if(!to) return console.error(`せんぱ〜い？${to}ってどこですか〜？笑`);
 	
-	for(let a of dooC.lis) document.getElementById(a.name).classList.remove('show');
-    document.getElementById(to).classList.add('show');
-    dooC.lis = to;
+	for(let a of Object.keys(dooC.shuDs)) dooC.shuDs[a].classList.remove('show');
+    dooC.shuDs[to].classList.add('show');
+    dooC.now = to;
 }
 
 // #region loby
@@ -53,6 +153,7 @@ dooC.cavC = {
     btDs:{
         start: dooC.cavD.querySelector(".bts .bt.start"),
     },
+    racersD: dooC.cavD.querySelector(".racers"),
     
     ing:0,
     waiting:0,
@@ -65,33 +166,73 @@ dooC.cavC = {
 dooC.cavF = {};
 
 dooC.cavF.tekiou = () => {
-    
+    for(let racer of dooC.cavC.racers){
+        let div = racer.div;
+        let at0 = div.querySelector(".at");
+         if(at0) at0.remove();
+
+        let pos = racer.pos;
+        let at = document.createElement("img");
+        at.className = "at";
+        at.src = `assets/images/racers/${racer.name}.png`;
+        console.log(`.road${pos}`)
+        div.querySelector(`.road${pos}`).appendChild(at);
+    }
 }
 
 dooC.cavF.start = () => {
-    let num = dooC.cavC.num
-    for(let i=0; i<num; i++){
-        
+    jump:{
+        if(dooC.cavC.ing) break jump;
+        dooC.cavC.ing = 1;
+
+        console.log("[racer] 事前準備タイム")
+        dooC.cavC.racersD.innerHTML = "";
+        dooC.cavC.racers = [];
+
+        let num = dooC.cavC.num;
+        for(let i=0; i<num; i++){
+            console.log(`[racer] racer作成日記: ${i}番目`);
+            let racer = dooC.cavF.racerMake(i);
+        }
+
+        dooC.cavF.tekiou();
     }
 }
 dooC.cavC.btDs["start"].addEventListener("click", () => {
-    if(!ing) dooC.cavF.start();
-    // else 1=1
+    if(!dooC.cavC.ing) dooC.cavF.start();
+    else{
+        if(!dooC.cavC.stop) dooC.cavF.stop();
+        else dooC.cavF.start();
+    }
 });
 
-dooC.cavF.racerMake = (name = 0) => {
-    if(!name) arraySelect(Racers).name;
+dooC.cavF.racerMake = (id, name = 0) => {
+    if(!name) name = arraySelect(Racers).name;
     let data = findRacer(name);
 
     let racer = {
+        id,
         name,
         pos: 0,
         spd: data.spd,
         aga: data.aga,
         data
     }
+    
+    // div
+    let div = El("div", `racer racer${id} ${name}`);
+    let road = El("div", "road");
+    for(let i=0; i<dooC.cavC.longleg; i++){
+        let mich = road.cloneNode(true);
+        mich.classList.add(`road${i}`);
+         div.appendChild(mich);
+    }
+    dooC.cavC.racersD.appendChild(div);
+    racer.div = div;
 
     dooC.cavC.racers.push(racer);
+
+    return racer;
 }
 
 
@@ -124,7 +265,12 @@ dooC.cavF.move = async(who, hos, props=[]) => {
     }
 }
 dooC.cavF.moveGo = async(who, dir, props=[]) => {
-    
+    let pos = who.pos + dir;
+    if(pos < 0) pos = 0;
+    if(dooC.cavC.longleg <= pos) pos = dooC.cavC.longleg-1;
+    who.pos = pos;
+
+    dooC.cavF.tekiou();
 }
 
 // #endregion 
@@ -139,6 +285,7 @@ function start(){
     OBS.load();
 
     mainF.load();
+    homF.load();
 
     let hash = location.hash.replace("?", "");
     let space = Spaces.find(a => a.name == hash);

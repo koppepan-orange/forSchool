@@ -37,6 +37,7 @@
             <div class="unit uni1">
                 <!-- 家近辺 -->
                 <div class="bt farm">畑の様子を見に行く</div>
+                <div class="bt cook">キッチンに向かう</div> <!--確率で"キッキンチキンに向かう"に-->
             </div>
             
             <div class="unit uni2">
@@ -47,11 +48,24 @@
         </div>
 
         <div id="farm" class="space">
+            <div class="return" data-belong="farm"></div>
             <!-- 畑 -->
 
         </div>
 
+        <div id="cook" class="space">
+            <div class="return" data-belong="cook"></div>
+            <!-- やあ！僕はキッキンチキン！ -->
+
+        </div>
+
+        <div id="shop" class="space">
+            <div class="return" data-belong="shop"></div>
+            <!-- 売店 -->
+        </div>
+
         <div id="door" class="space">
+            <div class="return" data-belong="door"></div>
             <!-- 謎のドア。これを通って階段を降りると謎カジノへ -->
 
             <div class="area loby">
@@ -64,12 +78,14 @@
 
             </div>
 
-            <div class="area cave">
+            <div class="area cave show">
                 <!--競馬です 馬じゃないけど-->
 
                 <div class="bts">
                     <div class="bt start">staRt</div>
                 </div>
+
+                <div class="racers"></div>
             </div>
         </div>
 

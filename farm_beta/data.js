@@ -1,4 +1,4 @@
-let Style = {
+const Style = {
     iPhone:{ //16
         "width": "393px",
     },
@@ -159,6 +159,51 @@ const Foods = [
 		desc:``,
 		flav:"",
 	},
+];
+
+const Recipes = [
+    {
+        name:"flour",
+        madefrom:"wheat",
+        acts:["grind"]
+    },
+    {
+        name:"suger",
+        madefrom:"suger_cane",
+        acts:["grind"]
+    },
+    
+    {
+        name:"baked sweet_potato",
+        madefrom:"sweet_potato",
+        acts:["bake"]
+    },
+    {
+        name:"bread",
+        madefrom:"flour",
+        acts:["wet", "knead", "bake"]
+    },
+    {
+        name:"eat_bread", //食パン
+        madefrom:"bread",
+        acts:["cut"]
+    },
+    {
+        name:"choco_cream",
+        madefrom:"cacao",
+        madeof:["milk", "suger"],
+        acts:["dry", "roast", "smash", "knead"], //kneadは"練る"
+    },
+    {
+        name:"chocolate",
+        madefrom:"choco_cream",
+        acts:["mold", "cold"],//←押韻すぎる
+    },
+    {
+        name:"choco_cake",
+        madefrom:"cake",
+        madeof:["choco_cream"]
+    }
 ]
 
 
@@ -200,7 +245,7 @@ const Racers = [
         aga:100, //100/10で10↑↑
     },
     {
-        name:"a human",
+        name:"human",
         jpnm:"人間",
         flav:"すみません...",
         acts:[
@@ -271,3 +316,4 @@ const Buffs = [
         }
     }
 ]
+
