@@ -175,7 +175,6 @@ dooC.cavF.tekiou = () => {
         let at = document.createElement("img");
         at.className = "at";
         at.src = `assets/images/racers/${racer.name}.png`;
-        console.log(`.road${pos}`)
         div.querySelector(`.road${pos}`).appendChild(at);
     }
 }
@@ -243,13 +242,17 @@ dooC.cavF.act = async(who) => {
     let act = arraySelect(who.acts);
      let actL = act.split(",");
     let aflike = dooC.cavC.aflike;
-     if(actL[0].startsWith("%")) aflike = +actL[0].slice(1);
+     if(actL[0].startsWith("%")){
+        aflike = +actL[0].slice(1);
+        actL.splice(0,1)
+     }
 
     // becauseof: act_pre
     for(let buff of who.buffs){
         let data = findBuff(buff.name);
-        if(hase(data.effects, "行動不可")) return 0;
+        if(data.becauseof == "act_pre") buff.time -= data.heru;
         
+        if(data.efs.includes("行動不可")) return 0;
     }
 }
 

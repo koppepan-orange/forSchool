@@ -226,7 +226,7 @@ const Racers = [
     fir 先頭の人 | las 最後尾の人
 
     #行動 禁止 行動
-    ・前進,歩数 {歩数}分進みます。abs(1)超過ならgap200msで移動 //←言い方カッコヨ スギ
+    ・移動,歩数 {歩数}分進みます。abs(1)超過ならgap200msで移動 //←言い方カッコヨ スギ
     ・無 今日はなーんにもしません！
     ・集中,値 無の上位互換 自身のepを{値}分上昇させます
     ・効果,人,名称,時間 人に「{名称}」({時間})を付与します。
@@ -261,7 +261,7 @@ const Racers = [
         P:"自分が転倒した", //ここ未定〜。{対象}が{行動}をしたなら、か？いや、、いいや。簡易的に...ifでゴリ押そう
         PF:(who) => { //if(typeof PF == "function")
             buffRemove(who, "奮起");
-            buffAdd(who, "羞恥", 4);
+            buffAdd(who, "焦燥", 4);
         }
     }
 ]
@@ -277,7 +277,7 @@ const Buffs = [
         name:"stan",
         jpnm:"スタン",
         type:"time",
-        effects:["行動不可"],
+        efs:["行動不可"],
         desc:"行動不可",
         flav:"うん。"
     },
@@ -285,10 +285,14 @@ const Buffs = [
         name:"palsy",
         jpnm:"麻痺",
         type:"stack",
-        becauseof:"act_pre", //いざ行動！の前
+        becauseof:"act_pre",
+        decl:1,
         desc:`行動開始時、30%の確率で行動を"無"に変更します`,
         flav:"難しいこと言ってるけど、つまりは麻痺ったら規定値2000ms動けないってことねぇ〜ん",
         
+        efs:[
+            "行動阻害,30"
+        ],
         func:(who) => {
             // act_pre: res = await data.func(who), if(res) act = res;
             if(hit(30)) return "無";
@@ -300,6 +304,7 @@ const Buffs = [
         jpnm:"奮起",
         type:"stack",
         becauseof:"act_end",
+        decl:1,
         desc:"後隙を50%カットします", //これもifでやります
         flav:"最近アプデで、野良でも扱いやすくなったスキルです まじ可愛いけど地雷がちとか言われるからあんまり=あんまり"
     },
@@ -307,10 +312,11 @@ const Buffs = [
         name:"shy",
         jpnm:"焦燥",
         type:"stack",
-        becauseof:"act_start",
+        becauseof:"act_pre",
+        decl:1,
         desc:`後隙が25%カットされる。また行動開始時、50%の確率で行動を"無"に変更します`,
         flav:"うぅ..まじ無理全員去れガチ見ないで見ないで見ないで",
-        func:(who, act) => {
+        func:(who) => {
             if(hit(50)) are = "無";
             return 0;
         }

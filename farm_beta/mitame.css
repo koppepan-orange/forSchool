@@ -6,8 +6,8 @@
     khtml- : Konqueror(考えなくてヨシ)
     o- : 古いOpera(考えなくてヨシ)
     ただし、-webkit-は**Safari以外**ではプレフィックスなしで使用可能なプロパティも多い。
-    例外的に、user-selectは全てのブラウザでプレフィックスが必要。
-    さらに例外的に、touch-calloutはSafariでしか使用できない。
+    例外的に、user-selectは全てのブラウザでプレフィックスが必要
+    さらに例外的に、touch-calloutはSafariでしか使用できない
 */
 html{
     margin: -8px;
