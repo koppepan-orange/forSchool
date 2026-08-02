@@ -1,5 +1,6 @@
 //#region komagome
-function delay(ms){
+function delay(ms, who = 0){
+    if(who) dooC.cavF.buffDecZen(who, ms);
     return new Promise(resolve=>setTimeout(resolve,ms));
 };
 
@@ -29,7 +30,7 @@ function tobiText(youso, mes, config = {}) {
     if(typeof el == "string") el = document.querySelector(youso);
     if(!el) return console.error('せんぱ〜い？この要素壊れてますよ〜〜？');
 
-    console.log(`[tobi] ${mes}`);
+    // console.log(`[tobi] ${mes}`);
 
     let rect = el.getBoundingClientRect();
     let left = rect.left + (window.scrollX+rect.width/2);
@@ -1634,15 +1635,15 @@ loaF.loadI = async() => {
 }
 */
 loaF.loadI = async() => {
-    if(loaC.imgT == 0) return loaF.loadS();
-
-    let kasan = () => {
+    let kasan = (mono) => {
         loaC.imgD += 1;
+        console.log(`${loaC.imgD}/${loaC.imgT} | ${mono}`)
         if(loaC.imgD == loaC.imgT) loaF.loadS();
     }
 
+    if(loaC.imgT == 0) return loaF.loadS();
     let loaloa = async(arr, route) => {
-        let srcBase = "assets/images/" + route.join("/") + "/";
+        let srcBase = `assets/images/${route.join("/")}/`;
 
         let tar = images;
         for(let r of route){
@@ -1652,14 +1653,17 @@ loaF.loadI = async() => {
 
         arr.forEach(mono => {
             let img = new Image();
-            img.src = `${srcBase}${mono}.png`;
+            tar[mono] = img;
             
             img.onload = () => {
                 tar[mono] = img;
-                kasan();
+                kasan(mono);
             };
 
             img.onerror = () => {
+                img.onload = null;
+                img.onerror = null;
+
                 console.error(`Image ${srcBase}${mono}.png failed to load.`);
                 loaC.erd += 1;
                 
@@ -1670,8 +1674,10 @@ loaF.loadI = async() => {
                 
                 img.src = `assets/images/systems/error.png`;
                 tar[mono] = img;
-                kasan();
+                kasan(`error (${mono})`);
             };
+
+            img.src = `${srcBase}${mono}.png`;
         });
     }
 

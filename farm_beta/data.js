@@ -19,7 +19,7 @@ const Fonts = [
 ];
 
 const Images = {
-    systems:['error'],
+    systems:['error', "loby", "nero", "cave"],
 }
 
 const Sounds = {
@@ -105,8 +105,10 @@ const Secrates = [
 
 const Spaces = [
     { name:'home', rank:2, back:'#f0f8ff', sho:1 },
-    { name:'farm', rank:2, back:'#fff8e2', sho:1 },
-    { name:'door', rank:2, back:'#ffe4be', sho:1 },
+    { name:'farm', rank:2, back:'#fff8e2' },
+    { name:'cook', rank:2, back:'#fff8e2' },
+    { name:'shop', rank:2, back:'#daf9ff' },
+    { name:'door', rank:2, back:'#ffe4be' },
 ];
 
 
@@ -233,18 +235,21 @@ const Racers = [
     ・効果削除,人,名称 人の「{名称}」を解消します。
     */
     {
+        // no:1,
         name:"ningen",
         jpnm:"人",
         flav:"普遍的なステータス。普通、人間はこうもなれない",
         acts:[ //後隙が終わり次第ランダム選択行動
-            "移動,1",
-            "移動,1",
+            "前進,1",
+            "前進,1",
             "%1000,無",
         ],
         spd:100, //100*10で1000ms↓↓
         aga:100, //100/10で10↑↑
     },
+
     {
+        // no:1,
         name:"human",
         jpnm:"人間",
         flav:"すみません...",
@@ -263,12 +268,94 @@ const Racers = [
             buffRemove(who, "奮起");
             buffAdd(who, "焦燥", 4);
         }
+    },
+
+    {
+        // no:1,
+        name: "alice",
+        jpnm: "青春アリス",
+         moto: "#コンパス",
+        flav: "不思議の優しさでマイペースに進む少女",
+        acts: [
+            "前進,1",
+            "前進,1",
+            "前進,2",
+            "%1500,無",
+        ],
+        spd: 110,
+        aga: 60,
+        P:"act_pre", //P: 自分が1位なら、2位以下になるまで待つ（行動を「無」にするなど）
+        PF:(who) => {
+            let top = dooC.cavF.ri(who, "fir");
+            if(top.id == who.id){
+                nicoText("ちょっとお茶にしましょう？");
+                return "無";
+            }
+        }
+    },
+
+    {
+        // no:1,
+        name: "bob",
+        jpnm: "ビッグ・ボブ",
+         moto: "アークナイツ",
+        flav: "重装備ゆえに動きが遅い。しかしその分スタン耐性がある",
+        acts: [
+            "前進,1",
+            "前進,1",
+            "前進,1",
+        ],
+        spd: 50,
+        aga: 200,
+        sei: ["効果無効,スタン", "強制移動無効"],
+    },
+
+    {
+        // no: 1,
+        name: "highlander",
+        jpnm: "ハイランダー姉妹",
+         moto: "ブルーアーカイブ",
+        flav: "法定速度以上だが脱線はしない列車。高速で動くが、まあまあ事故る",
+        acts: [
+            "前進,1",
+            "前進,1",
+            "%0,効果,me,スタン,10000",
+        ],
+        spd: 160,
+        aga: 30,
+        // P: パニック（自身のスタン解除時、4秒間スタン無効+速度低下）
+        P: "buff_rem",
+        PF:(who, name) => {
+            if(name == "スタン" || name == "stan"){
+                dooC.cavF.buffAdd(who, who, "カイ＝キスク", 6000);
+                dooC.cavF.buffAdd(who, who, "慎重", 3);
+            }
+        }
+    },
+    
+    {
+        // no:1,
+        name:"ky_kiske",
+        jpnm:"カイ＝キスク",
+         moto: "ギルティギア",
+        flav:"スタンディッパー！！",
+        acts:[
+            "%1500,無",
+            "前進,1",
+            "効果,fir,スタン,2000",
+        ],
+        spd: 80,
+        aga: 80,
+        sei: ["効果無効,スタン"],
     }
 ]
 
 const Buffs = [
     /*
     #type
+    ・time
+     時間経過で減少。減少はsetIntervalを10で回す？
+
     ・stack
     　becauseof（減る理由）
     　func（減るよって時の挙動）
@@ -289,15 +376,7 @@ const Buffs = [
         decl:1,
         desc:`行動開始時、30%の確率で行動を"無"に変更します`,
         flav:"難しいこと言ってるけど、つまりは麻痺ったら規定値2000ms動けないってことねぇ〜ん",
-        
-        efs:[
-            "行動阻害,30"
-        ],
-        func:(who) => {
-            // act_pre: res = await data.func(who), if(res) act = res;
-            if(hit(30)) return "無";
-            return 0;
-        }
+        efs:["行動阻害,30"],
     },
     {
         name:"inspire",
@@ -316,10 +395,25 @@ const Buffs = [
         decl:1,
         desc:`後隙が25%カットされる。また行動開始時、50%の確率で行動を"無"に変更します`,
         flav:"うぅ..まじ無理全員去れガチ見ないで見ないで見ないで",
-        func:(who) => {
-            if(hit(50)) are = "無";
-            return 0;
-        }
+        efs:["後隙カット,25", "行動阻害,50"],
+    },
+    {
+        name:"cautious",
+        jpnm:"慎重",
+        type:"stack",
+        becauseof:"act_pre",
+        decl:1,
+        desc:"後隙が50%上乗せされる",
+        flav:"こ、これを壊す？壊すのかな、大丈夫かな...",
+        efs:["後隙ヴァイ,50"], //vai, vai!(二人称命令形)
+    },
+    {
+        name:"ky_kiske",
+        jpnm:"カイ＝キスク",
+        type:"time",
+        desc:"スタン無効になる",
+        flav:"私はただ、自らが正しいと信じる道を歩むだけです。",
+        efs:["効果無効,スタン"],
     }
 ]
 

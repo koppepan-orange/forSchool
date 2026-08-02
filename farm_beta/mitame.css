@@ -747,6 +747,9 @@ input[type="range"].slider::-webkit-slider-thumb:hover{
         scale: 3.00;
         transition: scale 0.85s linear;
     }
+
+    &.shop{background-image: url(assets/images/systems/door_blue.png)}
+    &.door{background-image: url(assets/images/systems/door_brow.png)}
 }
 
 
@@ -806,7 +809,46 @@ input[type="range"].slider::-webkit-slider-thumb:hover{
     }
 }
 
+/* repeat 500 cliclick -e 500 w:500 c:1375,890 w:2000 c:1615,865 w:38500 */
+#door .area.loby{
+    content:"loby";
+}
+#door .area.loby .paints{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: fit-content;
+    height: fit-content;
+     max-height: 600px;
+    box-sizing: border-box;
+
+    & .paint{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        width: 80px;
+        height: fit-content;
+        padding: 20px 15px;
+        background: #ffefd9;
+        border: 2.5px solid #b2b2b2;
+        border-radius: 30px;
+        transition: scale 0.10s ease-in-out, background 0.02s;
+        &:active{
+            scale: 0.90;
+            background: #e0c093;
+        }
+
+        & img{
+            width: 90%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+        }
+    }
+}
+
 #door .area.cave{
+    content: "cave。競馬だね 馬じゃないけど";
     gap: 40px;
 }
 #door .area.cave .racers{
